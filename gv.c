@@ -4643,7 +4643,7 @@ BOOL CALLBACK saveopt_custom(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       case SaveDef:
         o = 0x45*SendDlgItemMessage(hdlg, SaveRad2, BM_GETCHECK,0,0)+0x19;
         for (i=0; i<64; i++) {
-          sprintf(text, "%d", ((uchar *)jpghead)[i+o]);
+          sprintf(text, "%d", jpghead[i+o]);
           SetDlgItemText(hdlg, SaveQ+i, text); }
         return(0);
       case SaveRad1: case SaveRad2:

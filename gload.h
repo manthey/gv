@@ -187,11 +187,11 @@ void   vertical_flip    (uchar *image, long w, long h);
 #ifndef LIBRARY
 extern char fcheck1[], outcode[], pspec[], software[], suffix[], zagtbl[];
 extern float Gamma;
-extern long Dither, Interpolate, jpghead[], LoadPart, MAXGSIZE, Minpheight,
-       Minpwidth, NumPart, perr, pfree, pheight, pinter, ppart, pwidth,
-       UniformPal;
+extern long Dither, Interpolate, LoadPart, MAXGSIZE, Minpheight, Minpwidth,
+       NumPart, perr, pfree, pheight, pinter, ppart, pwidth, UniformPal;
 extern short prefix[];
-extern uchar *ColorTable, imask[], MasterPal[], *ppic, pquant[], winpal[];
+extern uchar *ColorTable, imask[], jpghead[], MasterPal[], *ppic, pquant[],
+       winpal[];
 extern FILE *(*fopen2)(char *name, char *mode);
 extern size_t (*fread2)(void *buffer, size_t size, size_t count, FILE *fptr);
 extern size_t (*fwrite2)(void *buffer, size_t size, size_t count,FILE *fptr);
