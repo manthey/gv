@@ -1,0 +1,180 @@
+5/1/97 - Official 1.00 release
+
+5/12/97 - Official 1.01 release
+
+7/19/97:
+ Improvement: Long name file support is better.
+
+7/19/97 - Official 1.02 release
+
+8/19/97:
+ Bug fix: The preview couldn't be sorted if thumbnails were actively being
+  generated.
+ Improvement: Many dialogs have been made to look closer to the Windows 95
+  standard.
+ Improvement: Better handling of corrupted JPEG files.
+ Feature: 8 and 24 bit cursor and icon files are supported.
+
+8/19/97 - Official 1.03 release
+
+1/4/98:
+ Bug fix: Long file names with spaces sometimes caused problems.
+ Feature: Bilinear interpolation
+ Feature: Can now dither 24-bit images on 16-bit displays.
+
+1/4/98 - Official 1.04 release
+
+6/17/98:
+ Feature: Support for pasting metafiles containing images, such as those
+  created using MS Word.
+
+6/17/98 - Official 1.05 release
+
+10/4/00:
+ Feature: Supports Group 3 and Group 4 CCITT compressed TIF files.
+
+10/4/00 - Official 1.06 release
+
+1/29/01:
+ Change: Sole process now defaults to on.
+ Improvement: Removed the 3000 strip limitation in the TIFF reader.
+ Feature: Supports reading progressive JPEGs
+ Feature: There is a 'Keep' option in the GIF save options.  This maintains
+  the previous image in an animated gif, allowing transparency in later
+  images to be used to improve the compression.
+
+1/29/01 - Official 1.07 release
+
+7/27/01:
+ Improvement: Better support for invalid CCITT Group 4 TIFF files.
+
+7/27/01 - Official 1.08 release
+
+12/12/01:
+ Bug fix: Very small palettized bitmaps didn't load properly.
+
+12/20/01:
+ Bug fix: CCITT Group 3 (T4) TIF files were offset if the line length wasn't
+  a multiple of 8 pixels.
+ Bug fix: The last save directory was not always remembered properly.
+ Improvement: On systems with more that 8 bit per pixel displays, palettized
+  images are now interpolated if interpolation is turned on.  This is slower,
+  but looks better.
+ Feature: Bicubic interpolation menu item added.
+ Feature: Added 'DefaultSaveDir' option to the INI file.  If this is not
+  blank, then all save directories are changed to this whenever the program
+  starts.
+ Feature: Added First Image, Previous Image, and Next Image menu items for
+  ease in viewing images in multi-image files.
+ Feature: Typing F10 toggles between maximized and normal window sizes.
+ Feature: Added Save All Parts menu item.  When a multi-image file is saved
+  to a format that supports multiple images, the whole image is saved, and
+  this option is selected, then all parts of the image are saved in the
+  original order, regardless of which part is currently being viewed.
+
+12/20/01 - Official 1.09 release
+
+1/10/02:
+ Improvement: Palettization with a transparent color is now better.
+
+4/11/02:
+ Feature: The JPEG save routines can now write just the JPEG header data or
+  just the JPEG image data.  This is useful for constructing limited-header
+  flash files.
+
+5/6/02:
+ Improvement: JPEGs with nearly white areas are written more precisely.
+
+5/28/02:
+ Feature: Batch convert will now handle save all parts of a multi-image file
+  if the appropriate options are so selected.
+
+8/1/02:
+ Bug fix: When outputting 256 color icon files, one color was occasionally
+  altered.
+
+1/7/03:
+ Bug fix: When all of the files in a directory are deleted from a slide show,
+  the program would crash.
+
+1/7/03 - Official 1.10 release
+
+6/12/03:
+ Improvement: Linking extensions now supports XP.
+
+6/17/03:
+ Bug fix: When saving a 24 bit image as a 24 bit icon or cursor, the picture
+  in memory would become corrupted.
+
+6/19/03:
+ Improvement: Can handle non-standard 32 bit-per-pixel BMP files better.
+
+6/19/03 - Official 1.11 release
+
+9/29/03:
+ Feature: Added various spiff options.
+ Feature: Added rotate clockwise and rotate counterclockwise.
+
+10/6/03:
+ Feature: Added 'turn off spiff' as an explicit option.
+
+10/8/03:
+ Improvement: Sort now maintains the order of identical items.
+
+12/9/03:
+ Improvement: Better handling of images with sizes >32767 pixels in either
+  width or height.
+
+12/17/03:
+ Bug fix: JPEGs with incorrect application tag lengths could cause the
+  program to crash.
+
+12/18/03 - Official 1.12 release
+
+3/13/04:
+ Feature: Can now read TIFF compression mode 2 (CCITT RLE).
+
+5/8/04:
+ Feature: Typing F10 now toggles between maximized, full screen, and normal
+  window sizes.
+
+5/19/04:
+ Improvement: Internal memory management may have been improved.
+ Improvement: Opening a file that is part of a slide show will always honor
+  view area settings according to preferences.
+ Bug fix: Image preview would sometimes crash on greyscale images.
+
+7/6/04:
+ Bug fix: T6 compressed TIFF files with erroneous final strip lengths could
+  cause the program to crash.
+
+8/5/04 - Official 1.13 release
+
+8/6/04:
+ Feature: GIF, JPG, and TIF files now support up to 65536 multiple images (up
+  from 128).
+
+12/30/04:
+ Improvement: More variations of T6 TIFF files can be read.
+
+1/11/05:
+ Improvement: Some JPGs with conflicting surplus data after them are now
+  loaded.
+
+1/13/05:
+ Bug fix: JPEGs with a single channel that had a minimum codiung unit other
+  than 1 would not be read properly.
+
+1/18/05:
+ Change: GIFs with a non-unity pixel aspect ratio are opened anyway.
+
+10/19/05:
+ Improvement: CCITT mode 2 encoded TIFs which lack EOL codes can now be read.
+
+4/7/17:
+ Change: Now freeware -- removed all shareware functions
+ Change: Now compiled with MSVCC
+ Feature: If GV can't read an image natively, it attempts to invoke a python process using PIL to read the image.  Python must be in the path, and the PIL or Pillow must be present.
+ Bug fix: A few dialogs could fail if they were invoked certain ways.
+ Change: Now under the Apache 2 license.
+ Change: Removed Twain functions (scanner interface functions).
