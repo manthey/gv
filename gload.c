@@ -3381,7 +3381,7 @@ STATIC ungif(uchar *dest, uchar *source, long srclen)
  *        long srclen: length of source data.                   5/1/94-DWM */
 {
   uchar bitspixel, background;
-  ushort totalx, totaly, xstart, ystart, xlength, ylength, xend, yend,
+  ushort totalx, totaly, xstart, ystart, xlength, ylength, xxend, yend,
          bitmask, part;
   long palsub;
 
@@ -3504,7 +3504,7 @@ ungif7:   mov ax, [esi+1]                                       ;read header2
           mov WORD PTR pheight, dx
           add ax, cx
           dec ax
-          mov xend, ax
+          mov xxend, ax
           add bx, dx
           dec bx
           mov yend, bx
