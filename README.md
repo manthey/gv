@@ -1,6 +1,6 @@
 # Graphic Viewer
 
-[![Build status](https://ci.appveyor.com/api/projects/status/github/manthey/gv?svg=true)](https://ci.appveyor.com/project/manthey/gv/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/sxe3531fs0qjh5g5/branch/master?svg=true)](https://ci.appveyor.com/project/manthey/gv/branch/master)
 
 Graphic Viewer is a small, fast, free image display program for Windows.
 

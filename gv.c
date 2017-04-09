@@ -4123,13 +4123,15 @@ read_ini()
           strcpy(titleimage+1, inifile);
           sprintf(titleimage+1+strlen(titleimage+1)-3, "TIF"); } break;
       case 23: for (j=0; j<sizeof(WINDOWPLACEMENT) && j*2<strlen(text); j++)
-          sscanf(text+j*2, "%2X", ((char *)(&WinPlace.length))+j); break;
+          sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace.length))+j));
+          break;
       case 24: if (strlen(text)) strcpy(opendir+768, text); break;
       case 25: if (strlen(text)) strcpy(savedir+768, text); break;
       case 26: sscanf(text, "%d", &SlideOpt); break;
       case 27: sscanf(text, "%d", &SlideDelay); break;
       case 28: for (j=0; j<sizeof(WINDOWPLACEMENT) && j*2<strlen(text); j++)
-          sscanf(text+j*2, "%2X", ((char *)(&WinPlace2.length))+j); break;
+          sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace2.length))+j));
+          break;
       case 29: sscanf(text, "%d", &SlideTx); break;
       case 30: sscanf(text, "%d", &SlideTy); break;
       case 31: sscanf(text, "%d%*c%d%*c%d", &SortVal, &SortDir, &FindType);
@@ -4165,7 +4167,7 @@ read_ini()
     sprintf(text2, "CustomQuant%d", i);
     GetPrivateProfileString(inihead, text2, "", text, 256, inifile);
     for (j=0; j<32; j++)
-      sscanf(text+j*2, "%2X", gquant+i*32+j); }
+      sscanf(text+j*2, "%2X", (int *)(gquant+i*32+j)); }
   for (i=1; i<4; i++) {
     if (!opendir[256*i])  strcpy(opendir+256*i, opendir);
     if (!savedir[256*i])  strcpy(savedir+256*i, savedir); }

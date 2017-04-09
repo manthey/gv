@@ -2,6 +2,8 @@ CL_OPTS=/O2 /GL /nologo
 LINK_OPTS=
 RC_OPTS=/n /nologo
 
+all: gv.exe
+
 gv.exe: gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res
 	cl $(CL_OPTS) $(LINK_OPTS) gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res /link /OUT:gv.exe advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib 
 

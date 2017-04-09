@@ -179,4 +179,6 @@
  Change: Now under the Apache 2 license.
  Change: Removed Twain functions (scanner interface functions).
 
-4/9/17 - Official 1.14 release
+4/9/17:
+ Change: Refactored code to eliminate many warnings.
+

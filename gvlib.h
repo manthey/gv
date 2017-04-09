@@ -17,7 +17,7 @@
 #define uchar unsigned char
 
 
-typedef struct BMP {
+struct BMP {
   long color, compression, dpi, bmptype; };
 
 #define BMP_BEST        0
@@ -32,7 +32,7 @@ typedef struct BMP {
 #define BMP_TYPE40      0
 #define BMP_TYPE12      1
 
-typedef struct CUR {
+struct CUR {
   long image, moreimages;
   long color, dpi, cursize, transparent, inverse, hotx, hoty; };
 
@@ -46,14 +46,14 @@ typedef struct CUR {
 #define CUR_16X16       1
 #define CUR_32X32       2
 
-typedef struct GIF {
+struct GIF {
   long image, moreimages;
   long giftype, interlace, usetrans, transparent, delay, repeat, keep; };
 
 #define GIF_TYPE87      0
 #define GIF_TYPE89      1
 
-typedef struct GRO {
+struct GRO {
   long grobtype, grobsize, numshades;
   float gamma; };
 
@@ -63,7 +63,7 @@ typedef struct GRO {
 #define GRO_NORMAL      0
 #define GRO_131x64      1
 
-typedef struct ICO {
+struct ICO {
   long image, moreimages;
   long color, dpi, icosize, transparent, inverse; };
 
@@ -77,7 +77,7 @@ typedef struct ICO {
 #define ICO_16X16       1
 #define ICO_32X32       2
 
-typedef struct JPG {
+struct JPG {
   long image, moreimages;
   long color, compression, dpi, decimation, quality, usecustom;
   char *customquant;
@@ -99,7 +99,7 @@ typedef struct JPG {
 #define JPG_2X2TO1X1    2
 #define JPG_4X2TO1X1    3
 
-typedef struct PPM {
+struct PPM {
   long color, ppmtype; };
 
 #define PPM_BEST        0
@@ -110,7 +110,7 @@ typedef struct PPM {
 #define PPM_ASCII       0
 #define PPM_BINARY      1
 
-typedef struct PCX {
+struct PCX {
   long color; };
 
 #define PCX_BEST        0
@@ -118,14 +118,14 @@ typedef struct PCX {
 #define PCX_8BIT        2
 #define PCX_24BIT       3
 
-typedef struct TGA {
+struct TGA {
   long reserved; };
 
 #define TIF_MAXMODELLEN      50
 #define TIF_MAXSOFTWARELEN  100
 #define TIF_MAXSERIALLEN     50
 
-typedef struct TIF {
+struct TIF {
   long image, moreimages;
   long color, compression, dpi, endian, rowsperstrip;
   char model[TIF_MAXMODELLEN], serial[TIF_MAXSERIALLEN];
