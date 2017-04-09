@@ -3,3 +3,25 @@ init:
 
 build_script:
   - nmake
+
+artifacts:
+  - path: gv.exe
+
+deploy:
+  - provider: GitHub
+    tag: 'gv-latest'
+    release: 'Release gv-latest'
+    auth_token:
+      secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
+    artifact: gv.exe
+    on:
+      branch: master
+
+  - provider: GitHub
+    tag: gv-$(appveyor_repo_tag_name)
+    release: Release gv-$(appveyor_repo_tag_name)
+    auth_token:
+      secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
+    artifact: gv.exe
+    on:
+      appveyor_repo_tag: true
