@@ -14,14 +14,16 @@ deploy:
     auth_token:
       secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
     artifact: gv.exe
+    force_update: true
     on:
       branch: master
 
   - provider: GitHub
-    tag: gv-$(appveyor_repo_tag_name)
-    release: Release gv-$(appveyor_repo_tag_name)
+    tag: $(appveyor_repo_tag_name)
+    release: Release $(appveyor_repo_tag_name)
     auth_token:
       secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
     artifact: gv.exe
+    force_update: true
     on:
       appveyor_repo_tag: true
