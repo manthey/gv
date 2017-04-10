@@ -1,3 +1,6 @@
+#ifndef PROCESSHEADER                            /* Prevent double inclusion */
+#define PROCESSHEADER 1
+
 #include <windows.h>
 
 #define uchar unsigned char
@@ -21,3 +24,5 @@ uchar *pipe_file_to_command(char *command, FILE *dptr,
 uchar *pipe_memory_to_command(char *command, uchar *data, long datalen,
                          long maxoutlen, long *outlen);
 DWORD WINAPI pipe_write_thread(LPVOID lpWriteParams);
+
+#endif                                  /* End of prevent double inclusion */

@@ -756,8 +756,8 @@ HBITMAPINFO PalettizeBMP(HBITMAPINFO bmp, long dither, LPLOGPALETTE palette)
     bmp8 = graphic_to_bmp(w, h, 1, pic, 0);
     free2(pic);
     return(bmp8); }
-  if (!palette)          pal2 = 0;
-  else if (palette==-1)  pal2 = -1;
+  if (!palette)                        pal2 = 0;
+  else if (palette==(LPLOGPALETTE)-1)  pal2 = (uchar *)-1;
   else {
     pal2 = pal;
     memset(pal, 0, 768);
@@ -795,12 +795,12 @@ HANDLE PalettizeGraphic(long w, long h, long pinter, HANDLE hpic,
 
   if (!hpic)  return(0);
   pic = lock2(hpic);
-  if (hpal!=-1)  pal = lock2(hpal);
-  else           pal = -1;
+  if (hpal!=(HANDLE)-1)  pal = lock2(hpal);
+  else                   pal = (uchar *)-1;
   if (dither==2)  dither = 1-pinter;
   apic = palettize_graphic(w, h, pinter, pic, dither, pal);
   unlock2(pic);
-  if (hpal!=-1)  unlock2(pal);
+  if (hpal!=(HANDLE)-1)  unlock2(pal);
   if (!apic)
     return(0);
   return(unlock2(apic));

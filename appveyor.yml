@@ -10,10 +10,11 @@ init:
 
 build_script:
   - nmake
-  - dir gv.exe
+  - dir gv.exe gvlib.lib
 
 artifacts:
   - path: gv.exe
+  - path: gvlib.lib
 
 deploy:
   - provider: GitHub
@@ -21,7 +22,7 @@ deploy:
     release: 'Release gv-latest'
     auth_token:
       secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
-    artifact: gv.exe
+    artifact: gv.exe, gvlib.lib
     force_update: true
     on:
       branch: master
@@ -31,7 +32,7 @@ deploy:
     release: Release $(appveyor_repo_tag_name)
     auth_token:
       secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
-    artifact: gv.exe
+    artifact: gv.exe, gvlib.lib
     force_update: true
     on:
       appveyor_repo_tag: true

@@ -1,11 +1,14 @@
 CL_OPTS=/O2 /GL /nologo 
-LINK_OPTS=
+CLLIB_OPTS=/O2 /nologo
+LINK_OPTS=/LTCG /nologo
+LIB_OPTS=/nologo
 RC_OPTS=/n /nologo
 
-all: gv.exe
+all: gv.exe gvlib.lib
+
 
 gv.exe: gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res
-	cl $(CL_OPTS) $(LINK_OPTS) gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res /link /OUT:gv.exe advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib 
+	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib 
 
 gv.res: gv.rc gvrc.h 
 	rc $(RC_OPTS) gv.rc
@@ -22,6 +25,16 @@ mem.obj: mem.c mem.h
 	cl /c $(CL_OPTS) mem.c
 process.obj: process.c process.h mem.h
 	cl /c $(CL_OPTS) process.c
+
+
+gvlib.lib: lib.obj
+	lib $(LIB_OPTS) /out:gvlib.lib lib.obj
+	IF EXIST "C:\P\LIB" copy gvlib.lib C:\P\LIB\gvlib.lib 
+	IF EXIST "C:\P\LIB" copy gvlib.h C:\P\LIB\gvlib.h
+	
+lib.obj: lib.c gload.c gsave.c gvlib.c process.c gload.h gvlib.h process.h
+	cl /c $(CLIB_OPTS) lib.c
+
 
 clean: 
 	rm *.obj
