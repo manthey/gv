@@ -213,7 +213,7 @@ typedef struct GV {
 #define GV_DITHERIF24BIT                2
 
 #define GV_OPTIMALPALETTE               0
-#define GV_UNIFORMPALETTE              -1
+#define GV_UNIFORMPALETTE      (HANDLE)-1
 
 #define GV_REPLICATE                    0
 #define GV_BILINEAR                     1

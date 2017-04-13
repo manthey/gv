@@ -71,7 +71,7 @@ STATIC uchar jpghead[]={  /* 0x27B = 635 bytes long */
     0xDA, 0x00, 0x08, 0x01, 0x00, 0x00, 0x00, 0x3F, 0x00, 0xFF, 0xD9};
 
 #ifndef DOSLIB
-STATIC append_curico(FILE *fptr, char *spec)
+STATIC long append_curico(FILE *fptr, char *spec)
 /* Append a picture to a CUR or ICO file.  Returns with file written and
  *  closed.
  * Enter: FILE *fptr: pointer to file to write to.
@@ -105,7 +105,7 @@ STATIC append_curico(FILE *fptr, char *spec)
 }
 #endif
 
-STATIC append_gif(FILE *fptr, char *spec)
+STATIC long append_gif(FILE *fptr, char *spec)
 /* Append a picture to a GIF file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: See save_gif for spec details.
@@ -128,7 +128,7 @@ STATIC append_gif(FILE *fptr, char *spec)
   return(save_gif(fptr, spec));
 }
 
-STATIC append_jpg(FILE *fptr, char *spec)
+STATIC long append_jpg(FILE *fptr, char *spec)
 /* Append a picture to a JPG file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: See save_jpg for spec details.
@@ -142,7 +142,7 @@ STATIC append_jpg(FILE *fptr, char *spec)
   return(save_jpg(fptr, spec));
 }
 
-STATIC append_tif(FILE *fptr, char *spec)
+STATIC long append_tif(FILE *fptr, char *spec)
 /* Append a picture to a TIF file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: See save_tif for spec details.
@@ -444,7 +444,7 @@ STATIC long best_color(long allowed, long trans, long inver)
   return(best);
 }
 
-STATIC bmp4rle(uchar *src, long w, FILE *fptr, uchar *buf)
+STATIC void bmp4rle(uchar *src, long w, FILE *fptr, uchar *buf)
 /* Compress a BMP 4-bit/pixel image.
  * Enter: char *src: pointer to original data.
  *        long w: length of data to compress.
@@ -481,7 +481,7 @@ STATIC bmp4rle(uchar *src, long w, FILE *fptr, uchar *buf)
   (*fwrite2)(buf, 1, d, fptr);
 }
 
-STATIC bmp8rle(uchar *src, long w, FILE *fptr, uchar *buf)
+STATIC void bmp8rle(uchar *src, long w, FILE *fptr, uchar *buf)
 /* Compress a BMP 8-bit/pixel image.
  * Enter: char *src: pointer to original data.
  *        long w: length of data to compress.
@@ -489,7 +489,7 @@ STATIC bmp8rle(uchar *src, long w, FILE *fptr, uchar *buf)
  *        char *buf: buffer large enough to hold compressed data.
  *                                                             8/24/96-DWM */
 {
-  long run=0, d=0, s=0, cur, i, count=0;
+  long run=0, d=0, s=0, cur, count=0;
 
   while (s<w) {
     cur = src[s];  run = 1;
@@ -511,7 +511,7 @@ STATIC bmp8rle(uchar *src, long w, FILE *fptr, uchar *buf)
   (*fwrite2)(buf, 1, d, fptr);
 }
 
-STATIC dct_1d(char *src, long *dest)
+STATIC void dct_1d(char *src, long *dest)
 /* Perform a one dimensional forward discrete-cosine transformation on a set
  *  of 8 values.  The values returned from this routine have been scaled up
  *  by 512*sqrt(2) (i.e., they must be divided by 512*sqrt(2) to get the
@@ -534,7 +534,7 @@ STATIC dct_1d(char *src, long *dest)
   dest[7]=t4+z1+z3;  dest[5]=t5+z2+z4;  dest[3]=t6+z2+z3;  dest[1]=t7+z1+z4;
 }
 
-STATIC dct_1d_alt(long *src, long *dest)
+STATIC void dct_1d_alt(long *src, long *dest)
 /* Perform a one dimensional forward discrete-cosine transformation on a set
  *  of 8 spaced out values.  The values returned from this routine have been
  *  scaled up by 512*sqrt(2) (i.e., they must be divided by 512*sqrt(2) to
@@ -1093,7 +1093,7 @@ lzwt14:   xor eax, eax                               ;return total lzw length
 }
 #endif
 
-STATIC palettize(uchar *image, long w, long h, long scale)
+STATIC long palettize(uchar *image, long w, long h, long scale)
 /* Compute the appropriate 8-bit palette for a 24-bit image.  The computed
  *  palette is stored in MasterPal.
  * Enter: uchar *image: pointer to 24-bt image.
@@ -1118,7 +1118,7 @@ STATIC palettize(uchar *image, long w, long h, long scale)
   return(2-j);
 }
 
-STATIC rle(uchar *output, uchar *input, ushort ln)
+STATIC long rle(uchar *output, uchar *input, ushort ln)
 /* Convert a string into a compacted Run Length Encoded format.  The maximum
  *  value for len is 32511 bytes.  The output string should be at least 1
  *  byte longer than the input string per 128 characters.  The end of RLE
@@ -1218,7 +1218,7 @@ rle13:    mov eax, edi
   return(finlen);
 }
 
-STATIC save_bmp(FILE *fptr, char *spec)
+STATIC long save_bmp(FILE *fptr, char *spec)
 /* Save a picture to a BMP file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: byte 2-color: 0-best, 1-1 bit, 2-4 bit, 3-8 bit, 4-rgb.
@@ -1317,7 +1317,7 @@ STATIC save_bmp(FILE *fptr, char *spec)
 }
 
 #ifndef DOSLIB
-STATIC save_curico(FILE *fptr, char *spec)
+STATIC long save_curico(FILE *fptr, char *spec)
 /* Save a picture to a CUR or ICO file.  Returns with file written and
  *  closed.  The hot spot is in the original image coordinates.
  * Enter: FILE *fptr: pointer to file to write to.
@@ -1483,7 +1483,7 @@ STATIC save_curico(FILE *fptr, char *spec)
 }
 #endif
 
-STATIC save_gif(FILE *fptr, char *spec)
+STATIC long save_gif(FILE *fptr, char *spec)
 /* Save a picture to a GIF file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: byte 2-use transparent: 0-no, 1-yes.
@@ -1649,7 +1649,7 @@ STATIC long save_graphic(char *name, uchar *image, char *spec, long free)
 }
 
 #ifndef DOSLIB
-STATIC save_grob(FILE *fptr, char *spec)
+STATIC long save_grob(FILE *fptr, char *spec)
 /* Save a picture to a GROB file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: byte 6-binary: 0-ascii, 1-binary.
@@ -1725,7 +1725,7 @@ STATIC save_grob(FILE *fptr, char *spec)
 }
 #endif
 
-STATIC save_jpg(FILE *fptr, char *spec)
+STATIC long save_jpg(FILE *fptr, char *spec)
 /* Save a picture to a JPEG file.  Returns with file written and closed.  The
  *   custom quantization table is 128 uchar values, the first 64 being the
  *   luminance table and the second 64 being the chrominance table.  Each 64
@@ -1857,7 +1857,7 @@ STATIC save_jpg(FILE *fptr, char *spec)
 }
 
 #ifndef DOSLIB
-STATIC save_pcx(FILE *fptr, char *spec)
+STATIC long save_pcx(FILE *fptr, char *spec)
 /* Save a picture to a PCX file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: byte 2-color mode: 0-best, 1-1-bit, 2-8-bit palette.
@@ -1909,7 +1909,7 @@ STATIC save_pcx(FILE *fptr, char *spec)
 }
 #endif
 
-STATIC save_ppm(FILE *fptr, char *spec)
+STATIC long save_ppm(FILE *fptr, char *spec)
 /* Save a picture to a PPM file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: byte 2-color mode: 0-best, 1-1-bit, 2-8-bit, 3-24-bit.
@@ -1954,7 +1954,7 @@ STATIC save_ppm(FILE *fptr, char *spec)
 }
 
 #ifndef DOSLIB
-STATIC save_tga(FILE *fptr, char *spec)
+STATIC long save_tga(FILE *fptr, char *spec)
 /* Save a picture to a TARGA file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: ignored.  This can be any value.
@@ -1979,7 +1979,7 @@ STATIC save_tga(FILE *fptr, char *spec)
 }
 #endif
 
-STATIC save_tif(FILE *fptr, char *spec)
+STATIC long save_tif(FILE *fptr, char *spec)
 /* Save a picture to a TIF file.  Returns with file written and closed.
  * Enter: FILE *fptr: pointer to file to write to.
  *        char *spec: byte 2-color mode: 0-best, 1-1-bit, 2-greyscale,
@@ -2191,8 +2191,8 @@ STATIC void scale_pic(uchar *dest, uchar *source, long srcw, long destw,
   free2(horz);
 }
 
-STATIC scale_pic_prep(long *ind, long *fac, long w, long sw, float invscale,
-                      long inter)
+STATIC void scale_pic_prep(long *ind, long *fac, long w, long sw,
+                           float invscale, long inter)
 /* Prepare an array for scaling.  The interpolation mode can be 0-nearest
  *  neighbor, 1-linear, 2-quadratic, 3-cubic, 4-quartic, 5-quintic.
  *  Additionally, the following flags can be specified:
@@ -2295,7 +2295,7 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
  *                    color are changed to 0xFFFFFF, and all other values are
  *                    set to zero.  To prevent this, use -1.   2/28/96-DWM */
 {
-  long *horz, *vert, i, j, t, a, b, c, d, w, h, px, py, inter=0;
+  long *horz, *vert, i, j, t, a, b, c, d, w, h, inter=0;
   long *hfac, *vfac, *crop;
   long w2, w3, w4, w5, h2, h3, h4, h5, hist[256];
   double stepx, stepy, gamma;
@@ -2419,7 +2419,7 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
   free2(horz);
 }
 
-STATIC set_color_table(long size, long notlast)
+STATIC long set_color_table(long size, long notlast)
 /* Set the color table based on the colors used.  The ColorTable array must
  *  have either 0s to indicate unused colors or 1s to indicate used values.
  * Enter: long size: number of colors to allocate.  Usually 254.  Note that
@@ -2545,7 +2545,7 @@ STATIC set_color_table(long size, long notlast)
   return(exact);
 }
 
-STATIC use_palette(uchar *pal)
+STATIC long use_palette(uchar *pal)
 /* Use a palette for palettization purposes.  This stores the palette in
  *  MasterPal and sets up the references in ColorTable.
  * Enter: uchar *pal: palette to use.

@@ -52,7 +52,6 @@ HANDLE handle2(void *mem)
  * Exit:  HANDLE hmem: handle to the memory.                   2/12/97-DWM */
 {
   long i;
-  HANDLE hmem;
 
   if (!mem)  return(0);
   for (i=0; i<MallocNum; i++)
@@ -142,7 +141,6 @@ void *pointer2(HANDLE hmem)
  *                                                             2/20/01-DWM */
 {
   long i;
-  void *mem;
 
   if (!hmem)  return(0);
   for (i=0; i<MallocNum; i++)

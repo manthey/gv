@@ -81,14 +81,21 @@
 #define UNDCT11 -502  /* sqrt(2)(-cos(5pi/16)-cos(3pi/16)) */
 #define UNDCT12 -100  /* sqrt(2)(cos(5pi/16)-cos(3pi/16)) */
 
+long   append_curico    (FILE *fptr, char *spec);
+long   append_gif       (FILE *fptr, char *spec);
+long   append_jpg       (FILE *fptr, char *spec);
+long   append_tif       (FILE *fptr, char *spec);
 long   best_color       (long allowed, long trans, long inver);
-       bgr_to_rgb       (uchar *image, long size);
+void   bgr_to_rgb       (uchar *image, long size);
+void   bmp4rle          (uchar *src, long w, FILE *fptr, uchar *buf);
+void   bmp8rle          (uchar *src, long w, FILE *fptr, uchar *buf);
+void   dct_1d           (char *src, long *dest);
+void   dct_1d_alt       (long *src, long *dest);
 short  endian           (short *x);
 long   endianl          (long *x);
 void   fill_zone24      (uchar *dest, long bclr, long count);
 void   find_next        (void);
 long   free_left        (long all);
-       halve_pic24      (uchar *dest, uchar *source, long srcw, long srch);
 void   hor_flip         (uchar *image, long w, long h, long pix);
 void   join_names       (char *text);
 void   jpeg_dct         (char *src, long w, long *div, long channel,
@@ -100,8 +107,8 @@ long   jpeg_decode_spectral(uchar *src, long offset, long len, uchar *dchuff,
                          uchar *dchlen, uchar *achuff, uchar *achlen,
                          uchar *quant, long *dest, long spec0, long spec1,
                          long first, long succ);
-       jpeg_shift       (uchar *dest, long *source);
-       jpeg_shift_add   (uchar *dest, long *source);
+void   jpeg_shift       (uchar *dest, long *source);
+void   jpeg_shift_add   (uchar *dest, long *source);
 void   jpeg_undct       (long *res, char *dest, long w, long rw, long rh,
                          long add);
 long   jpeg_unstuff     (uchar *jpg, long len, long start);
@@ -135,7 +142,7 @@ int    mseek            (FILE *fptr, long offset, int origin);
 long   mtell            (FILE *fptr);
 size_t mwrite           (void *buffer, size_t size, size_t count,
                          FILE *fptr);
-       palettize        (uchar *image, long w, long h, long scale);
+long   palettize        (uchar *image, long w, long h, long scale);
 uchar *palettize_graphic(long w, long h, long pinter, uchar *pic,
                          long dither, uchar *pal);
 void   plane_to_rgb     (uchar *image, long w, long h);
@@ -148,40 +155,50 @@ long   read_tif         (uchar *grey, long *count, long *offset, long *pic,
 void   read_tif_dcs     (uchar *grey, long x, long y, long ax);
 void   reduce_res       (HWND hwnd, long all);
 void   rename_file      (void);
-       reorder_tif      (uchar *dest, uchar *tag, long num, long end,
+void   reorder_tif      (uchar *dest, uchar *tag, long num, long end,
                          FILE *fptr);
 uchar *reorient         (uchar *pic, int orient);
-       save_bmp         (FILE *fptr, char *spec);
-       save_curico      (FILE *fptr, char *spec);
-       save_gif         (FILE *fptr, char *spec);
+void   reverse_bitorder (uchar *buf, long ln);
+long   rle              (uchar *output, uchar *input, ushort ln);
+long   save_bmp         (FILE *fptr, char *spec);
+long   save_curico      (FILE *fptr, char *spec);
+long   save_gif         (FILE *fptr, char *spec);
 long   save_graphic     (char *name, uchar *image, char *spec, long free);
-       save_grob        (FILE *fptr, char *spec);
-       save_jpg         (FILE *fptr, char *spec);
-       save_pcx         (FILE *fptr, char *spec);
-       save_ppm         (FILE *fptr, char *spec);
-       save_tga         (FILE *fptr, char *spec);
-       save_tif         (FILE *fptr, char *spec);
+long   save_grob        (FILE *fptr, char *spec);
+long   save_jpg         (FILE *fptr, char *spec);
+long   save_pcx         (FILE *fptr, char *spec);
+long   save_ppm         (FILE *fptr, char *spec);
+long   save_tga         (FILE *fptr, char *spec);
+long   save_tif         (FILE *fptr, char *spec);
 void   scale_pic        (uchar *dest, uchar *source, long srcw, long destw,
                          long simgw, long dimgw, long simgh, long dimgh,
                          long bclr, long trans);
-       scale_pic_prep   (long *ind, long *fac, long w, long sw,
+void   scale_pic_prep   (long *ind, long *fac, long w, long sw,
                          float invscale, long inter);
 void   scale_pic24      (uchar *dest, uchar *source, long srcw, long destw,
                          long simgw, long dimgw, long simgh, long dimgh,
                          long bclr, long trans);
+long   set_color_table  (long size, long notlast);
 void   slide_cat_select (long cat);
 void   unbmp4rle        (uchar *source, long len, uchar *dest, long w,
                          long h);
 void   unbmp8rle        (uchar *source, long len, uchar *dest, long w,
                          long h);
+long   unccitt_mode2    (uchar *output, uchar *input, long ln, long srclen,
+                         long bitorder, long w);
+long   unccitt_t4       (uchar *output, uchar *input, long ln, long srclen,
+                         long bitorder, long w);
+long   unccitt_t6       (uchar *output, uchar *input, long ln, long srclen,
+                         long bitorder, long w, long h);
 void   undct_1d         (long *src, long *dest);
-       undct_1d_alt     (long *src, long *dest);
-       ungif            (void *dest, void *source, long len);
+void   undct_1d_alt     (long *src, long *dest);
+void   ungif            (void *dest, void *source, long len);
 void   uninterlace      (char *addr, long rev);
-       unlzw            (void *dest, void *source, long maxlen, long srclen,
+void   unlzw            (void *dest, void *source, long maxlen, long srclen,
                          short numbits);
-       unlzwtif         (void *dest, void *source, long maxlen, long srclen);
+void   unlzwtif         (void *dest, void *source, long maxlen, long srclen);
 long   unrle            (void *dest, void *source, long len, long srclen);
+long   use_palette      (uchar *pal);
 void   vertical_flip    (uchar *image, long w, long h);
 
 #ifndef LIBRARY

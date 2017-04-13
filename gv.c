@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <commctrl.h>
+#include <direct.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -151,7 +152,7 @@ BOOL CALLBACK about(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
 void add_extensions(HWND hwnd)
 /* Enter: HWND hwnd: handle of window.                         5/27/96-DWM */
 {
-  char ext[]="Extensions", base[256], out[256], *cmd, ekey[5];
+  char ext[]="Extensions", base[256], out[256], *cmd;
   long i, j;
   HKEY hkey;
 
@@ -279,7 +280,7 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       TimerOn = 1;
       SetTimer(hdlg, 0, 0, 0);
       num = 1;  cur = part = 0;
-      for (i=0; i<strlen(opfile); i++) {
+      for (i=0; (size_t)i<strlen(opfile); i++) {
         if (opfile[i]==' ' && !flag)  num++;
         if (opfile[i]=='"')  flag ^= 1; }
       new = 0;
@@ -496,7 +497,7 @@ BOOL CALLBACK copy_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   static uchar *new, *iname, *oname;
   static long num, cur, left, newdir;
   char *s;
-  long res, okay, i;
+  long res, okay;
 
   switch (msg) {
     case WM_INITDIALOG: SetWindowText(hdlg, BatchTitle[PMode-1]);
@@ -572,8 +573,6 @@ void copy_file(long copy)
 /* Copy or move the selected files to another directory.
  * Enter: long copy: 0 to move files, 1 to copy them.          3/22/97-DWM */
 {
-  long i;
-
   if (!preview_deselect(1)) {
     if (slide->tsel<0)  return;
     slide->file[slide->tsel*FE+0x2F] |= 6; }
@@ -608,13 +607,11 @@ void copy_preview(long full)
  * Enter: long full: 0 for selection, 1 for full preview.      3/26/97-DWM */
 {
   RECT rect;
-  long w, h, i, j, d, scan, pal;
+  long w, h;
   HDC hdc, hdc2;
   HBITMAP membmp, oldbmp;
   HGLOBAL gmem;
-  char *dest, *buf;
   char fail[]="Can't create clipboard image.";
-  LPBITMAPINFOHEADER head;
 
   GetClientRect(HwndP, &rect);
   w = rect.right;
@@ -647,7 +644,7 @@ void create_savepic(HWND hdlg, HDC hdc)
  * Enter: HWND hdlg: handle to dialog to work with.
  *        HDC hdc: device context handle to draw with.         10/2/96-DWM */
 {
-  long pal=1, i, w, h, fit=(PreviewOpt&2)>>1, trans, x, y;
+  long pal=1, w, h, fit=(PreviewOpt&2)>>1, trans;
   RECT rect[2];
   HBITMAP wpic;
   HPALETTE wpal;
@@ -1123,7 +1120,7 @@ void find_next(void)
     switch (FindType) {
       case 0: okay = !stricmp(Findtext, name); break;
       case 1: okay = !strnicmp(Findtext, name, strlen(Findtext)); break;
-      case 2: for (k=0; k<strlen(name); k++)
+      case 2: for (k=0; (size_t)k<strlen(name); k++)
           if (okay=!strnicmp(Findtext, name+k, strlen(Findtext))) break; }
     if (((long *)(slide->file+j*FE+0x40))[0]<0)
       okay = 0;
@@ -1386,12 +1383,9 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
  *        WPARAM wp, LPARAM lp: parameters for message.         5/6/96-DWM */
 {
   HDC hdc;
-  HWND prog;
   PAINTSTRUCT paint;
-  POINT pt;
   RECT rect;
   long w, h, i;
-  char text[80];
 
   switch (msg) {
     case WM_CLOSE:
@@ -1658,7 +1652,7 @@ HANDLE metafile_to_bmp(HANDLE gmem)
  * Exit:  HANDLE bmp: handle to a newly allocated bitmap or null for no
  *                    bitmap present.                          6/17/98-DWM */
 {
-  uchar *temp, *pic, *pic2;
+  uchar *temp, *pic;
   HANDLE mf;
   long size, i;
 
@@ -2028,7 +2022,7 @@ void open_pic_mid(HWND hwnd, char *name, long preremove)
   if (preremove)
     remove_quotes(temp);
   while (temp[0]<=' ' && temp[0])  memmove(temp, temp+1, NAMELEN-1);
-  for (i=0; i<strlen(temp); i++)
+  for (i=0; (size_t)i<strlen(temp); i++)
     if (temp[i]<' ')  temp[i] = 0;
   remove_quotes(temp);
   if (strchr(temp, '?')) {
@@ -2119,10 +2113,9 @@ void paste(void)
  *  from a file.                                                6/8/96-DWM */
 {
   HGLOBAL gmem=0, gpal=0;
-  uchar *src, *dest=0, *buf;
+  uchar *dest=0;
   char text[80];
-  long w, h, bits, i, scan, pal, clear=0;
-  BITMAP data;
+  long i, clear=0;
 
   cursor(1);
   if (OpenClipboard(Hwnd)) {
@@ -2202,7 +2195,6 @@ void prep_pic(HWND hwnd)
  * Enter: HWND hwnd: handle of window to do this 'for'.         5/6/96-DWM */
 {
   char *pic2;
-  HDC DC, memDC;
   LOGPALETTE *lpal;
   long *lpic, i, w, x, y, a=0, border, border8, ow, oh, oi, pal, start;
   long depal=0;
@@ -2805,8 +2797,8 @@ long preview_invalidate(long num, char *name, long part)
  * Exit:  long num: either the number of the file in the slide file, or -1
  *                  not present.                               3/18/97-DWM */
 {
-  long i, dir, r, oldtime, inum;
-  RECT rect, rect2;
+  long i, dir, oldtime, inum;
+  RECT rect;
   char dname[NAMELEN], fname[NAMELEN], name2[NAMELEN], *new, *file;
   WIN32_FIND_DATA find;
 
@@ -3255,7 +3247,7 @@ void preview_palette(void)
  *                                                             3/11/97-DWM */
 {
   LOGPALETTE *lpal;
-  long i, j, k;
+  long i;
 
   if (BitsPixel>8)  return;
   lpal = LocalAlloc(LPTR, sizeof(LOGPALETTE) + 256*sizeof(PALETTEENTRY));
@@ -3389,7 +3381,7 @@ void preview_purge(void)
 /* Discard the thumbnail pictures from the selected preview files.
  *                                                             3/20/97-DWM */
 {
-  long i, j, num;
+  long i, num;
   char *s;
 
   if (!slide)  return;
@@ -3468,9 +3460,9 @@ void preview_rectangles(HDC pdc)
 void preview_save(void)
 /* Save the preview images as a series of graphic files.       3/28/97-DWM */
 {
-  long full, i, j, w, h, scan, pal, ext, err, page;
+  long full, i, w, h, ext, err, page;
   HDC hdc, hdc2;
-  HBITMAP membmp, bmp, oldbmp;
+  HBITMAP membmp, oldbmp;
   uchar *dest, *buf, gspec[SAVELEN+2], gspec2[SAVELEN*2];
   char base[NAMELEN], name[NAMELEN], *root, num[12];
 
@@ -3623,11 +3615,11 @@ VOID CALLBACK preview_timer(HWND hwnd, ulong msg, ulong id, long time)
 {
   static long check=-1, check2=-1, check3=0, refresh=-1, refdelay=0;
   long read=0, w, h, aw, ah, pal, more, i, len, comp, last, rloop, dith, num;
-  uchar *s, *pic, *pic2, *new, *buf;
+  uchar *s, *pic, *pic2, *new;
   char name[NAMELEN];
   short *p;
   HBITMAP bmp;
-  RECT rect, rect2;
+  RECT rect;
 
   if (!slide || (Down && Down!=5) || Busy || LoadPart>0)  return;
   if (slide->option&0x6000000)  return;
@@ -3785,10 +3777,9 @@ void preview_update(HWND hwnd)
   HDC hdc;
   PAINTSTRUCT paint;
   RECT rect;
-  long i, j, k, l, w, h, x, y, n, w2, pal, num;
+  long i, j, k, l, w, h, x, y, n, w2, num;
   char text[300], tbl[]="-+xx";
   uchar *s, *buf;
-  LPBITMAPINFOHEADER bmp;
 
   if (!slide)  return;
   ODown[0] |= 2;
@@ -4074,10 +4065,10 @@ void quit(void)
   PostQuitMessage(0);
 }
 
-read_ini()
+void read_ini(void)
 /* Locate and read in values from the INI file.                5/26/96-DWM */
 {
-  char cmd[MAX_PATH+2], text[256], text2[32], *t2;
+  char cmd[MAX_PATH+2], text[256], text2[32];
   long i, j, k, def;
 
   memset(cmd, 0, MAX_PATH+2);
@@ -4122,14 +4113,14 @@ read_ini()
         else {
           strcpy(titleimage+1, inifile);
           sprintf(titleimage+1+strlen(titleimage+1)-3, "TIF"); } break;
-      case 23: for (j=0; j<sizeof(WINDOWPLACEMENT) && j*2<strlen(text); j++)
+      case 23: for (j=0; j<sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++)
           sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace.length))+j));
           break;
       case 24: if (strlen(text)) strcpy(opendir+768, text); break;
       case 25: if (strlen(text)) strcpy(savedir+768, text); break;
       case 26: sscanf(text, "%d", &SlideOpt); break;
       case 27: sscanf(text, "%d", &SlideDelay); break;
-      case 28: for (j=0; j<sizeof(WINDOWPLACEMENT) && j*2<strlen(text); j++)
+      case 28: for (j=0; j<sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++)
           sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace2.length))+j));
           break;
       case 29: sscanf(text, "%d", &SlideTx); break;
@@ -4211,7 +4202,7 @@ void reduce_res(HWND hwnd, long all)
  *                  case.                                      5/25/96-DWM */
 {
   uchar *apic;
-  long i, r, g, b;
+  long i;
 
   if (!oldi && BitsPixel<=8 && (Reduce || all)) {
     if (!(apic=palettize_graphic(oldw, oldh, 0, pic, Dither, 0))) {
@@ -4329,7 +4320,7 @@ void remove_quotes(char *text)
 {
   long i;
 
-  for (i=0; i<strlen(text)-1; i++)
+  for (i=0; (size_t)i<strlen(text)-1; i++)
     if (text[i]=='"' && text[i+1]=='"') {
       memmove(text+i, text+1+i, strlen(text)-i);
       i--; }
@@ -4346,7 +4337,7 @@ void remove_quotes2(char *text)
 {
   long i;
 
-  for (i=0; i<strlen(text)-1; i++)
+  for (i=0; (size_t)i<strlen(text)-1; i++)
     if (text[i]=='"' && text[i+1]=='"') {
       memmove(text+i, text+1+i, strlen(text)-i);
       i--; }
@@ -4623,7 +4614,6 @@ BOOL CALLBACK saveopt_custom(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
  *        long msg: message to process.
  *        WPARAM wp, LPARAM lp: parameters for message.        6/11/96-DWM */
 {
-  HWND ctrl;
   char text[80];
   long i, o, temp;
   static uchar qtbl[128];
@@ -4703,7 +4693,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   static char *clrt[]={"Best possible","1-bit black and white","4-bit Windows colors","8-bit greyscale","8-bit color palette","24-bit RGB","32-bit CMYK","24-bit YCbCr"};
   static uchar com[]={0x03,0x00,0x00,0x00,0x00,0x30,0x00,0x00,0x00,0x0F};
   char text[80];
-  long i, j, temp, init=0, x, y;
+  long i, temp, init=0, x, y;
   float temp2;
 
   switch (msg) {
@@ -5401,7 +5391,7 @@ void slide_delete(long num, long part)
  *                   eliminate unused names and directories (num is not used
  *                   in this case).                            3/23/97-DWM */
 {
-  long i, j, l, p, filenamepos, dirnamepos;
+  long i, j, l, p, filenamepos;
   char *s;
 
   if (!slide || (num<0 && part<2))  return;
@@ -6152,10 +6142,9 @@ void slide_refresh(long remove, HWND hwnd)
  *        HWND hwnd: owner window.                            11/29/96-DWM */
 {
   SlideList *slide2, *slide3;
-  long i, j, d, dir, found, l, p;
+  long i, j, d, dir, found;
   long dirlen=0, dirnamelen=0, filelen=0, filenamelen=0;
   char *name, *name2, *new, *file;
-  uchar *s;
 
   slide->ttop = slide->tsel = 0;
   if (HwndP)  InvalidateRect(HwndP, 0, 1);
@@ -6189,7 +6178,7 @@ void slide_refresh(long remove, HWND hwnd)
       }
       if (!(new=realloc2(slide->dir, dirlen)))  continue;
       slide->dir = new;
-      if (slide->lendirname+strlen(name2)+1 > dirnamelen) {
+      if (slide->lendirname+(long)strlen(name2)+1 > dirnamelen) {
         dirnamelen = (slide->lendirname+strlen(name2)+1) * 2;
       }
       if (!(new=realloc2(slide->dirname, dirnamelen)))
@@ -6223,7 +6212,7 @@ void slide_refresh(long remove, HWND hwnd)
       slide->file = new;  file = new+(slide->numfile*FE);
       memcpy(file, slide2->file+i*FE, FE);
       ((short *)file)[0] = dir;
-      if (slide->lenfilename+strlen(name)+1 > filenamelen) {
+      if (slide->lenfilename+(long)strlen(name)+1 > filenamelen) {
         filenamelen = (slide->lenfilename+strlen(name)+1) * 2;
       }
       if (!(new=realloc2(slide->filename, filenamelen)))
@@ -6248,7 +6237,6 @@ long slide_root(HWND hwnd)
  * Exit:  long new: 0 for no change, 1 for changed.           12/28/96-DWM */
 {
   long len, i, ol, nl, l;
-  FILE *fptr;
   SlideList *s2;
   char *name;
 
@@ -6306,7 +6294,7 @@ long slide_save(HWND hwnd, long saveas)
  *        long saveas: 0 for save, 1 for save as.
  * Exit:  long okay: 0 for cancelled, 1 for okay.             11/15/96-DWM */
 {
-  char *name, *ext;
+  char *ext;
   char serr[]="Saving slide file -- File now invalid";
   long head[19], max;
   uchar *work, *comp;
@@ -6416,8 +6404,7 @@ void slide_show(void)
 {
   char *s;
   short *p;
-  long mo=MultiOpen, i;
-  RECT rect;
+  long mo=MultiOpen;
 
   if (!slide || TimerOn)  return;
   if (!NextPic) {
@@ -6462,7 +6449,7 @@ void slide_show_group(void)
  *  current file.  The file name must be more than 3 characters different.
  *                                                               5/29/15-DWM */
 {
-  long i, num, j, same;
+  long i, j, same;
   char *s, *name, *name2;
 
   if (!slide)  return;
@@ -6472,15 +6459,15 @@ void slide_show_group(void)
   for (i=LastNum+1; i<slide->numfile; i++) {
     s = slide->file+FE*i;
     name2 = slide->filename+((long *)(s+2))[0];
-    for (j=0; j<strlen(name) && j<strlen(name2); j++) {
+    for (j=0; (size_t)j<strlen(name) && (size_t)j<strlen(name2); j++) {
       if (name[j]!=name2[j]) {
         same = j;
         break; } }
-    for (j=0; j<strlen(name) && j<strlen(name2); j++) {
+    for (j=0; (size_t)j<strlen(name) && (size_t)j<strlen(name2); j++) {
       if (name[strlen(name)-1-j]!=name2[strlen(name2)-1-j]) {
         same += j;
         break; } }
-    if (same+3>=strlen(name) && same+3>=strlen(name2))
+    if ((size_t)same+3>=strlen(name) && (size_t)same+3>=strlen(name2))
       LastNum += 1;
     else
       break; }
@@ -6599,7 +6586,7 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
 {
   static long num, cur, left, all;
   static char *text;
-  long i, j, k, val, w, h, len, H, V, N, S, bin[256], bin2[256], inc;
+  long i, j, k, val, w, h, len, V, N, S, bin[256], bin2[256], inc;
   char *s, *n;
   uchar *buf, *pic2, *pic;
 
@@ -6840,7 +6827,7 @@ void undo(HWND hwnd)
   rescale |= 2;  InvalidateRect(Hwnd, 0, 0);
 }
 
-APIENTRY WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR argv, int winmode)
+int APIENTRY WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR argv, int winmode)
 /* Enter: HINSTANCE inst: number identifying this program.
  *        HINSTANCE prev: 0.
  *        LPSTR argv: single string containing command line parameters.
@@ -6962,7 +6949,6 @@ long windows_file(char *name)
  * Exit:  long present: 0 for non found, 1 for present.        10/2/96-DWM */
 {
   char path[256], *cmd;
-  FILE *fptr;
   WIN32_FIND_DATA find;
   HANDLE temp;
   long i;

@@ -83,6 +83,7 @@ void    print_getitem  (HWND hdlg, long item, float *value, long type);
 void    print_setitem  (HWND hdlg, long item, float value, long type);
 void    printer        (HWND hwnd, long setup);
 void    quit           (void);
+void    read_ini       (void);
 void    recheck        (HWND hwnd, long refresh);
 void    rectangle_dotted(HDC dc, long x1, long y1, long x2, long y2, long dot);
 void    remove_quotes  (char *text);

@@ -258,7 +258,7 @@ STATIC long ccittblack[]={
           0x01f0 /* 0b0000000111110000 */, 12, 2560,
           0x0000 /* 0b0000000000000000 */, 11,   -1, -2,-2,-2};
 
-STATIC bgr_to_rgb(uchar *image, long siz)
+STATIC void bgr_to_rgb(uchar *image, long siz)
 /* Convert a packed array of BGR values to RGB values.
  * Enter: uchar *image: pointer to array to convert.
  *        long size: number of values to convert.  Each value is 3 bytes.
@@ -503,7 +503,7 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
   return((p<<3)+bit);
 }
 
-STATIC jpeg_shift(uchar *dest, long *source)
+STATIC void jpeg_shift(uchar *dest, long *source)
 /* Divide a set of 64 long signed values by 1024*1024*2, and crop the result
  *  to -128/+127.
  * Enter: uchar *dest: byte array to store results.
@@ -529,7 +529,7 @@ jshift3:  mov [edi], al
     }
 }
 
-STATIC jpeg_shift_add(uchar *dest, long *source)
+STATIC void jpeg_shift_add(uchar *dest, long *source)
 /* Divide a set of 64 long signed values by 1024*1024/2, add 128, and crop the
  *  result to 0-255.
  * Enter: uchar *dest: byte array to store results.
@@ -1026,7 +1026,7 @@ STATIC uchar *load_grob(FILE *fptr)
   uchar *new;
   long size=17, i, j, k, d, t;
   uchar mask[]={1,2,4,8,16,32,64,128};
-  char header[50], *h;
+  char header[50];
 
   (*fread2)(header, 1, 18, fptr);
   pheight = ((uchar *)(header+13))[0]+((uchar *)(header+14))[0]*256;
@@ -1453,7 +1453,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
  *                    of image this is.                        1/27/01-DWM */
 {
   uchar *new, *temp, *temp2, *hufflen, *quant, *dres, *crop, *dres2, *dres3;
-  long res[64], dy, s, d, val, restart, h, i, j, k, l, r, w, firstspec;
+  long dy, s, d, val, restart, h, i, j, k, l, r, w, firstspec;
   long mw, mh, start, size, com[28], rr[8], ncom, hl[16], dcbase[4];
   long x, y, Y, Cb, Cr, mw8, mh8, *ytbl, succ, C, M, K, ycck;
   long *ytbl2, *ytbl3, *ytbl4, lastr, rnum;
@@ -1967,7 +1967,7 @@ STATIC uchar *load_tif(FILE *fptr)
  *                                                             2/21/95-DWM */
 {
   short ifd=0, ifd2=0, orient=0;
-  long end, temp, temp2, i, j, k, pic[8]={8,1,1,1,0,0,-1,1}, part=ppart;
+  long end, temp, temp2, i, j, pic[8]={8,1,1,1,0,0,-1,1}, part=ppart;
   long trydcs=1, *offset=0, *count, onum;
   char *Grey, *tag;
 
@@ -2547,7 +2547,7 @@ STATIC long read_tif(uchar *grey, long *count, long *offset, long *pic,
  *        FILE *fptr: open TIFF file to read picture data.
  * Exit:  long error: 0 for okay, otherwise error number.      3/20/95-DWM */
 {
-  long i, j, k, l, s, temp[5], bit, bit2=0, simp=0, sl, cl, ul;
+  long i, j, k, l, s, temp[5], bit, sl, cl, ul;
   long w=1+2*(!pinter);
   uchar *cdata=0, *udata=0, *cur, *dest=grey;
   long mask[]={0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535};
@@ -2673,7 +2673,7 @@ void read_tif_dcs(uchar *grey, long x, long y, long ax)
   memset(grey+(y-2)*ax, 0, ax*2);
 }
 
-STATIC reorder_tif(uchar *dest, uchar *tag, long num, long end, FILE *fptr)
+STATIC void reorder_tif(uchar *dest, uchar *tag, long num, long end, FILE *fptr)
 /* Change a set of tif records from either endian to little endian.  Also
  *  convert all tags so that all numbers are stored as longs.  The new field
  *  layout becomes Tag|Type|Num|Address|Long1|Long2|Long3|Long4, where tag
@@ -2689,7 +2689,7 @@ STATIC reorder_tif(uchar *dest, uchar *tag, long num, long end, FILE *fptr)
   unsigned short *idest=(short *)dest, itemp[4];
   uchar temp[4];
 
-  for (i=0; i<num; i++) {
+  for (i=0; i<(unsigned long)num; i++) {
     if (end) {
       endian(itag+6*i);    endianl(ltag+3*i+1);
       endian(itag+6*i+1);  endianl(ltag+3*i+2); }
@@ -2820,7 +2820,7 @@ STATIC uchar *reorient(uchar *pic, int orient)
    return new;
 }
 
-STATIC reverse_bitorder(uchar *buf, long ln)
+STATIC void reverse_bitorder(uchar *buf, long ln)
 /* Reverse the bitorder of a block of bytes.
  * Enter: uchar *buf: array to reverse.
  *        long ln: number of bytes to reverse.                12/29/00-DWM */
@@ -2932,8 +2932,8 @@ STATIC void unccitt_prep_bits(uchar *input, long *s, long *sb, long *cur,
   cur[0] = (cur[0]>>(8-sb[0]))&0xFFFF;
 }
 
-STATIC unccitt_mode2(uchar *output, uchar *input, long ln, long srclen,
-                     long bitorder, long w)
+STATIC long unccitt_mode2(uchar *output, uchar *input, long ln, long srclen,
+                          long bitorder, long w)
 /* Uncompress data using the CCITT T4 encoding scheme.  The size of the
  *  output is unpredicatable.  Decompression ends when len characters have
  *  been converted or six EOL codes in a row are sent.  If the first code is
@@ -3026,8 +3026,8 @@ STATIC unccitt_mode2(uchar *output, uchar *input, long ln, long srclen,
   return(s);
 }
 
-STATIC unccitt_t4(uchar *output, uchar *input, long ln, long srclen,
-                  long bitorder, long w)
+STATIC long unccitt_t4(uchar *output, uchar *input, long ln, long srclen,
+                       long bitorder, long w)
 /* Uncompress data using the CCITT T4 encoding scheme.  The size of the
  *  output is unpredicatable.  Decompression ends when len characters have
  *  been converted or six EOL codes in a row are sent.  If the first code is
@@ -3105,8 +3105,8 @@ STATIC unccitt_t4(uchar *output, uchar *input, long ln, long srclen,
   return(s);
 }
 
-STATIC unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
-                  long bitorder, long w, long h)
+STATIC long unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
+                       long bitorder, long w, long h)
 /* Uncompress data using the CCITT T6 encoding scheme.  The size of the
  *  output is unpredicatable.  Decompression ends when len characters have
  *  been converted or six EOL codes in a row are sent.  If the first code is
@@ -3238,7 +3238,7 @@ STATIC unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
 }
 
 #ifdef slowdct
-STATIC undct_1d(long *src, long *dest)
+STATIC void undct_1d(long *src, long *dest)
 /* Perform a one dimensional inverse discrete-cosine transformation on a set
  *  of 8 values.  The values returned from this routine have been scaled up
  *  by 1024 (i.e., they must be divided by 1024 to get the correct values).
@@ -3279,7 +3279,7 @@ STATIC undct_1d(long *src, long *dest)
   dest[4] = b7-b11;  dest[5] = b6-b10;  dest[6] = b5-b9;  dest[7] = b4-b8;
 }
 
-STATIC undct_1d_alt(long *src, long *dest)
+STATIC void undct_1d_alt(long *src, long *dest)
 /* Just like undct_1d, except values are only stored at every eighth point in
  *  the array.  Note that there is no early out on this routine, since this
  *  routine is operated second, and therefore is much less likely to have all
@@ -3339,7 +3339,7 @@ STATIC void undct_1d(long *src, long *dest)
   dest[2] = t12+t1;  dest[5] = t12-t1;  dest[3] = t13+t0;  dest[4] = t13-t0;
 }
 
-STATIC undct_1d_alt(long *src, long *dest)
+STATIC void undct_1d_alt(long *src, long *dest)
 /* Just like undct_1d, except values are only stored at every eighth point in
  *  the array.  Note that there is no early out on this routine, since this
  *  routine is operated second, and therefore is much less likely to have all
@@ -3366,7 +3366,7 @@ STATIC undct_1d_alt(long *src, long *dest)
   dest[24] = t13+t0;  dest[32] = t13-t0;
 }
 
-STATIC ungif(uchar *dest, uchar *source, long srclen)
+STATIC void ungif(uchar *dest, uchar *source, long srclen)
 /* Decode any GIF file.  The file must be completely stored in memory, and
  *  there must be sufficient space to store the uncompressed image, including
  *  space for a color map (768 bytes).  The original data is modified.  Note
@@ -3612,7 +3612,7 @@ STATIC void uninterlace(char *addr, long rev)
   free2(buf);
 }
 
-STATIC unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
+STATIC void unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
              short numbits)
 /* LZW decode data until the specified number of bytes have been created or
  *  an eof code is encountered.  This routine only works on LZW data which
@@ -3755,7 +3755,7 @@ unlzw7:
     }
 }
 
-STATIC unlzwtif(uchar *dest, uchar *source, long maxlen, long srclen)
+STATIC void unlzwtif(uchar *dest, uchar *source, long maxlen, long srclen)
 /* TIFF LZW decode data until the specified number of bytes have been created
  *  or an eof code is encountered.  This routine only works on LZW data which
  *  was created from 8 bit samples and has a maximum code length of 12 bits.

@@ -24,7 +24,7 @@ HBITMAPINFO BitmapToBMP(HBITMAP gmem, HPALETTE gpal, HDC hdc)
  * Exit:  HBITMAPINFO bmp: handle to the regular bitmap.        4/5/97-DWM */
 {
   char *dest=0, *buf;
-  long w, h, bits, obits, scan, pal, i, j;
+  long w, h, bits, obits, scan, pal, i;
   BITMAP data;
   HANDLE hdest;
 
@@ -579,7 +579,7 @@ STATIC FILE *mopen2(char *name, char *mode)
   return((FILE *)-1);
 }
 
-STATIC size_t mread(void *buffer, size_t size, size_t count, FILE *fptr)
+STATIC size_t mread(char *buffer, size_t size, size_t count, FILE *fptr)
 /* Read data from a memory buffer.  This mimicks the fread function,
  *  including EOF behavior.
  * Enter: void *buffer: location to store data.
@@ -592,12 +592,12 @@ STATIC size_t mread(void *buffer, size_t size, size_t count, FILE *fptr)
   char bm[]="BM\0\0\0\0\0\0\0\0\0\0\0\0";
 
   len = Mlen-Mpos;
-  if (size*count>len)
+  if (size*count > (size_t)len)
     count = len/size;
   len = size*count;
   if (Mpos-Mpad<0 && len+Mpos-Mpad>0) {
     memcpy(buffer, bm, min(14, Mpad-Mpos));
-    ((char *)buffer) += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
+    buffer += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
   else if (Mpos-Mpad<0) {
     memcpy(buffer, bm, min(14, len));  Mpos += len;  len = 0; }
   if (len) {
@@ -632,7 +632,7 @@ STATIC long mtell(FILE *fptr)
   return(Mpos);
 }
 
-STATIC size_t mwrite(void *buffer, size_t size, size_t count, FILE *fptr)
+STATIC size_t mwrite(char *buffer, size_t size, size_t count, FILE *fptr)
 /* Write data to a memory buffer.  This mimicks the fwrite function,
  *  including EOF behavior.
  * Enter: void *buffer: location to store data.
@@ -645,7 +645,7 @@ STATIC size_t mwrite(void *buffer, size_t size, size_t count, FILE *fptr)
   uchar *file;
 
   len = Mlen-Mpos;
-  if (size*count>len) {
+  if (size*count > (size_t)len) {
     file = realloc2(Mfile, Mpos+size*count-Mpad);
     if (!file)
       count = len/size;
@@ -654,7 +654,7 @@ STATIC size_t mwrite(void *buffer, size_t size, size_t count, FILE *fptr)
       Mlen = Mpos+size*count; } }
   len = size*count;
   if (Mpos-Mpad<0 && len+Mpos-Mpad>0) {
-    ((char *)buffer) += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
+    buffer += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
   else if (Mpos-Mpad<0) {
     Mpos += len;  len = 0; }
   if (len) {
@@ -937,7 +937,7 @@ STATIC void scale_pic_grey(uchar *dest, uchar *source, long srcw, long destw,
  *        long bclr: 8-bit background color for letterboxing, or -1 for non-
  *                   fixed aspect ratio.                      12/20/03-DWM */
 {
-  long *horz, *vert, i, j, t, a, b, c, d, w, h, px, py, inter=0;
+  long *horz, *vert, i, j, t, a, b, c, d, w, h, inter=0;
   long *hfac, *vfac, *crop;
   long w2, w3, w4, w5, h2, h3, h4, h5, hist[256];
   double stepx, stepy, gamma;
