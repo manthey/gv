@@ -963,6 +963,12 @@ STATIC uchar *load_graphic(char *name)
     case 13: break;
 /** Additional file formats go here **/
     default: perr = 0;  return(0); }
+  if (!new && type >= 2 && type !=12 && type !=13) {
+    if (new=load_pil(fptr)) {
+      type = 13;
+      perr = 0;
+    }
+  }
   if (LoadPart>0)  return(0);
   return(new);
 }
