@@ -1304,7 +1304,7 @@ STATIC uchar *load_jpg(FILE *fptr)
              tagnum = endian((short *)(jpg+s+10+tiflen));
           else
              tagnum = ((short *)(jpg+s+10+tiflen))[0];
-          tag = malloc2(taglen);
+          tag = malloc2(tagnum * 28 > taglen ? tagnum * 28 : taglen);
           if (!tag)  break;
           reorder_tif(tag, jpg+s+10+tiflen+2, tagnum, tifend, 0);
           for (i=0; i<tagnum; i++)
