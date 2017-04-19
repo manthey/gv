@@ -43,5 +43,5 @@ mem.lib: mem.obj
 
 
 clean:
-	rm *.obj
-	rm *.res
+	del *.obj
+	del *.res
