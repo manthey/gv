@@ -525,7 +525,7 @@ BOOL CALLBACK copy_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                 ((short *)s)[0]*6))[0], slide->filename+((long *)(s+2))[0]);
         SetDlgItemText(hdlg, BatchStat2, iname);
         sprintf(oname, "%s\\%s", opendir+1024, slide->filename+((long *)(s+2))[0]);
-        sprintf(oname, "%s\\I%04d-%s", opendir+1024, left, slide->filename+((long *)(s+2))[0]); //DWM::
+        // sprintf(oname, "%s\\I%04d-%s", opendir+1024, left, slide->filename+((long *)(s+2))[0]); //DWM::
         SetDlgItemText(hdlg, BatchStat3, oname);
         if (PMode==4) {
           if (!(okay=CopyFile(iname, oname, Msg&4)))
@@ -1886,21 +1886,6 @@ long open_pic(HWND hwnd)
 {
   long len, i;
   char name[NAMELEN];
-
-  /*
-  char lpstrFile[MAX_PATH * 2] = "";
-
-  OPENFILENAME ofn = {0};
-  ofn.hwndOwner   = hwnd;
-  ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.lpstrFile   = &lpstrFile[0];
-  ofn.nMaxFile    = MAX_PATH -1;
-  ofn.lpstrFilter = "TXT\0*.txt\0All Files\0*.*\0\0";
-  ofn.lpstrTitle  = "TXT Files";
-  ofn.Flags       = OFN_OVERWRITEPROMPT;
-  ofn.lpstrDefExt = ".txt";
-  return GetOpenFileNameA(&ofn);
-  */
 
   prep_undo(hwnd);
   opfile[0] = 0;
