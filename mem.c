@@ -100,9 +100,9 @@ void *lock2(HANDLE hmem)
   return(mem);
 }
 
-void *malloc2(long size)
+void *malloc2(size_t size)
 /* Allocate memory through Windows calls.
- * Enter: long size: number of bytes to allocate.
+ * Enter: size_t size: number of bytes to allocate.
  * Exit:  void *mem: pointer to memory.                         5/4/96-DWM */
 {
   HANDLE hmem;
@@ -149,10 +149,10 @@ void *pointer2(HANDLE hmem)
   return(0);
 }
 
-void *realloc2(void *current, long size)
+void *realloc2(void *current, size_t size)
 /* Realloc a memory block using Windows calls.
  * Enter: void *current: pointer to current data.
- *        long size: number of bytes to allocate for the new block.
+ *        size_t size: number of bytes to allocate for the new block.
  * Exit:  void *mem: pointer to memory.                         5/4/96-DWM */
 {
   long i;
@@ -160,8 +160,9 @@ void *realloc2(void *current, long size)
 
   if (!size)  size = 1;
   if (!current)  return(malloc2(size));
-if (size>2*1024*1024)  size = (((size-1)/(1024*1024))+1)*1024*1024; //
-else { for (i=1; i<size; i*=2);  size = i; } //
+  /* Reallocate to even size blocks to help avoid memory fragmentation. */
+  if (size>2*1024*1024)  size = (((size-1)/(1024*1024))+1)*1024*1024;
+  else { for (i=1; i<size; i*=2);  size = i; }
   for (i=0; i<MallocNum; i++)
 	if (current==MallocTbl[i].mem) {
 	  hmem = (HANDLE)MallocTbl[i].hmem;
