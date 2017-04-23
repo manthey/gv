@@ -11,7 +11,7 @@
 #include <string.h>
 #include "mem.h"
 
-#pragma pack(4)
+#pragma pack(push, 4)
 
 #define HBITMAPINFO HANDLE
 #define uchar unsigned char
@@ -274,5 +274,7 @@ HANDLE       BMPToGraphic      (GV *graphicspec, HBITMAPINFO bmp);
 HBITMAPINFO  GraphicToBMP      (long width, long height, long palettized,
                                 HANDLE graphic);
 HBITMAPINFO  BitmapToBMP       (HBITMAP bitmap, HPALETTE palette, HDC hdc);
+
+#pragma pack(pop)
 
 #endif                                  /* End of prevent double inclusion */

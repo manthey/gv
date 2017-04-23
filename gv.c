@@ -4062,7 +4062,7 @@ void read_ini(void)
     strcpy(inifile, cmd);
     remove_quotes(inifile);
     if (strchr(inifile, '\\'))  strrchr(inifile, '\\')[0] = 0;
-    strcat(inifile, "\\GV.INI"); }
+    strcat(inifile, "\\gv.ini"); }
   for (i=0; key[i*3]; i++) {
     GetPrivateProfileString(inihead, key[i*3], key[i*3+1], text, 256, inifile);
     def = 1-(!strcmpi(text, key[i*3+1]));
