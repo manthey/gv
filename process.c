@@ -256,7 +256,7 @@ DWORD WINAPI pipe_write_thread(LPVOID lpWriteParams)
 {
   PIPEWRITEPARAMS *writeParams = (PIPEWRITEPARAMS *)lpWriteParams;
   long reslen, pos = 0, chunk = 64 * 1024, inlen;
-  uchar buf[65536];
+  uchar buf[64 * 1024];
 
   if (writeParams->dptr) {
     while (1) {

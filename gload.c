@@ -939,6 +939,7 @@ STATIC uchar *load_graphic(char *name)
     if (type<=1) {
       if (new=load_pil(fptr)) {
         type = 13;
+        (*fclose2)(fptr);
       }
     }
     if (type<=1 || type==12) {
@@ -964,9 +965,12 @@ STATIC uchar *load_graphic(char *name)
 /** Additional file formats go here **/
     default: perr = 0;  return(0); }
   if (!new && type >= 2 && type !=12 && type !=13) {
-    if (new=load_pil(fptr)) {
-      type = 13;
-      perr = 0;
+    if ((fptr=(*fopen2)(name, "rb"))) {
+      if (new=load_pil(fptr)) {
+        type = 13;
+        perr = 0;
+      }
+      (*fclose2)(fptr);
     }
   }
   if (LoadPart>0)  return(0);
