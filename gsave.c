@@ -571,7 +571,7 @@ STATIC void fill_zone24(uchar *dest, long bclr, long count)
 {
   if (bclr==0xFFFFFF || !bclr) {
     memset(dest, bclr, count*3);  return; }
-  _asm {
+  __asm {
           mov edi, dest
           mov eax, bclr
           mov bx, ax
@@ -726,7 +726,7 @@ STATIC long lzwtif(uchar *dest, uchar *source, uchar *buf, long len,
          nextlink;
   long finlen;
 
-  _asm {
+  __asm {
           xor ebx, ebx
           mov ecx, maxlen                    ;zero out the destination buffer
           shr ecx, 0x02
@@ -945,7 +945,7 @@ STATIC long lzwtiflen(uchar *source, uchar *buf, long len)
          nextlink;
   long finlen;
 
-  _asm {
+  __asm {
           xor ebx, ebx
           mov al, 0x8
           mov dx, 0x0100
@@ -1132,7 +1132,7 @@ STATIC long rle(uchar *output, uchar *input, ushort ln)
   ushort i, t;
   long finlen;
 
-  _asm {
+  __asm {
           mov edi, output
           mov esi, input
           xor ebx, ebx

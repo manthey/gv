@@ -6513,7 +6513,7 @@ int sort_compare(const char *s1, const char *s2)
   long val;
 
   if (SortDir) {
-    if (SortVal<=2)
+    if (SortVal <= 3 && SortVal != 1)
       val = stricmp((char *)(((long *)(s1+0x40))[0]),
                     (char *)(((long *)(s2+0x40))[0]));
     else
@@ -6523,7 +6523,7 @@ int sort_compare(const char *s1, const char *s2)
     return((((long *)(s1+0x44))[0]>((long *)(s2+0x44))[0])-
            (((long *)(s1+0x44))[0]<((long *)(s2+0x44))[0]));
   }
-  if (SortVal<=2)
+  if (SortVal <= 3 && SortVal != 1)
     val = stricmp((char *)(((long *)(s2+0x40))[0]),
                   (char *)(((long *)(s1+0x40))[0]));
   else
@@ -6540,9 +6540,34 @@ BOOL CALLBACK sort_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
  *        long msg: message to process.
  *        WPARAM wp, LPARAM lp: parameters for message.        6/11/96-DWM */
 {
-  static char *method[]={"File name","File extension","Directory name","File size (bytes)","Date of last modification","Time","Date and time","Image format","Image size (pixels)","Width","Height","Aspect ratio (width:height)",
-         "DPI","Bit depth","Number of categories","Viewed flag","Compression efficiency (bits/pixel)","Intensity (greyscale brightness)","Contrast","Hue (hexcone model)","Saturation (hexcone model)","Hue weighted by saturation",
-         "Value (hexcone model)","Red","Green","Blue", 0};
+  static char *method[]={
+    "File name",                     // 0
+    "Date and time",
+    "File extension",
+    "Directory name",
+    "File size (bytes)",
+    "Date of last modification",     // 5
+    "Time",
+    "Image format",
+    "Image size (pixels)",
+    "Width",
+    "Height",
+    "Aspect ratio (width:height)",
+    "DPI",
+    "Bit depth",
+    "Number of categories",
+    "Viewed flag",
+    "Compression efficiency (bits/pixel)",
+    "Intensity (greyscale brightness)",
+    "Contrast",
+    "Hue (hexcone model)",
+    "Saturation (hexcone model)",
+    "Hue weighted by saturation",
+    "Value (hexcone model)",
+    "Red",
+    "Green",
+    "Blue",
+     0};
   long i;
 
   switch (msg) {
@@ -6592,15 +6617,15 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           ((long *)(s+0x44))[0] = cur;
           switch (SortVal) {
             case 0: val = (long)(slide->filename+((long *)(s+2))[0]); break;
-            case 1: n = slide->filename+((long *)(s+2))[0];
+            case 1: val = ((ulong *)(s+0x3C))[0]>>1; break;
+            case 2: n = slide->filename+((long *)(s+2))[0];
               if (strchr(n, '.'))  n = strrchr(n, '.');
               val = (long)(n);  break;
-            case 2: val = (long)(slide->dirname+((long *)(slide->dir+
+            case 3: val = (long)(slide->dirname+((long *)(slide->dir+
                                           ((short *)s)[0]*6))[0]); break;
-            case 3: val = ((long *)(s+0x38))[0]; break;
-            case 4: val = ((ushort *)(s+0x3E))[0]; break;
-            case 5: val = ((ushort *)(s+0x3C))[0]; break;
-            case 6: val = ((ulong *)(s+0x3C))[0]>>1; break;
+            case 4: val = ((long *)(s+0x38))[0]; break;
+            case 5: val = ((ushort *)(s+0x3E))[0]; break;
+            case 6: val = ((ushort *)(s+0x3C))[0]; break;
             case 7: val = s[0xC]; break;
             case 8: val = ((short *)(s+6))[0]*((short *)(s+6))[1]; break;
             case 9: val = ((short *)(s+6))[0]; break;

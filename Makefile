@@ -4,7 +4,7 @@ LINK_OPTS=/LTCG /nologo
 LIB_OPTS=/LTCG /nologo
 RC_OPTS=/n /nologo
 
-all: gv.exe gvlib.lib mem.lib
+all: gv.exe gvlib.lib mem.lib gvlib.dll
 
 
 gv.exe: gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res
@@ -31,6 +31,10 @@ gvlib.lib: lib.obj
 	lib $(LIB_OPTS) /out:gvlib.lib lib.obj
 	IF EXIST "C:\P\LIB" copy gvlib.lib C:\P\LIB\gvlib.lib
 	IF EXIST "C:\P\LIB" copy gvlib.h C:\P\LIB\gvlib.h
+
+gvlib.dll: lib.obj mem.obj
+	link $(LINK_OPTS) /dll /out:gvlib.dll lib.obj mem.obj advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib
+	IF EXIST "C:\P\LIB" copy gvlib.dll C:\P\LIB\gvlib.dll
 	
 lib.obj: lib.c gload.c gsave.c gvlib.c process.c gload.h gvlib.h process.h
 	cl /c $(CLIB_OPTS) lib.c
@@ -43,5 +47,7 @@ mem.lib: mem.obj
 
 
 clean:
+	del *.dll
+	del *.lib
 	del *.obj
 	del *.res
