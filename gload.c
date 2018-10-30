@@ -264,7 +264,7 @@ STATIC void bgr_to_rgb(uchar *image, long siz)
  *        long size: number of values to convert.  Each value is 3 bytes.
  *                                                             2/26/96-DWM */
 {
-  _asm {
+  __asm {
           mov esi, image
           mov ecx, siz
 bgrrgb1:  mov al, [esi]
@@ -509,7 +509,7 @@ STATIC void jpeg_shift(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/5/96-DWM */
 {
-  _asm {
+  __asm {
           mov edi, dest
           mov esi, source
           mov ecx, 0x040
@@ -535,7 +535,7 @@ STATIC void jpeg_shift_add(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/7/96-DWM */
 {
-  _asm {
+  __asm {
           mov edi, dest
           mov esi, source
           mov ecx, 0x40
@@ -2171,7 +2171,7 @@ STATIC long lzw(uchar *dest, uchar *source, uchar *buf, long len, long maxlen,
          nextlink;
   long finlen;
 
-  _asm {
+  __asm {
           xor ebx, ebx
           mov ecx, maxlen                    ;zero out the destination buffer
           shr ecx, 0x02
@@ -2347,7 +2347,7 @@ STATIC long lzwlen(uchar *source, uchar *buf, long len, short numbits)
          nextlink;
   long finlen;
 
-  _asm {
+  __asm {
           xor ebx, ebx
           mov al, BYTE PTR numbits
           mov cl, al
@@ -3395,7 +3395,7 @@ STATIC void ungif(uchar *dest, uchar *source, long srclen)
          bitmask, part;
   long palsub;
 
-  _asm {
+  __asm {
           mov eax, ppart
           mov part, ax
           xor eax, eax                                     ;read first header
@@ -3639,7 +3639,7 @@ STATIC void unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
   ushort clearcode, eof, firstfree, freecode, maxcode, bitmask, codemask,
          initcodemask, initmaxcode, oldcode, incode, finchar;
 
-  _asm {
+  __asm {
           xor ebx, ebx
           mov eax, dest
           add maxlen, eax
@@ -3779,7 +3779,7 @@ STATIC void unlzwtif(uchar *dest, uchar *source, long maxlen, long srclen)
   ushort clearcode, eof, firstfree, freecode, maxcode, bitmask, codemask,
          initcodemask, initmaxcode, oldcode, incode, finchar;
 
-  _asm {
+  __asm {
           xor ebx, ebx
           mov eax, dest
           add maxlen, eax
@@ -3937,7 +3937,7 @@ STATIC long unrle(uchar *output, uchar *input, long ln, long srclen)
 {
   long finlen;
 
-  _asm {
+  __asm {
           mov edi, input
           mov esi, output
           mov ecx, esi

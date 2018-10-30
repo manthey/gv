@@ -10,10 +10,11 @@ init:
 
 build_script:
   - nmake
-  - dir gv.exe gvlib.lib mem.lib
+  - dir gv.exe gvlib.dll gvlib.lib mem.lib
 
 artifacts:
   - path: gv.exe
+  - path: gvlib.dll
   - path: gvlib.lib
   - path: gvlib.h
   - path: mem.lib
@@ -25,7 +26,7 @@ deploy:
     release: 'Release gv-latest'
     auth_token:
       secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
-    artifact: gv.exe, gvlib.lib, gvlib.h, mem.lib, mem.h
+    artifact: gv.exe, gvlib.dll, gvlib.lib, gvlib.h, mem.lib, mem.h
     force_update: true
     on:
       branch: master
@@ -35,7 +36,7 @@ deploy:
     release: Release $(appveyor_repo_tag_name)
     auth_token:
       secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
-    artifact: gv.exe, gvlib.lib, gvlib.h, mem.lib, mem.h
+    artifact: gv.exe, gvlib.dll, gvlib.lib, gvlib.h, mem.lib, mem.h
     force_update: true
     on:
       appveyor_repo_tag: true
