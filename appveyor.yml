@@ -10,14 +10,22 @@ init:
 
 build_script:
   - nmake
-  - dir gv.exe gvlib.dll gvlib.lib mem.lib
+  - appveyor PushArtifact gv.exe
+  - call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64
+  - nmake /f Makefile64 clean
+  - nmake /f Makefile64
+  - dir *.exe *.dll *.lib
 
 artifacts:
   - path: gv.exe
+  - path: gv64.exe
   - path: gvlib.dll
+  - path: gvlib64.dll
   - path: gvlib.lib
+  - path: gvlib64.lib
   - path: gvlib.h
   - path: mem.lib
+  - path: mem64.lib
   - path: mem.h
 
 deploy:

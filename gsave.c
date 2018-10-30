@@ -571,6 +571,7 @@ STATIC void fill_zone24(uchar *dest, long bclr, long count)
 {
   if (bclr==0xFFFFFF || !bclr) {
     memset(dest, bclr, count*3);  return; }
+  #ifdef _M_IX86
   __asm {
           mov edi, dest
           mov eax, bclr
@@ -582,6 +583,16 @@ fill1:    mov es:[edi], bx
           add edi, 0x03
           loop    fill1
     }
+  #else
+  long i;
+  uchar v0=((uchar *)&bclr)[0], v1=((uchar *)&bclr)[1], v2=((uchar *)&bclr)[2];
+
+  for (; count > 0; count--, dest+=3) {
+    dest[0] = v0;
+    dest[1] = v1;
+    dest[2] = v2;
+  }
+  #endif
 }
 
 STATIC void jpeg_dct(char *src, long w, long *div, long channel, long *huff)

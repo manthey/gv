@@ -258,21 +258,31 @@ STATIC long ccittblack[]={
           0x01f0 /* 0b0000000111110000 */, 12, 2560,
           0x0000 /* 0b0000000000000000 */, 11,   -1, -2,-2,-2};
 
-STATIC void bgr_to_rgb(uchar *image, long siz)
+STATIC void bgr_to_rgb(uchar *image, long count)
 /* Convert a packed array of BGR values to RGB values.
  * Enter: uchar *image: pointer to array to convert.
- *        long size: number of values to convert.  Each value is 3 bytes.
+ *        long count: number of values to convert.  Each value is 3 bytes.
  *                                                             2/26/96-DWM */
 {
+  #ifdef _M_IX86
   __asm {
           mov esi, image
-          mov ecx, siz
+          mov ecx, count
 bgrrgb1:  mov al, [esi]
           xchg al, [esi+2]
           mov [esi], al
           add esi, 03
           loop   bgrrgb1
     }
+  #else
+  uchar v;
+
+  for (; count > 0; count--, image+=3) {
+    v = image[0];
+    image[0] = image[2];
+    image[2] = v;
+  }
+  #endif
 }
 
 STATIC short endian(short *x)
@@ -509,6 +519,7 @@ STATIC void jpeg_shift(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/5/96-DWM */
 {
+  #ifdef _M_IX86
   __asm {
           mov edi, dest
           mov esi, source
@@ -527,6 +538,14 @@ jshift3:  mov [edi], al
           add esi, 0x04
           loop    jshift1
     }
+  #else
+  long i, v;
+
+  for (i=0; i<64; i++) {
+    v = source[i]>>13;
+    ((signed char *)dest)[i] = v < -128 ? 128 : v > 127 ? 127 : v;
+  }
+  #endif
 }
 
 STATIC void jpeg_shift_add(uchar *dest, long *source)
@@ -535,6 +554,7 @@ STATIC void jpeg_shift_add(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/7/96-DWM */
 {
+  #ifdef _M_IX86
   __asm {
           mov edi, dest
           mov esi, source
@@ -553,6 +573,14 @@ jshifta3: mov [edi], al
           add esi, 0x04
           loop    jshifta1
     }
+  #else
+  long i, v;
+
+  for (i=0; i<64; i++) {
+    v = (source[i]>>13) + 128;
+    dest[i] = v < 0 ? 0 : v > 255 ? 255 : v;
+  }
+  #endif
 }
 
 STATIC void jpeg_undct(long *res, char *dest, long w, long rw, long rh, long add)
@@ -2158,14 +2186,15 @@ STATIC long lzw(uchar *dest, uchar *source, uchar *buf, long len, long maxlen,
  *  destination buffer is filled, there will not be an eof code written.  In
  *  the worst case, the LZW routine will produce output which is 1.391 times
  *  the size of the original input.
- * Enter: long dest: absolute memory location for compressed data.
- *        long source: memory location for data to compress.
+ * Enter: uchar *dest: memory location for compressed data.
+ *        uchar *source: memory location for data to compress.
  *        char *buf: 28k of work space.
  *        long len: length of data to compress.  Must be at least 2 bytes.
  *        long maxlen: length of output buffer.  Must be at least 8 bytes.
  *        int numbits: number of bits to begin.
  * Exit:  long len: length of compressed data, including eof. 12/11/94-DWM */
 {
+  #ifdef _M_IX86
   uchar codesize, initcodesize;
   ushort clearcode, eof, firstfree, freecode, maxcode, initmaxcode, incode,
          nextlink;
@@ -2331,6 +2360,140 @@ lzw14:    xor eax, eax                               ;return total lzw length
           mov finlen, eax
     }
   return(finlen);
+  #else
+  long clearcode = 1 << numbits, eof = clearcode + 1, firstfree = eof + 1,
+       codesize = numbits + 1, initcodesize = codesize,
+       maxcode = clearcode << 1, initmaxcode = maxcode;
+  uchar *maxdest = dest+maxlen-4;
+
+  memset(dest, 0, maxlen);
+
+/*
+          mov edx, dest
+          xor cx, cx
+          xor eax, eax
+          mov esi, source
+          mov al, [esi]
+          inc source
+          mov esi, buf
+          dec len
+          mov incode, ax
+          mov ax, clearcode
+lzw3:     mov edi, eax                                    ;add code to output
+          shl eax, cl
+          or  [edx], eax
+          add cl, codesize
+          xor eax, eax
+          mov al, cl
+          shr ax, 0x03
+          add edx, eax
+          and cl, 0x07
+          cmp edx, maxlen
+          jge     lzw14
+          cmp di, eof
+          je      lzw14
+          cmp di, clearcode
+          jne     lzw7
+          mov al, initcodesize                                   ;clear codes
+          mov codesize, al
+          mov ax, initmaxcode
+          mov maxcode, ax
+          mov ax, firstfree
+          mov freecode, ax
+          xor eax, eax
+          xor ebx, ebx
+lzw4:     mov [esi+ebx], eax
+          add bx, 0x04
+          cmp bx, 0x2000
+          jne     lzw4
+          mov nextlink, bx
+          jmp     lzw7
+lzw5:     mov ax, [esi+edi+1]                         ;continue building code
+          mov incode, ax
+          jmp     lzw7
+lzw6:     mov ax, [esi+ebx+1]
+          mov incode, ax
+lzw7:     xor eax, eax                                       ;build next code
+          cmp len, 0x00
+          je      lzw12
+          mov esi, source
+          mov al, [esi]
+          inc source
+          mov esi, buf
+          dec len
+          mov bx, incode
+          shl bx, 0x01
+          mov edi, ebx
+          sub edi, 0x03
+          mov bx, [esi+ebx]
+lzw8:     test bx, bx
+          je      lzw10
+          cmp [esi+ebx], al
+          je      lzw6
+          xor edi, edi
+          mov di, [esi+ebx+3]
+          test edi, edi
+          je      lzw9
+          cmp [esi+edi], al
+          je      lzw5
+          mov bx, [esi+edi+3]
+          jmp     lzw8
+lzw9:     mov edi, ebx
+lzw10:    mov bx, nextlink
+          mov [esi+edi+3], bx
+          add nextlink, 0x05
+          mov [esi+ebx], al
+          xor edi, edi
+          mov di, freecode
+          mov [esi+ebx+1], edi
+          mov di, incode
+          mov incode, ax
+          shl edi, cl
+          or  [edx], edi
+          add cl, codesize
+          mov ax, cx
+          shr ax, 0x03
+          add edx, eax
+          and cl, 0x07
+          cmp edx, maxlen
+          jge     lzw14
+          inc freecode
+          mov bx, freecode
+          cmp bx, maxcode
+          jle     lzw7
+          inc codesize
+          shl maxcode, 0x01
+          cmp codesize, 0x0C
+          jl      lzw7
+          jg      lzw11
+          sub maxcode, 0x01
+          jmp     lzw7
+lzw11:    dec codesize
+          mov ax, clearcode
+          jmp     lzw3
+lzw12:    mov ax, incode                                     ;write last code
+          shl eax, cl
+          or  [edx], eax
+          add cl, codesize
+          inc freecode
+          mov bx, freecode
+          cmp bx, maxcode
+          jle     lzw13
+          cmp codesize, 0x0C
+          jne     lzw13
+          inc codesize
+lzw13:    xor eax, eax
+          mov ax, eof
+          jmp     lzw3
+lzw14:    xor eax, eax                               ;return total lzw length
+          mov al, cl
+          add al, 0x07
+          shr al, 0x03
+          add eax, edx
+          sub eax, dest
+          mov finlen, eax
+*/
+  #endif
 }
 
 STATIC long lzwlen(uchar *source, uchar *buf, long len, short numbits)
