@@ -459,12 +459,13 @@ BEGIN
 	LTEXT           "Display images from:", IDC_STATIC,     8,56,72,8, SS_LEFT
 	CONTROL         "&Eligible categories", PrevOpt31a, "Button", BS_AUTORADIOBUTTON,   8,68,72,12
 	CONTROL         "&All files", PrevOpt31b, "Button", BS_AUTORADIOBUTTON,     8,80,36,12
-	CONTROL         "&Make thumbnails", PrevOpt25, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,12,68,12
-	CONTROL         "Show &images", PrevOpt26, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,28,68,12
-	CONTROL         "Show file &names", PrevOpt27, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,40,68,12
-	CONTROL         "Show image &size", PrevOpt29, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,52,68,12
-	CONTROL         "Show &pixel depth", PrevOpt30, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    100,64,68,12
-	CONTROL         "Show &categories", PrevOpt28, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,76,68,12
+	CONTROL         "&Make thumbnails", PrevOpt25, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,4,68,12
+	CONTROL         "Show &images", PrevOpt26, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,20,68,12
+	CONTROL         "Show file &names", PrevOpt27, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,32,68,12
+	CONTROL         "Show image &size", PrevOpt29, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,44,68,12
+	CONTROL         "Show &pixel depth", PrevOpt30, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    100,56,68,12
+	CONTROL         "Show &file size", PrevOpt23, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    100,68,68,12
+	CONTROL         "Show &categories", PrevOpt28, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,80,68,12
 	PUSHBUTTON      "Help", HelpHelp,    10, 99,40,14, 0
 	PUSHBUTTON      "Cancel", IDCANCEL,  75, 99,40,14, 0
 	DEFPUSHBUTTON   "Done", IDOK,       125, 99,40,14, 0
