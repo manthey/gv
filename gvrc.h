@@ -213,6 +213,7 @@
 #define PrevOpt30      3007 /*   |                      */
 #define PrevOpt31a     3008 /*  /                       */
 #define PrevOpt31b     3009
+#define PrevOpt23      3010
 
 #define PrevSDLG        109
 #define PrevSWidth     3000

@@ -2671,10 +2671,12 @@ BOOL CALLBACK preview_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   switch (msg) {
     case WM_COMMAND: switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpPreview); break;
-      case IDOK: SlideOpt &= 0x01FFFFFF;
+      case IDOK: SlideOpt &= 0x017FFFFF;
         for (i=25; i<=31; i++)
           if (!SendDlgItemMessage(hdlg, PrevOpt25+i-25, BM_GETCHECK, 0, 0))
             SlideOpt |= (1<<i);
+        if (!SendDlgItemMessage(hdlg, PrevOpt23, BM_GETCHECK, 0, 0))
+          SlideOpt |= (1<<23);
         GetDlgItemText(hdlg, PrevWidth, text, 79);
         sscanf(text, "%d", &i);
         if (i>=40 && i<=255)  slide->tx = i;
@@ -2689,6 +2691,7 @@ BOOL CALLBACK preview_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       for (i=25; i<=31; i++)
         SendDlgItemMessage(hdlg, PrevOpt25+i-25, BM_SETCHECK,
                            !(SlideOpt&(1<<i)), 0);
+      SendDlgItemMessage(hdlg, PrevOpt23, BM_SETCHECK, !(SlideOpt&(1<<23)), 0);
       SendDlgItemMessage(hdlg, PrevOpt31b, BM_SETCHECK,
                          (SlideOpt&0x80000000)!=0, 0);
       sprintf(text, "%d", slide->tx);
@@ -3196,7 +3199,7 @@ long preview_page(HDC hdc, long ww, long wh, long page, long full)
         sprintf(text+strlen(text), " - %d", 1+num);
       draw_text(hdc, text, x, y, w-10, 12);
       y += 12; }
-    if ((slide->option&0x60000000)!=0x60000000) {
+    if ((slide->option&0x60800000)!=0x60800000) {
       if (!(slide->option&0x20000000))
         sprintf(text, "%d x %d", ((short *)(s+6))[0], ((short *)(s+6))[1]);
       else  text[0] = 0;
@@ -3204,6 +3207,10 @@ long preview_page(HDC hdc, long ww, long wh, long page, long full)
         strcat(text, " x ");
       if (!(slide->option&0x40000000))
         sprintf(text+strlen(text), "%d bit", 24-16*((short *)(s+6))[2]);
+      if (!(slide->option&0x800000) && ((slide->option&0x60000000)!=0x60000000))
+        strcat(text, " - ");
+      if (!(slide->option&0x800000))
+        sprintf(text+strlen(text), "%ld", ((long *)(s+0x38))[0]);
       if (((short *)(s+6))[0])
         draw_text(hdc, text, x, y, w-10, 12);
       y += 12; }
@@ -3806,7 +3813,7 @@ void preview_update(HWND hwnd)
         sprintf(text+strlen(text), " - %d", 1+num);
       draw_text(hdc, text, x, y, w-10, 12);
       y += 12; }
-    if ((slide->option&0x60000000)!=0x60000000) {
+    if ((slide->option&0x60800000)!=0x60800000) {
       if (!(slide->option&0x20000000))
         sprintf(text, "%d x %d", ((short *)(slide->file+FE*n+6))[0],
                 ((short *)(slide->file+FE*n+6))[1]);
@@ -3816,6 +3823,10 @@ void preview_update(HWND hwnd)
       if (!(slide->option&0x40000000))
         sprintf(text+strlen(text), "%d bit",
                 24-16*((short *)(slide->file+FE*n+6))[2]);
+      if (!(slide->option&0x800000) && ((slide->option&0x60000000)!=0x60000000))
+        strcat(text, " - ");
+      if (!(slide->option&0x800000))
+        sprintf(text+strlen(text), "%ld", ((long *)(slide->file+FE*n+0x38))[0]);
       if (((short *)(slide->file+FE*n+6))[0])
         draw_text(hdc, text, x, y, w-10, 12);
       y += 12; }
@@ -5896,6 +5907,7 @@ void slide_open(HWND hwnd)
  *               9: 0-new slide file, 1-changing root directory
  *              10: 0-and category include, 1-or category include
  *           Preview option flags
+ *              23: 0-show file size, 1-don't show
  *              24: 0-save selection, 1-save all
  *              25: 0-make thumbnails, 1-don't make thumbnails
  *              26: 0-show thumbnail, 1-don't show
