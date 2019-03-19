@@ -1818,15 +1818,21 @@ STATIC uchar *load_pil(FILE *fptr)
 
   /* The command uses -u to prevent buffering and ensure stdin and stdout are
    * in binary mode.  This copies memory far too many times. */
-  char *command = "python -c \"\n"
+  char *command = "python -u -c \"\n"
     "import six, sys, PIL.Image\n"
     "import os, msvcrt\n"
-    "msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)\n"
-    "msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)\n"
-    "inp = six.BytesIO(sys.stdin.read())\n"
+    "if sys.version_info >= (3, 0):\n"
+    "  src = sys.stdin.buffer\n"
+    "  dest = sys.stdout.buffer\n"
+    "else:\n"
+    "  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)\n"
+    "  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)\n"
+    "  src = sys.stdin\n"
+    "  dest = sys.stdout\n"
+    "inp = six.BytesIO(src.read())\n"
     "buf = six.BytesIO()\n"
     "PIL.Image.open(inp).convert('RGB').save(buf, format='PPM')\n"
-    "sys.stdout.write(buf.getvalue())\"";
+    "dest.write(buf.getvalue())\"";
 
   dest = pipe_file_to_command(command, fptr, fread2, 512*1024*1024, &destlen);
   if (!dest) {
