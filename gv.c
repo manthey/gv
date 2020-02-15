@@ -2626,6 +2626,12 @@ void preview_delete(void)
         if (i<PreCoor[4])  first = 0;
         if (i>PreCoor[2+PreCoor[0]*2])  first = 1e6; }
       DeleteFile(name);
+      if (strlen(name) > 4 && !stricmp(name + strlen(name) - 4, ".jpg")) {
+        char nef[NAMELEN];
+        strcpy(nef, name);
+        strcpy(nef + strlen(nef) - 4, ".nef");
+        DeleteFile(nef);
+      }
       slide_delete(i, 0);
       i--; }
   if (slide->tsel>=slide->numfile)  slide->tsel = slide->numfile-1;

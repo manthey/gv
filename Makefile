@@ -1,3 +1,6 @@
+# switch to vcc environment and build:
+#  vcc
+#  nmake
 # CL_OPTS=/O2 /GL /W4 /w34244 /wd4996 /w34305 /wd4706 /wd4057 /wd4127 /nologo
 CL_OPTS=/O2 /GL /W2 /w24101 /w34244 /w34305 /nologo
 LINK_OPTS=/LTCG /nologo
