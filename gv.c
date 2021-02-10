@@ -3007,6 +3007,15 @@ LRESULT CALLBACK preview_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         case SB_THUMBTRACK: ScrollOff = 1;
         case SB_THUMBPOSITION: i = (wp>>16); break;
         case SB_TOP: i = y; }
+    case WM_MOUSEWHEEL: /* part way through WM_VSCROLL */
+      if (msg == WM_MOUSEWHEEL) {
+        k = GET_WHEEL_DELTA_WPARAM(wp);
+        GetScrollRange(HwndP, SB_VERT, &x, &y);
+        i = j = GetScrollPos(HwndP, SB_VERT);
+        i -= k / 120;
+        if (i < x) i = x;
+        if (i > y) i = y;
+      }
       SetScrollPos(HwndP, SB_VERT, i, 1);
       if (i!=j) {
         if (slide)  slide->ttop = i*PreCoor[2];

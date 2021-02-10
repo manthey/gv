@@ -5,172 +5,172 @@
 
 MainMenu MENU {
   POPUP "&File" {
-	MENUITEM "&Open...\t^O", MenuOpen
-	MENUITEM "Open &New...\t^N", MenuNew
-	MENUITEM "Open A&ll Parts", MenuMulti
-	MENUITEM SEPARATOR
-	MENUITEM "&First Image\t^PgUp", MenuImageFirst
-	MENUITEM "Previous I&mage\tPgUp", MenuImagePrev
-	MENUITEM "Next &Image\tPgDn", MenuImageNext
-	MENUITEM SEPARATOR
-	MENUITEM "&Save...\t^S", MenuSave
-	MENUITEM "Save &As...\t^A", MenuSaveAs
-	MENUITEM "Sa&ve All Parts", MenuSaveMulti
-	MENUITEM "Appen&d...\t^D", MenuAppend
-	MENUITEM SEPARATOR
-	MENUITEM "&Batch Convert...\t^B", MenuBatch
-	MENUITEM "Ba&tch Append...", MenuBatchApp
-	MENUITEM SEPARATOR
-	MENUITEM "&Print...\t^P", MenuPrint
-	MENUITEM "P&rint Setup...", MenuPSetup
-	MENUITEM SEPARATOR
-	MENUITEM "E&xit\tAlt-F4", MenuExit
-	MENUITEM SEPARATOR }
+  MENUITEM "&Open...\t^O", MenuOpen
+  MENUITEM "Open &New...\t^N", MenuNew
+  MENUITEM "Open A&ll Parts", MenuMulti
+  MENUITEM SEPARATOR
+  MENUITEM "&First Image\t^PgUp", MenuImageFirst
+  MENUITEM "Previous I&mage\tPgUp", MenuImagePrev
+  MENUITEM "Next &Image\tPgDn", MenuImageNext
+  MENUITEM SEPARATOR
+  MENUITEM "&Save...\t^S", MenuSave
+  MENUITEM "Save &As...\t^A", MenuSaveAs
+  MENUITEM "Sa&ve All Parts", MenuSaveMulti
+  MENUITEM "Appen&d...\t^D", MenuAppend
+  MENUITEM SEPARATOR
+  MENUITEM "&Batch Convert...\t^B", MenuBatch
+  MENUITEM "Ba&tch Append...", MenuBatchApp
+  MENUITEM SEPARATOR
+  MENUITEM "&Print...\t^P", MenuPrint
+  MENUITEM "P&rint Setup...", MenuPSetup
+  MENUITEM SEPARATOR
+  MENUITEM "E&xit\tAlt-F4", MenuExit
+  MENUITEM SEPARATOR }
   POPUP "&Edit" {
-	MENUITEM "&Undo\t^Z", MenuUndo, GRAYED
-	MENUITEM SEPARATOR
-	MENUITEM "&Copy Whole Image\t^C", MenuCopyFull
-	MENUITEM "Copy &View\t^X", MenuCopyView
-	MENUITEM "&Paste\t^V", MenuPaste
-	MENUITEM SEPARATOR
-	MENUITEM "&Refresh Screen\t`", MenuRefresh }
+  MENUITEM "&Undo\t^Z", MenuUndo, GRAYED
+  MENUITEM SEPARATOR
+  MENUITEM "&Copy Whole Image\t^C", MenuCopyFull
+  MENUITEM "Copy &View\t^X", MenuCopyView
+  MENUITEM "&Paste\t^V", MenuPaste
+  MENUITEM SEPARATOR
+  MENUITEM "&Refresh Screen\t`", MenuRefresh }
   POPUP "&Slide" {
-	MENUITEM "&New/Open Slide Show\tS", MenuSlide
-	MENUITEM "&Save Slide File", MenuSlSave
-	MENUITEM "Save &As Slide File...", MenuSlSaveAs
-	MENUITEM "&Close Slide File", MenuSlClose
-	MENUITEM SEPARATOR
-	MENUITEM "Slide &Options...\tO", MenuSlOptions
-	MENUITEM "&Preview\tP", MenuPreview
-	MENUITEM SEPARATOR
-	MENUITEM "&Increase Delay\t+", MenuSlInc
-	MENUITEM "&Decrease Delay\t-", MenuSlDec
-	MENUITEM "&Manual Advance (pause)\tM", MenuSlMan
-	MENUITEM "A&uto Advance\tA", MenuSlAuto
-	MENUITEM "Clear &Viewed Record\tC", MenuSlClear
-	MENUITEM "Nex&t File\tN", MenuSlNon
-	MENUITEM "Ne&xt Slide\tspc", MenuSlNext
-	MENUITEM "Next Slide &Group\t^spc", MenuSlNextGroup
-	MENUITEM SEPARATOR }
+  MENUITEM "&New/Open Slide Show\tS", MenuSlide
+  MENUITEM "&Save Slide File", MenuSlSave
+  MENUITEM "Save &As Slide File...", MenuSlSaveAs
+  MENUITEM "&Close Slide File", MenuSlClose
+  MENUITEM SEPARATOR
+  MENUITEM "Slide &Options...\tO", MenuSlOptions
+  MENUITEM "&Preview\tP", MenuPreview
+  MENUITEM SEPARATOR
+  MENUITEM "&Increase Delay\t+", MenuSlInc
+  MENUITEM "&Decrease Delay\t-", MenuSlDec
+  MENUITEM "&Manual Advance (pause)\tM", MenuSlMan
+  MENUITEM "A&uto Advance\tA", MenuSlAuto
+  MENUITEM "Clear &Viewed Record\tC", MenuSlClear
+  MENUITEM "Nex&t File\tN", MenuSlNon
+  MENUITEM "Ne&xt Slide\tspc", MenuSlNext
+  MENUITEM "Next Slide &Group\t^spc", MenuSlNextGroup
+  MENUITEM SEPARATOR }
   POPUP "&Zoom" {
-	MENUITEM "&Whole Picture\tW", MenuWhole
-	MENUITEM "&Enlarge\tE", MenuZEnlarge
-	MENUITEM "&Reduce\tR", MenuZReduce
-	MENUITEM SEPARATOR
-	MENUITEM "&Original Size\t^0", MenuOrig
-	MENUITEM "&25% Size\t^3", MenuZ025
-	MENUITEM "&50% Size\t^5", MenuZ050
-	MENUITEM "&100% Size\t^1", MenuZ100
-	MENUITEM "2&00% Size\t^2", MenuZ200
-	MENUITEM "&400% Size\t^4", MenuZ400
-	MENUITEM SEPARATOR
-	MENUITEM "&Bigger\t^+", MenuZPlus
-	MENUITEM "&Smaller\t^-", MenuZMinus
-	MENUITEM SEPARATOR
-	MENUITEM "Lock &Aspect Ratio...\t^8", MenuZAspect
-	MENUITEM "&78x110 Aspect Ratio\t^7", MenuZ78 }
+  MENUITEM "&Whole Picture\tW", MenuWhole
+  MENUITEM "&Enlarge\tE", MenuZEnlarge
+  MENUITEM "&Reduce\tR", MenuZReduce
+  MENUITEM SEPARATOR
+  MENUITEM "&Original Size\t^0", MenuOrig
+  MENUITEM "&25% Size\t^3", MenuZ025
+  MENUITEM "&50% Size\t^5", MenuZ050
+  MENUITEM "&100% Size\t^1", MenuZ100
+  MENUITEM "2&00% Size\t^2", MenuZ200
+  MENUITEM "&400% Size\t^4", MenuZ400
+  MENUITEM SEPARATOR
+  MENUITEM "&Bigger\t^+", MenuZPlus
+  MENUITEM "&Smaller\t^-", MenuZMinus
+  MENUITEM SEPARATOR
+  MENUITEM "Lock &Aspect Ratio...\t^8", MenuZAspect
+  MENUITEM "&78x110 Aspect Ratio\t^7", MenuZ78 }
   POPUP "&Options" {
-	POPUP "Letter&boxing" {
-	  MENUITEM "&Fit Window", MenuLetFit
-	  MENUITEM SEPARATOR
-	  MENUITEM "&Black", MenuLetBlack
-	  MENUITEM "&Grey", MenuLetGrey
-	  MENUITEM "&White", MenuLetWhite
-	  MENUITEM "&Contrasting", MenuLetCon }
-	POPUP "&Display" {
-	  MENUITEM "&Greyscale", MenuGrey
-	  MENUITEM "&Reduce Color Depth", MenuColor
-	  MENUITEM "&Dither", MenuDither
-	  MENUITEM "Bilinear &Interpolate", MenuInter
-	  MENUITEM "Bi&cubic Interpolate", MenuInter2
-	  MENUITEM "&Spiff\tF", MenuSpiff
-	  MENUITEM "Turn &Off Spiff\tshift-F", MenuSpiffOff }
-	MENUITEM SEPARATOR
-	MENUITEM "&Rotate Clockwise\t>", MenuRotateCW
-	MENUITEM "R&otate Counterclockwise\t<", MenuRotateCCW
-	MENUITEM SEPARATOR
-	MENUITEM "&Lock Window Size", MenuZLock
-	MENUITEM "&Prevent Enlarge", MenuZPrev
-	MENUITEM "Lo&ck 100% Size", MenuZL100
-	MENUITEM SEPARATOR
-	MENUITEM "&Error Messages", MenuError
-	MENUITEM "&Warning Messages", MenuWarn
-	MENUITEM "&Sole Process", MenuSole
-	MENUITEM "Always On &Top", MenuTop
-	MENUITEM SEPARATOR
-	MENUITEM "Link E&xtensions", MenuExt }
+  POPUP "Letter&boxing" {
+    MENUITEM "&Fit Window", MenuLetFit
+    MENUITEM SEPARATOR
+    MENUITEM "&Black", MenuLetBlack
+    MENUITEM "&Grey", MenuLetGrey
+    MENUITEM "&White", MenuLetWhite
+    MENUITEM "&Contrasting", MenuLetCon }
+  POPUP "&Display" {
+    MENUITEM "&Greyscale", MenuGrey
+    MENUITEM "&Reduce Color Depth", MenuColor
+    MENUITEM "&Dither", MenuDither
+    MENUITEM "Bilinear &Interpolate", MenuInter
+    MENUITEM "Bi&cubic Interpolate", MenuInter2
+    MENUITEM "&Spiff\tF", MenuSpiff
+    MENUITEM "Turn &Off Spiff\tshift-F", MenuSpiffOff }
+  MENUITEM SEPARATOR
+  MENUITEM "&Rotate Clockwise\t>", MenuRotateCW
+  MENUITEM "R&otate Counterclockwise\t<", MenuRotateCCW
+  MENUITEM SEPARATOR
+  MENUITEM "&Lock Window Size", MenuZLock
+  MENUITEM "&Prevent Enlarge", MenuZPrev
+  MENUITEM "Lo&ck 100% Size", MenuZL100
+  MENUITEM SEPARATOR
+  MENUITEM "&Error Messages", MenuError
+  MENUITEM "&Warning Messages", MenuWarn
+  MENUITEM "&Sole Process", MenuSole
+  MENUITEM "Always On &Top", MenuTop
+  MENUITEM SEPARATOR
+  MENUITEM "Link E&xtensions", MenuExt }
   POPUP "&Help" {
-	MENUITEM "Image &Info...\t^I", MenuInfo
-	MENUITEM SEPARATOR
-	MENUITEM "&Help...\tF1", MenuHelp
-	MENUITEM "&Search Help...", MenuHelpS
-	MENUITEM SEPARATOR
-	MENUITEM "&About...", MenuAbout } }
+  MENUITEM "Image &Info...\t^I", MenuInfo
+  MENUITEM SEPARATOR
+  MENUITEM "&Help...\tF1", MenuHelp
+  MENUITEM "&Search Help...", MenuHelpS
+  MENUITEM SEPARATOR
+  MENUITEM "&About...", MenuAbout } }
 
 PrevMenu MENU {
   POPUP "&File" {
-	MENUITEM "New/&Open Preview File...\t^O", MenuOpen
-	MENUITEM "&Save Preview File...\t^S", MenuSave
-	MENUITEM "Save Preview File &As...\t^A", MenuSaveAs
-	MENUITEM SEPARATOR
-	MENUITEM "Sa&ve Preview Screens...\tZ", MenuPrevSave
-	MENUITEM SEPARATOR
-	MENUITEM "&Print...\t^P", MenuPrint
-	MENUITEM "P&rint Setup...", MenuPSetup
-	MENUITEM SEPARATOR
-	MENUITEM "E&xit Preview\tAlt-F4", MenuExit }
+  MENUITEM "New/&Open Preview File...\t^O", MenuOpen
+  MENUITEM "&Save Preview File...\t^S", MenuSave
+  MENUITEM "Save Preview File &As...\t^A", MenuSaveAs
+  MENUITEM SEPARATOR
+  MENUITEM "Sa&ve Preview Screens...\tZ", MenuPrevSave
+  MENUITEM SEPARATOR
+  MENUITEM "&Print...\t^P", MenuPrint
+  MENUITEM "P&rint Setup...", MenuPSetup
+  MENUITEM SEPARATOR
+  MENUITEM "E&xit Preview\tAlt-F4", MenuExit }
   POPUP "&Edit" {
-	MENUITEM "&Copy Whole Preview\t^C", MenuCopyFull
-	MENUITEM "Copy &Selection\t^X", MenuCopyView
-	MENUITEM SEPARATOR
-	MENUITEM "Select &All", MenuSelectAll
-	MENUITEM "Select &None\t^D", MenuAppend
-	MENUITEM SEPARATOR
-	MENUITEM "&Refresh Screen\t`", MenuRefresh }
+  MENUITEM "&Copy Whole Preview\t^C", MenuCopyFull
+  MENUITEM "Copy &Selection\t^X", MenuCopyView
+  MENUITEM SEPARATOR
+  MENUITEM "Select &All", MenuSelectAll
+  MENUITEM "Select &None\t^D", MenuAppend
+  MENUITEM SEPARATOR
+  MENUITEM "&Refresh Screen\t`", MenuRefresh }
   POPUP "&Preview" {
-	MENUITEM "&Slide Show\tS", MenuSlide
-	MENUITEM SEPARATOR
-	MENUITEM "Slide &Options...\tO", MenuSlOptions
-	MENUITEM "&Preview Options...\tI", MenuPrOptions
-	MENUITEM "&Make thumbnails\tA", MenuSlAuto
-	MENUITEM "S&top making thumbnails\tEsc", MenuSlMan
-	MENUITEM "&Delete thumbnails", MenuPurge
-	MENUITEM SEPARATOR
-	MENUITEM "Mark as &viewed\tV", MenuViewed
-	MENUITEM "&Clear viewed flag\tC", MenuSlClear
-	MENUITEM SEPARATOR }
+  MENUITEM "&Slide Show\tS", MenuSlide
+  MENUITEM SEPARATOR
+  MENUITEM "Slide &Options...\tO", MenuSlOptions
+  MENUITEM "&Preview Options...\tI", MenuPrOptions
+  MENUITEM "&Make thumbnails\tA", MenuSlAuto
+  MENUITEM "S&top making thumbnails\tEsc", MenuSlMan
+  MENUITEM "&Delete thumbnails", MenuPurge
+  MENUITEM SEPARATOR
+  MENUITEM "Mark as &viewed\tV", MenuViewed
+  MENUITEM "&Clear viewed flag\tC", MenuSlClear
+  MENUITEM SEPARATOR }
   POPUP "&Image" {
-	MENUITEM "&Show\tEnter", MenuShowImage
-	MENUITEM SEPARATOR
-	MENUITEM "&Copy", MenuCopyImage
-	MENUITEM "&Delete\t^Del", MenuDelete
-	MENUITEM "&Move", MenuMove
-	MENUITEM "&Rename", MenuRename
-	MENUITEM SEPARATOR
-	MENUITEM "Sor&t\tT", MenuSort
-	MENUITEM "&Find\t^F", MenuFind
-	MENUITEM "Find A&gain\t^G", MenuFindNext }
+  MENUITEM "&Show\tEnter", MenuShowImage
+  MENUITEM SEPARATOR
+  MENUITEM "&Copy", MenuCopyImage
+  MENUITEM "&Delete\t^Del", MenuDelete
+  MENUITEM "&Move", MenuMove
+  MENUITEM "&Rename", MenuRename
+  MENUITEM SEPARATOR
+  MENUITEM "Sor&t\tT", MenuSort
+  MENUITEM "&Find\t^F", MenuFind
+  MENUITEM "Find A&gain\t^G", MenuFindNext }
   POPUP "&Help" {
-	MENUITEM "Image &Info...\t^I", MenuInfo
-	MENUITEM SEPARATOR
-	MENUITEM "&Help...\tF1", MenuHelp
-	MENUITEM "&Search Help...", MenuHelpS
-	MENUITEM SEPARATOR
-	MENUITEM "&About...", MenuAbout } }
+  MENUITEM "Image &Info...\t^I", MenuInfo
+  MENUITEM SEPARATOR
+  MENUITEM "&Help...\tF1", MenuHelp
+  MENUITEM "&Search Help...", MenuHelpS
+  MENUITEM SEPARATOR
+  MENUITEM "&About...", MenuAbout } }
 
 MainMenu ACCELERATORS {
-  VK_ADD,MenuSlInc,   VIRTKEY
-  VK_ADD,MenuZPlus,   VIRTKEY, CONTROL
+  VK_ADD,MenuSlInc, VIRTKEY
+  VK_ADD,MenuZPlus, VIRTKEY, CONTROL
   VK_DELETE,MenuDelete,VIRTKEY,CONTROL
   VK_DELETE,MenuCopyView,VIRTKEY,SHIFT
   VK_DOWN,MenuKeyDown,VIRTKEY
   VK_DOWN,MenuKeyDown,VIRTKEY, CONTROL
   VK_DOWN,MenuKeyDown,VIRTKEY, SHIFT
-  VK_END,MenuKeyEnd,  VIRTKEY
-  VK_END,MenuKeyEnd,  VIRTKEY, CONTROL
-  VK_END,MenuKeyEnd,  VIRTKEY, SHIFT
+  VK_END,MenuKeyEnd, VIRTKEY
+  VK_END,MenuKeyEnd, VIRTKEY, CONTROL
+  VK_END,MenuKeyEnd, VIRTKEY, SHIFT
   VK_ESCAPE,MenuSlMan,VIRTKEY
-  VK_F1,MenuHelp,     VIRTKEY
+  VK_F1,MenuHelp, VIRTKEY
   VK_F3,MenuFindNext, VIRTKEY
   VK_F10,MenuZoomF10, VIRTKEY
   VK_HOME,MenuKeyHome,VIRTKEY
@@ -198,73 +198,73 @@ MainMenu ACCELERATORS {
   VK_SPACE,MenuSlNextGroup,VIRTKEY,SHIFT
   VK_SUBTRACT,MenuSlDec,VIRTKEY
   VK_SUBTRACT,MenuZMinus,VIRTKEY,CONTROL
-  VK_UP,MenuKeyUp,    VIRTKEY
-  VK_UP,MenuKeyUp,    VIRTKEY, CONTROL
-  VK_UP,MenuKeyUp,    VIRTKEY, SHIFT
-  "0",  MenuCat0,     VIRTKEY
-  "0",  MenuCatS0,    VIRTKEY, SHIFT
-  "1",  MenuCat0+1,   VIRTKEY
-  "1",  MenuCatS0+1,  VIRTKEY, SHIFT
-  "2",  MenuCat0+2,   VIRTKEY
-  "2",  MenuCatS0+2,  VIRTKEY, SHIFT
-  "3",  MenuCat0+3,   VIRTKEY
-  "3",  MenuCatS0+3,  VIRTKEY, SHIFT
-  "4",  MenuCat0+4,   VIRTKEY
-  "4",  MenuCatS0+4,  VIRTKEY, SHIFT
-  "5",  MenuCat0+5,   VIRTKEY
-  "5",  MenuCatS0+5,  VIRTKEY, SHIFT
-  "6",  MenuCat0+6,   VIRTKEY
-  "6",  MenuCatS0+6,  VIRTKEY, SHIFT
-  "7",  MenuCat0+7,   VIRTKEY
-  "7",  MenuCatS0+7,  VIRTKEY, SHIFT
-  "8",  MenuCat0+8,   VIRTKEY
-  "8",  MenuCatS0+8,  VIRTKEY, SHIFT
-  "9",  MenuCat0+9,   VIRTKEY
-  "9",  MenuCatS0+9,  VIRTKEY, SHIFT
-  "0",  MenuOrig,     VIRTKEY, CONTROL
-  "1",  MenuZ100,     VIRTKEY, CONTROL
-  "2",  MenuZ200,     VIRTKEY, CONTROL
-  "3",  MenuZ025,     VIRTKEY, CONTROL
-  "4",  MenuZ400,     VIRTKEY, CONTROL
-  "5",  MenuZ050,     VIRTKEY, CONTROL
-  "7",  MenuZ78,      VIRTKEY, CONTROL
-  "8",  MenuZAspect,  VIRTKEY, CONTROL
-  "`",  MenuRefresh,  ASCII
-  "<",  MenuRotateCCW,ASCII
-  ",",  MenuRotateCCW,ASCII
-  ">",  MenuRotateCW, ASCII
-  ".",  MenuRotateCW, ASCII
-  "A",  MenuSlAuto,   VIRTKEY
-  "A",  MenuSaveAs,   VIRTKEY, CONTROL
-  "B",  MenuBatch,    VIRTKEY, CONTROL
-  "C",  MenuCopyFull, VIRTKEY, CONTROL
-  "C",  MenuSlClear,  VIRTKEY
-  "D",  MenuAppend,   VIRTKEY, CONTROL
-  "E",  MenuZEnlarge, VIRTKEY
-  "F",  MenuSpiff,    VIRTKEY
-  "F",  MenuSpiffOff, VIRTKEY, SHIFT
-  "F",  MenuFind,     VIRTKEY, CONTROL
-  "H",  MenuZoomF10,  VIRTKEY
-  "G",  MenuFindNext, VIRTKEY, CONTROL
-  "I",  MenuPrOptions,VIRTKEY
-  "I",  MenuInfo,     VIRTKEY, CONTROL
-  "M",  MenuSlMan,    VIRTKEY
-  "N",  MenuSlNon,    VIRTKEY
-  "N",  MenuNew,      VIRTKEY, CONTROL
-  "O",  MenuSlOptions,VIRTKEY
-  "O",  MenuOpen,     VIRTKEY, CONTROL
-  "P",  MenuPreview,  VIRTKEY
-  "P",  MenuPrint,    VIRTKEY, CONTROL
-  "R",  MenuZReduce,  VIRTKEY
-  "S",  MenuSave,     VIRTKEY, CONTROL
-  "S",  MenuSlide,    VIRTKEY
-  "T",  MenuSort,     VIRTKEY
-  "V",  MenuViewed,   VIRTKEY
-  "V",  MenuPaste,    VIRTKEY, CONTROL
-  "W",  MenuWhole,    VIRTKEY
-  "X",  MenuCopyView, VIRTKEY, CONTROL
-  "Z",  MenuPrevSave, VIRTKEY
-  "Z",  MenuUndo,     VIRTKEY, CONTROL }
+  VK_UP,MenuKeyUp, VIRTKEY
+  VK_UP,MenuKeyUp, VIRTKEY, CONTROL
+  VK_UP,MenuKeyUp, VIRTKEY, SHIFT
+  "0", MenuCat0, VIRTKEY
+  "0", MenuCatS0, VIRTKEY, SHIFT
+  "1", MenuCat0+1, VIRTKEY
+  "1", MenuCatS0+1, VIRTKEY, SHIFT
+  "2", MenuCat0+2, VIRTKEY
+  "2", MenuCatS0+2, VIRTKEY, SHIFT
+  "3", MenuCat0+3, VIRTKEY
+  "3", MenuCatS0+3, VIRTKEY, SHIFT
+  "4", MenuCat0+4, VIRTKEY
+  "4", MenuCatS0+4, VIRTKEY, SHIFT
+  "5", MenuCat0+5, VIRTKEY
+  "5", MenuCatS0+5, VIRTKEY, SHIFT
+  "6", MenuCat0+6, VIRTKEY
+  "6", MenuCatS0+6, VIRTKEY, SHIFT
+  "7", MenuCat0+7, VIRTKEY
+  "7", MenuCatS0+7, VIRTKEY, SHIFT
+  "8", MenuCat0+8, VIRTKEY
+  "8", MenuCatS0+8, VIRTKEY, SHIFT
+  "9", MenuCat0+9, VIRTKEY
+  "9", MenuCatS0+9, VIRTKEY, SHIFT
+  "0", MenuOrig, VIRTKEY, CONTROL
+  "1", MenuZ100, VIRTKEY, CONTROL
+  "2", MenuZ200, VIRTKEY, CONTROL
+  "3", MenuZ025, VIRTKEY, CONTROL
+  "4", MenuZ400, VIRTKEY, CONTROL
+  "5", MenuZ050, VIRTKEY, CONTROL
+  "7", MenuZ78, VIRTKEY, CONTROL
+  "8", MenuZAspect, VIRTKEY, CONTROL
+  "`", MenuRefresh, ASCII
+  "<", MenuRotateCCW,ASCII
+  ",", MenuRotateCCW,ASCII
+  ">", MenuRotateCW, ASCII
+  ".", MenuRotateCW, ASCII
+  "A", MenuSlAuto, VIRTKEY
+  "A", MenuSaveAs, VIRTKEY, CONTROL
+  "B", MenuBatch, VIRTKEY, CONTROL
+  "C", MenuCopyFull, VIRTKEY, CONTROL
+  "C", MenuSlClear, VIRTKEY
+  "D", MenuAppend, VIRTKEY, CONTROL
+  "E", MenuZEnlarge, VIRTKEY
+  "F", MenuSpiff, VIRTKEY
+  "F", MenuSpiffOff, VIRTKEY, SHIFT
+  "F", MenuFind, VIRTKEY, CONTROL
+  "H", MenuZoomF10, VIRTKEY
+  "G", MenuFindNext, VIRTKEY, CONTROL
+  "I", MenuPrOptions,VIRTKEY
+  "I", MenuInfo, VIRTKEY, CONTROL
+  "M", MenuSlMan, VIRTKEY
+  "N", MenuSlNon, VIRTKEY
+  "N", MenuNew, VIRTKEY, CONTROL
+  "O", MenuSlOptions,VIRTKEY
+  "O", MenuOpen, VIRTKEY, CONTROL
+  "P", MenuPreview, VIRTKEY
+  "P", MenuPrint, VIRTKEY, CONTROL
+  "R", MenuZReduce, VIRTKEY
+  "S", MenuSave, VIRTKEY, CONTROL
+  "S", MenuSlide, VIRTKEY
+  "T", MenuSort, VIRTKEY
+  "V", MenuViewed, VIRTKEY
+  "V", MenuPaste, VIRTKEY, CONTROL
+  "W", MenuWhole, VIRTKEY
+  "X", MenuCopyView, VIRTKEY, CONTROL
+  "Z", MenuPrevSave, VIRTKEY
+  "Z", MenuUndo, VIRTKEY, CONTROL }
 
 ICON1 ICON gvicon1.ico
 ICON2 ICON gvicon2.ico
@@ -274,747 +274,747 @@ ICON4 ICON gvicon4.ico
 CursorNull CURSOR MOVEABLE PURE LOADONCALL DISCARDABLE nocursor.cur
 
 VersionGV VERSIONINFO MOVEABLE IMPURE LOADONCALL DISCARDABLE
-  FILEVERSION       1,0,0,0
-  PRODUCTVERSION    1,0,0,0
+  FILEVERSION 1,0,0,0
+  PRODUCTVERSION 1,0,0,0
   FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
   FILEFLAGS 0
-  FILEOS    VOS_NT_WINDOWS32
-  FILETYPE  VFT_APP
-  FILESUBTYPE   0
+  FILEOS VOS_NT_WINDOWS32
+  FILETYPE VFT_APP
+  FILESUBTYPE 0
 BEGIN
-	BLOCK "StringFileInfo"
-	BEGIN
-		BLOCK "040904E4"
-		BEGIN
-			VALUE   "CompanyName",  "David Manthey\0"
-			VALUE   "FileDescription",  "Graphic Viewer\0"
-			VALUE   "OriginalFilename", "GV.EXE\0"
-			VALUE   "ProductName",  "Graphic Viewer\0"
-			VALUE   "FileVersion",  "1.0\0"
-			VALUE   "ProductVersion",   "1.0\0"
-			VALUE   "Programmer", "David Manthey\0"
-			VALUE   "LegalCopyright",   "Copyright 1996-2017 by David Manthey\0"
-		END
-	END
-	BLOCK "VarFileInfo"
-	BEGIN
-		VALUE   "Translation", 0x0409, 1252
-	END
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "David Manthey\0"
+      VALUE "FileDescription", "Graphic Viewer\0"
+      VALUE "OriginalFilename", "GV.EXE\0"
+      VALUE "ProductName", "Graphic Viewer\0"
+      VALUE "FileVersion", "1.0\0"
+      VALUE "ProductVersion", "1.0\0"
+      VALUE "Programmer", "David Manthey\0"
+      VALUE "LegalCopyright", "Copyright 1996-2017 by David Manthey\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 1252
+  END
 END
 
-AbDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE  10, 10, 156, 100
+AbDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 156, 100
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "About Graphic Viewer"
 FONT 8, "MS Sans Serif"
 BEGIN
-	ICON    ICON1, IDC_STATIC   10,6,19,20
-	CTEXT           "Graphic Viewer", IDC_STATIC,   38,4,96,8, SS_LEFT
-	CTEXT           "", AbDate, 38,14,96,8, SS_LEFT
-	CTEXT           "Copyright 1996-2017 by David Manthey", IDC_STATIC,  17,36,129,8, SS_LEFT
-	CTEXT           "email: manthey@orbitals.com", IDC_STATIC,    17,57,129,8, SS_LEFT
-	CTEXT           "URL: http://www.orbitals.com/gv", IDC_STATIC,  17,66,129,10, SS_LEFT
-	DEFPUSHBUTTON      "Done", IDOK,    55,82,51,14, 0
+  ICON ICON1, IDC_STATIC 10,6,19,20
+  CTEXT "Graphic Viewer", IDC_STATIC, 38,4,96,8, SS_LEFT
+  CTEXT "", AbDate, 38,14,96,8, SS_LEFT
+  CTEXT "Copyright 1996-2017 by David Manthey", IDC_STATIC, 17,36,129,8, SS_LEFT
+  CTEXT "email: manthey@orbitals.com", IDC_STATIC, 17,57,129,8, SS_LEFT
+  CTEXT "URL: http://www.orbitals.com/gv", IDC_STATIC, 17,66,129,10, SS_LEFT
+  DEFPUSHBUTTON "Done", IDOK, 55,82,51,14, 0
 END
 
-AsDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 100, 87
+AsDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 100, 87
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Lock Aspect Ratio"
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT           "&Width", IDC_STATIC,    15,10,26,8, SS_LEFT
-	EDITTEXT        AspectXXX,    45,7,44,13, ES_AUTOHSCROLL | ES_RIGHT
-	LTEXT           "&Height", IDC_STATIC,   15,30,27,8, SS_LEFT
-	EDITTEXT        AspectYYY,    45,28,44,13, ES_AUTOHSCROLL | ES_RIGHT
-	PUSHBUTTON   "Help", HelpHelp,     10,50,37,14, 0
-	PUSHBUTTON   "Cancel", IDCANCEL,     10,68,37,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,     53,68,37,14, 0
+  LTEXT "&Width", IDC_STATIC, 15,10,26,8, SS_LEFT
+  EDITTEXT AspectXXX, 45,7,44,13, ES_AUTOHSCROLL | ES_RIGHT
+  LTEXT "&Height", IDC_STATIC, 15,30,27,8, SS_LEFT
+  EDITTEXT AspectYYY, 45,28,44,13, ES_AUTOHSCROLL | ES_RIGHT
+  PUSHBUTTON "Help", HelpHelp, 10,50,37,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 10,68,37,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 53,68,37,14, 0
 END
 
-BaDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 184, 70
+BaDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 184, 70
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 FONT 8, "MS Sans Serif"
 BEGIN
-	CTEXT           " ", BatchStat1,    4,6,176,10, SS_LEFT
-	RTEXT           "Input file:", IDC_STATIC,  4,20,40,8, SS_LEFT
-	RTEXT           "Output file:", IDC_STATIC,     4,36,40,8, SS_LEFT
-	PUSHBUTTON      "Cancel", IDCANCEL,  71,52,42,14, 0
-	LTEXT           " ", BatchStat2,     48,20,128,8, SS_LEFT
-	LTEXT           " ", BatchStat3,     48,36,128,8, SS_LEFT
+  CTEXT " ", BatchStat1, 4,6,176,10, SS_LEFT
+  RTEXT "Input file:", IDC_STATIC, 4,20,40,8, SS_LEFT
+  RTEXT "Output file:", IDC_STATIC, 4,36,40,8, SS_LEFT
+  PUSHBUTTON "Cancel", IDCANCEL, 71,52,42,14, 0
+  LTEXT " ", BatchStat2, 48,20,128,8, SS_LEFT
+  LTEXT " ", BatchStat3, 48,36,128,8, SS_LEFT
 END
 
-CopyDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 124, 22
+CopyDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 124, 22
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Processing Preview Images"
 FONT 8, "MS Sans Serif"
 BEGIN
-	CTEXT           " ", CopyStat1,    4,6,116,10, SS_LEFT
+  CTEXT " ", CopyStat1, 4,6,116,10, SS_LEFT
 END
 
-FindDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 184, 72
+FindDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 184, 72
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Find"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "&Find:", IDC_STATIC,     4,14,28,8, SS_LEFT
-	EDITTEXT        FindName,  36,12,140,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "Match:", IDC_STATIC,     4,34,24,8, SS_LEFT
-	CONTROL         "&Exact name", FindExact, "Button", BS_AUTORADIOBUTTON,  34,32,52,12
-	CONTROL         "&Beginning", FindBegin, "Button", BS_AUTORADIOBUTTON,     86,32,48,12
-	CONTROL         "&Substring", FindSub, "Button", BS_AUTORADIOBUTTON,    134,32,50,12
-	PUSHBUTTON      "Help", HelpHelp,    10, 56,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,      90, 56,40,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,   140, 56,40,14, 0
+  RTEXT "&Find:", IDC_STATIC, 4,14,28,8, SS_LEFT
+  EDITTEXT FindName, 36,12,140,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "Match:", IDC_STATIC, 4,34,24,8, SS_LEFT
+  CONTROL "&Exact name", FindExact, "Button", BS_AUTORADIOBUTTON, 34,32,52,12
+  CONTROL "&Beginning", FindBegin, "Button", BS_AUTORADIOBUTTON, 86,32,48,12
+  CONTROL "&Substring", FindSub, "Button", BS_AUTORADIOBUTTON, 134,32,50,12
+  PUSHBUTTON "Help", HelpHelp, 10, 56,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 90, 56,40,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 140, 56,40,14, 0
 END
 
-GrDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 148, 75
+GrDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 148, 75
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Greyscale Conversion"
 FONT 8, "MS Sans Serif"
 BEGIN
-	CTEXT           "Convert a 1-bit per pixel image into a greyscale.  This is especially useful with HP multi-shade GROB files.", IDC_STATIC,     7,5,134,25, SS_LEFT
-	LTEXT           "&Number of Shades", IDC_STATIC,     25,39,62,8, SS_LEFT
-	EDITTEXT        GreyShade,  90,37,33,12, ES_AUTOHSCROLL | ES_RIGHT
-	PUSHBUTTON      "Help", HelpHelp,      10,58,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     58,58,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,   103,58,35,14, 0
+  CTEXT "Convert a 1-bit per pixel image into a greyscale. This is especially useful with HP multi-shade GROB files.", IDC_STATIC, 7,5,134,25, SS_LEFT
+  LTEXT "&Number of Shades", IDC_STATIC, 25,39,62,8, SS_LEFT
+  EDITTEXT GreyShade, 90,37,33,12, ES_AUTOHSCROLL | ES_RIGHT
+  PUSHBUTTON "Help", HelpHelp, 10,58,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 58,58,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 103,58,35,14, 0
 END
 
-OpDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24,  269, 134
+OpDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 269, 134
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT "File &Name:", stc3,   6,   6,  76,  9
-	CONTROL "", edt1, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD | ES_OEMCONVERT, 6,    16,  90,  12
-	CONTROL "", lst1, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED | LBS_EXTENDEDSEL, 6,    32,  90,  68
-	LTEXT "&Directories:", -1, 110,   6,  92,   9
-	LTEXT "",            stc1, 110,  18,  92,   9, SS_NOPREFIX
-	CONTROL "", lst2, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 110,  32,  92,  68
-	LTEXT "List Files of &Type:", stc2, 6,  104,  90,   9
-	CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP | WS_CHILD, 6,  114,  90, 120
-	LTEXT "Dri&ves:", stc4,      110, 104,  92,  9
-	CONTROL "", cmb2, "combobox", CBS_SORT | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED | CBS_DROPDOWNLIST | WS_CHILD | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 110, 114,  92, 68
-	DEFPUSHBUTTON "Done", IDOK,       213,  6, 50, 14, WS_GROUP
-	PUSHBUTTON "Cancel", IDCANCEL,  213, 24, 50, 14, WS_GROUP
-	PUSHBUTTON " Help ", HelpHelp,      213, 42, 50, 14, WS_GROUP
-	AUTOCHECKBOX "&Show All", OpenMul, 218, 80, 50, 12, WS_TABSTOP | WS_GROUP
-	CTEXT "Parts", OpenMul2, 220, 92, 50, 8
-	AUTOCHECKBOX "&Recurse", OpenRec, 218, 110, 50, 12, WS_TABSTOP | WS_GROUP
-	CTEXT "Directories", OpenRec2, 220, 122, 50, 8
+  LTEXT "File &Name:", stc3, 6, 6, 76, 9
+  CONTROL "", edt1, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD | ES_OEMCONVERT, 6, 16, 90, 12
+  CONTROL "", lst1, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED | LBS_EXTENDEDSEL, 6, 32, 90, 68
+  LTEXT "&Directories:", -1, 110, 6, 92, 9
+  LTEXT "", stc1, 110, 18, 92, 9, SS_NOPREFIX
+  CONTROL "", lst2, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 110, 32, 92, 68
+  LTEXT "List Files of &Type:", stc2, 6, 104, 90, 9
+  CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP | WS_CHILD, 6, 114, 90, 120
+  LTEXT "Dri&ves:", stc4, 110, 104, 92, 9
+  CONTROL "", cmb2, "combobox", CBS_SORT | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED | CBS_DROPDOWNLIST | WS_CHILD | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 110, 114, 92, 68
+  DEFPUSHBUTTON "Done", IDOK, 213, 6, 50, 14, WS_GROUP
+  PUSHBUTTON "Cancel", IDCANCEL, 213, 24, 50, 14, WS_GROUP
+  PUSHBUTTON " Help ", HelpHelp, 213, 42, 50, 14, WS_GROUP
+  AUTOCHECKBOX "&Show All", OpenMul, 218, 80, 50, 12, WS_TABSTOP | WS_GROUP
+  CTEXT "Parts", OpenMul2, 220, 92, 50, 8
+  AUTOCHECKBOX "&Recurse", OpenRec, 218, 110, 50, 12, WS_TABSTOP | WS_GROUP
+  CTEXT "Directories", OpenRec2, 220, 122, 50, 8
 END
 
-PrDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 52,  225, 215
+PrDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 52, 225, 215
 CAPTION "Print"
 STYLE WS_CAPTION | WS_SYSMENU | WS_POPUP | DS_MODALFRAME | 0x0004
 FONT 8, "MS Sans Serif"
 BEGIN
-  LTEXT "Printer:"        stc6,   4,    4,  40,   8
-  LTEXT "System Default"  stc1,  44,   4, 120,  18
-  GROUPBOX "Print Range", grp1,   4,   27,  132,  67
-  RADIOBUTTON "&All" rad1,       10,  39,  76,  12,  WS_TABSTOP | WS_GROUP
-  RADIOBUTTON "S&election" rad2, 10,  52,  76,  12
-  RADIOBUTTON "&Pages" rad3,     10,  65,  76,  12
-  RTEXT "&From:"  stc2,          24,  80,  24,   9,  WS_GROUP
-  EDITTEXT edt1,                 52,  78,  26,  12,  WS_TABSTOP | ES_RIGHT
-  RTEXT "&To:"  stc3,            82,  80,  16,   9
-  EDITTEXT edt2,                 102,  78,  26,  12,  WS_TABSTOP | ES_RIGHT
-  LTEXT "Print &Quality:"  stc4, 4,  100,  50,   9
-  CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 55,  98,  81,  36
-  AUTOCHECKBOX "Print to Fi&le"   chx1, 4,  113, 120,  12,  WS_TABSTOP | WS_GROUP
-	GROUPBOX        "Margins",IDC_STATIC,   14,133,75,79, 0
-	RTEXT           "Le&ft",  IDC_STATIC,   17,147,25, 8, SS_LEFT
-	EDITTEXT        PrMargin1,              45,145,37,12, ES_AUTOHSCROLL | ES_RIGHT
-	RTEXT           "&Right", IDC_STATIC,   17,163,25, 8, SS_LEFT
-	EDITTEXT        PrMargin2,              45,161,37,12, ES_AUTOHSCROLL | ES_RIGHT
-	RTEXT           "&Top",   IDC_STATIC,   17,179,25, 8, SS_LEFT
-	EDITTEXT        PrMargin3,              45,177,37,12, ES_AUTOHSCROLL | ES_RIGHT
-	RTEXT           "&Bottom",IDC_STATIC,   17,195,25, 8, SS_LEFT
-	EDITTEXT        PrMargin4,              45,193,37,12, ES_AUTOHSCROLL | ES_RIGHT
-  DEFPUSHBUTTON "Done"  IDOK, 170,  4,  50,  14,  WS_GROUP
-  PUSHBUTTON "Cancel"  IDCANCEL, 170,  21,  50,  14,  WS_GROUP
-  PUSHBUTTON "&Setup..."  psh1, 170,  41,  50,  14,  WS_GROUP
-  PUSHBUTTON " Help "  HelpHelp,  170,  75,  50,  14,  WS_GROUP
-  LTEXT "&Copies:", stc5, 153, 100,  29,   9
-  EDITTEXT, edt3, 184,  98,  22,  12,  WS_TABSTOP | ES_RIGHT
-  AUTOCHECKBOX "Collate Cop&ies"  chx2, 153, 113,  67,  12,  WS_TABSTOP | WS_GROUP
-	CONTROL         "&Fill Page", MRadio1, "Button", BS_AUTORADIOBUTTON|WS_GROUP,     102,134,60,9
-	CONTROL         "&Use DPI", MRadio2, "Button", BS_AUTORADIOBUTTON,                102,146,60,9
-	CONTROL         "Ce&nter Image", CRadio1, "Button", BS_AUTORADIOBUTTON|WS_GROUP,  163,134,60,9
-	CONTROL         "U&pper Left", CRadio2, "Button", BS_AUTORADIOBUTTON,             163,146,60,9
-	CONTROL         "Print &View", VRadio1, "Button", BS_AUTORADIOBUTTON|WS_GROUP,    132,162,80,9
-	CONTROL         "Print &Whole Image",VRadio2,"Button",BS_AUTORADIOBUTTON,         132,174,80,9
-	RTEXT           "Image &DPI",PrDPIText,101,196,37, 8, SS_LEFT
-	EDITTEXT        PrDPI,                  141,194,37,12, ES_AUTOHSCROLL | ES_RIGHT
+  LTEXT "Printer:" stc6, 4, 4, 40, 8
+  LTEXT "System Default" stc1, 44, 4, 120, 18
+  GROUPBOX "Print Range", grp1, 4, 27, 132, 67
+  RADIOBUTTON "&All" rad1, 10, 39, 76, 12, WS_TABSTOP | WS_GROUP
+  RADIOBUTTON "S&election" rad2, 10, 52, 76, 12
+  RADIOBUTTON "&Pages" rad3, 10, 65, 76, 12
+  RTEXT "&From:" stc2, 24, 80, 24, 9, WS_GROUP
+  EDITTEXT edt1, 52, 78, 26, 12, WS_TABSTOP | ES_RIGHT
+  RTEXT "&To:" stc3, 82, 80, 16, 9
+  EDITTEXT edt2, 102, 78, 26, 12, WS_TABSTOP | ES_RIGHT
+  LTEXT "Print &Quality:" stc4, 4, 100, 50, 9
+  CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 55, 98, 81, 36
+  AUTOCHECKBOX "Print to Fi&le" chx1, 4, 113, 120, 12, WS_TABSTOP | WS_GROUP
+  GROUPBOX "Margins",IDC_STATIC, 14,133,75,79, 0
+  RTEXT "Le&ft", IDC_STATIC, 17,147,25, 8, SS_LEFT
+  EDITTEXT PrMargin1, 45,145,37,12, ES_AUTOHSCROLL | ES_RIGHT
+  RTEXT "&Right", IDC_STATIC, 17,163,25, 8, SS_LEFT
+  EDITTEXT PrMargin2, 45,161,37,12, ES_AUTOHSCROLL | ES_RIGHT
+  RTEXT "&Top", IDC_STATIC, 17,179,25, 8, SS_LEFT
+  EDITTEXT PrMargin3, 45,177,37,12, ES_AUTOHSCROLL | ES_RIGHT
+  RTEXT "&Bottom",IDC_STATIC, 17,195,25, 8, SS_LEFT
+  EDITTEXT PrMargin4, 45,193,37,12, ES_AUTOHSCROLL | ES_RIGHT
+  DEFPUSHBUTTON "Done" IDOK, 170, 4, 50, 14, WS_GROUP
+  PUSHBUTTON "Cancel" IDCANCEL, 170, 21, 50, 14, WS_GROUP
+  PUSHBUTTON "&Setup..." psh1, 170, 41, 50, 14, WS_GROUP
+  PUSHBUTTON " Help " HelpHelp, 170, 75, 50, 14, WS_GROUP
+  LTEXT "&Copies:", stc5, 153, 100, 29, 9
+  EDITTEXT, edt3, 184, 98, 22, 12, WS_TABSTOP | ES_RIGHT
+  AUTOCHECKBOX "Collate Cop&ies" chx2, 153, 113, 67, 12, WS_TABSTOP | WS_GROUP
+  CONTROL "&Fill Page", MRadio1, "Button", BS_AUTORADIOBUTTON|WS_GROUP, 102,134,60,9
+  CONTROL "&Use DPI", MRadio2, "Button", BS_AUTORADIOBUTTON, 102,146,60,9
+  CONTROL "Ce&nter Image", CRadio1, "Button", BS_AUTORADIOBUTTON|WS_GROUP, 163,134,60,9
+  CONTROL "U&pper Left", CRadio2, "Button", BS_AUTORADIOBUTTON, 163,146,60,9
+  CONTROL "Print &View", VRadio1, "Button", BS_AUTORADIOBUTTON|WS_GROUP, 132,162,80,9
+  CONTROL "Print &Whole Image",VRadio2,"Button",BS_AUTORADIOBUTTON, 132,174,80,9
+  RTEXT "Image &DPI",PrDPIText,101,196,37, 8, SS_LEFT
+  EDITTEXT PrDPI, 141,194,37,12, ES_AUTOHSCROLL | ES_RIGHT
 END
 
-PrevDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 182, 119
+PrevDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 182, 119
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Preview Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT           "Preview Image Size:", IDC_STATIC,  8,4,68,8, SS_LEFT
-	RTEXT           "&Width:", IDC_STATIC,  12,20,24,8, SS_LEFT
-	EDITTEXT        PrevWidth,  40,18,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "&Height:", IDC_STATIC,     12,36,24,8, SS_LEFT
-	EDITTEXT        PrevHeight,  40,34,24,12, ES_AUTOHSCROLL | ES_LEFT
-	LTEXT           "Display images from:", IDC_STATIC,     8,56,72,8, SS_LEFT
-	CONTROL         "&Eligible categories", PrevOpt31a, "Button", BS_AUTORADIOBUTTON,   8,68,72,12
-	CONTROL         "&All files", PrevOpt31b, "Button", BS_AUTORADIOBUTTON,     8,80,36,12
-	CONTROL         "&Make thumbnails", PrevOpt25, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,4,68,12
-	CONTROL         "Show &images", PrevOpt26, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,20,68,12
-	CONTROL         "Show file &names", PrevOpt27, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,32,68,12
-	CONTROL         "Show image &size", PrevOpt29, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,44,68,12
-	CONTROL         "Show &pixel depth", PrevOpt30, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    100,56,68,12
-	CONTROL         "Show &file size", PrevOpt23, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    100,68,68,12
-	CONTROL         "Show &categories", PrevOpt28, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     100,80,68,12
-	PUSHBUTTON      "Help", HelpHelp,    10, 99,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,  75, 99,40,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,       125, 99,40,14, 0
+  LTEXT "Preview Image Size:", IDC_STATIC, 8,4,68,8, SS_LEFT
+  RTEXT "&Width:", IDC_STATIC, 12,20,24,8, SS_LEFT
+  EDITTEXT PrevWidth, 40,18,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "&Height:", IDC_STATIC, 12,36,24,8, SS_LEFT
+  EDITTEXT PrevHeight, 40,34,24,12, ES_AUTOHSCROLL | ES_LEFT
+  LTEXT "Display images from:", IDC_STATIC, 8,56,72,8, SS_LEFT
+  CONTROL "&Eligible categories", PrevOpt31a, "Button", BS_AUTORADIOBUTTON, 8,68,72,12
+  CONTROL "&All files", PrevOpt31b, "Button", BS_AUTORADIOBUTTON, 8,80,36,12
+  CONTROL "&Make thumbnails", PrevOpt25, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,4,68,12
+  CONTROL "Show &images", PrevOpt26, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,20,68,12
+  CONTROL "Show file &names", PrevOpt27, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,32,68,12
+  CONTROL "Show image &size", PrevOpt29, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,44,68,12
+  CONTROL "Show &pixel depth", PrevOpt30, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,56,68,12
+  CONTROL "Show &file size", PrevOpt23, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,68,68,12
+  CONTROL "Show &categories", PrevOpt28, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 100,80,68,12
+  PUSHBUTTON "Help", HelpHelp, 10, 99,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 75, 99,40,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 125, 99,40,14, 0
 END
 
-PrevSDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 198, 104
+PrevSDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 198, 104
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Create Preview Screens"
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT           "Screen size:", IDC_STATIC,     24,8,44,8, SS_LEFT
-	LTEXT           "&Width:", IDC_STATIC,  8,24,24,8, SS_LEFT
-	EDITTEXT        PrevSWidth,  36,22,48,12, ES_AUTOHSCROLL | ES_LEFT
-	LTEXT           "&Height:", IDC_STATIC,     8,40,24,8, SS_LEFT
-	EDITTEXT        PrevSHeight,  36,38,48,12, ES_AUTOHSCROLL | ES_LEFT
-	CONTROL         "Save &Selection", PrevSOpt1, "Button", BS_AUTORADIOBUTTON,        104,22,80,12
-	CONTROL         "Save Whole &Preview", PrevSOpt2, "Button", BS_AUTORADIOBUTTON,    104,38,84,12
-	LTEXT           "Number of images:", IDC_STATIC,    48,60,64,8, SS_LEFT
-	CTEXT           " ", PrevSNum1,   116,60,28,8, SS_LEFT
-	LTEXT           "Number of screens:", IDC_STATIC,   48,72,64,8, SS_LEFT
-	CTEXT           "123456", PrevSNum2,   116,72,28,8, SS_LEFT
-	PUSHBUTTON      "Help", HelpHelp,    10, 88,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL, 104, 88,40,14, 0
-	DEFPUSHBUTTON   "Next >>", IDOK,       154, 88,40,14, 0
+  LTEXT "Screen size:", IDC_STATIC, 24,8,44,8, SS_LEFT
+  LTEXT "&Width:", IDC_STATIC, 8,24,24,8, SS_LEFT
+  EDITTEXT PrevSWidth, 36,22,48,12, ES_AUTOHSCROLL | ES_LEFT
+  LTEXT "&Height:", IDC_STATIC, 8,40,24,8, SS_LEFT
+  EDITTEXT PrevSHeight, 36,38,48,12, ES_AUTOHSCROLL | ES_LEFT
+  CONTROL "Save &Selection", PrevSOpt1, "Button", BS_AUTORADIOBUTTON, 104,22,80,12
+  CONTROL "Save Whole &Preview", PrevSOpt2, "Button", BS_AUTORADIOBUTTON, 104,38,84,12
+  LTEXT "Number of images:", IDC_STATIC, 48,60,64,8, SS_LEFT
+  CTEXT " ", PrevSNum1, 116,60,28,8, SS_LEFT
+  LTEXT "Number of screens:", IDC_STATIC, 48,72,64,8, SS_LEFT
+  CTEXT "123456", PrevSNum2, 116,72,28,8, SS_LEFT
+  PUSHBUTTON "Help", HelpHelp, 10, 88,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 104, 88,40,14, 0
+  DEFPUSHBUTTON "Next >>", IDOK, 154, 88,40,14, 0
 END
 
-ReDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 184, 66
+ReDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 184, 66
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Rename"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "Original Name:", IDC_STATIC,   8,8,48,8, SS_LEFT
-	LTEXT           "", RenameOrig,     60,8,116,8, SS_LEFT
-	RTEXT           "New &Name:", IDC_STATIC,   8,24,48,8, SS_LEFT
-	EDITTEXT        RenameNew,  60,24,116,12, ES_AUTOHSCROLL | ES_LEFT
-	PUSHBUTTON      "Help", HelpHelp,    10, 50,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,      90, 50,40,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,   140, 50,40,14, 0
+  RTEXT "Original Name:", IDC_STATIC, 8,8,48,8, SS_LEFT
+  LTEXT "", RenameOrig, 60,8,116,8, SS_LEFT
+  RTEXT "New &Name:", IDC_STATIC, 8,24,48,8, SS_LEFT
+  EDITTEXT RenameNew, 60,24,116,12, ES_AUTOHSCROLL | ES_LEFT
+  PUSHBUTTON "Help", HelpHelp, 10, 50,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 90, 50,40,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 140, 50,40,14, 0
 END
 
-SaDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24,  269, 134
+SaDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 269, 134
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT "File &Name:", stc3,   6,   6,  76,  9
-	CONTROL "", edt1, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD | ES_OEMCONVERT, 6,    16,  90,  12
-	CONTROL "", lst1, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 6,    32,  90,  68
-	LTEXT "&Directories:", -1, 110,   6,  92,   9
-	LTEXT "",            stc1, 110,  18,  92,   9, SS_NOPREFIX
-	CONTROL "", lst2, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 110,  32,  92,  68
-	LTEXT "List Files of &Type:", stc2, 6,  104,  90,   9
-	CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP | WS_CHILD, 6,  114,  90,  96
-	LTEXT "Dri&ves:", stc4,      110, 104,  92,  9
-	CONTROL "", cmb2, "combobox", CBS_SORT | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED | CBS_DROPDOWNLIST | WS_CHILD | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 110, 114,  92, 68
-	DEFPUSHBUTTON "Done", IDOK,       213,  6, 50, 14, WS_GROUP
-	PUSHBUTTON "Cancel", IDCANCEL,  213, 24, 50, 14, WS_GROUP
-	PUSHBUTTON " Help ", HelpHelp,      213, 42, 50, 14, WS_GROUP
-	PUSHBUTTON "&Options", SaveOptions,      213, 60, 50, 14, WS_GROUP
-	CONTROL "&Whole image", SaveView1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,   208,80,56,12
-	CONTROL "&Current view", SaveView2, "Button", BS_AUTORADIOBUTTON,  208,92,60,12
-	AUTOCHECKBOX "&Append File", SaveExt, 208, 110, 50, 12, WS_TABSTOP | WS_GROUP
-	CTEXT "Extension", SaveExt2, 208, 122, 50, 8
+  LTEXT "File &Name:", stc3, 6, 6, 76, 9
+  CONTROL "", edt1, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD | ES_OEMCONVERT, 6, 16, 90, 12
+  CONTROL "", lst1, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 6, 32, 90, 68
+  LTEXT "&Directories:", -1, 110, 6, 92, 9
+  LTEXT "", stc1, 110, 18, 92, 9, SS_NOPREFIX
+  CONTROL "", lst2, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 110, 32, 92, 68
+  LTEXT "List Files of &Type:", stc2, 6, 104, 90, 9
+  CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP | WS_CHILD, 6, 114, 90, 96
+  LTEXT "Dri&ves:", stc4, 110, 104, 92, 9
+  CONTROL "", cmb2, "combobox", CBS_SORT | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED | CBS_DROPDOWNLIST | WS_CHILD | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 110, 114, 92, 68
+  DEFPUSHBUTTON "Done", IDOK, 213, 6, 50, 14, WS_GROUP
+  PUSHBUTTON "Cancel", IDCANCEL, 213, 24, 50, 14, WS_GROUP
+  PUSHBUTTON " Help ", HelpHelp, 213, 42, 50, 14, WS_GROUP
+  PUSHBUTTON "&Options", SaveOptions, 213, 60, 50, 14, WS_GROUP
+  CONTROL "&Whole image", SaveView1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 208,80,56,12
+  CONTROL "&Current view", SaveView2, "Button", BS_AUTORADIOBUTTON, 208,92,60,12
+  AUTOCHECKBOX "&Append File", SaveExt, 208, 110, 50, 12, WS_TABSTOP | WS_GROUP
+  CTEXT "Extension", SaveExt2, 208, 122, 50, 8
 END
 
-SaDLG0 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 94
+SaDLG0 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 94
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "BMP Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,                  8, 4, 40,8, SS_LEFT
-	LTEXT           "BMP/DIB - Windows Bitmap", IDC_STATIC,     52, 4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,                                                  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,56
-	RTEXT           "&DPI:", IDC_STATIC,  132,26,28,8, SS_LEFT
-	EDITTEXT        SaveDPI,    164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "Co&mpression:", IDC_STATIC,     4,46,44,8, SS_LEFT
-	CONTROL         "", SaveCompress, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,   52,44,76,32
-	CONTROL         "Type &40", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,   142,44,40,12
-	CONTROL         "Type &12", SaveRad2, "Button", BS_AUTORADIOBUTTON,  142,56,40,12
-	PUSHBUTTON      "De&faults", SaveDef,    10,74,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,74,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,74,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,74,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8, 4, 40,8, SS_LEFT
+  LTEXT "BMP/DIB - Windows Bitmap", IDC_STATIC, 52, 4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,56
+  RTEXT "&DPI:", IDC_STATIC, 132,26,28,8, SS_LEFT
+  EDITTEXT SaveDPI, 164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "Co&mpression:", IDC_STATIC, 4,46,44,8, SS_LEFT
+  CONTROL "", SaveCompress, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,44,76,32
+  CONTROL "Type &40", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 142,44,40,12
+  CONTROL "Type &12", SaveRad2, "Button", BS_AUTORADIOBUTTON, 142,56,40,12
+  PUSHBUTTON "De&faults", SaveDef, 10,74,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,74,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,74,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,74,35,14, 0
 END
 
-SaDLG1 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 188
+SaDLG1 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 188
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "CUR Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "CUR - Windows Cursor", IDC_STATIC,     52,4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,56
-	RTEXT           "&DPI:", IDC_STATIC,  132,26,28,8, SS_LEFT
-	EDITTEXT        SaveDPI,    164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
-	CONTROL         "&Selected size", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,     4,48,60,12
-	CONTROL         "&16x16", SaveRad2, "Button", BS_AUTORADIOBUTTON,    4,60,56,12
-	CONTROL         "&32x32", SaveRad3, "Button", BS_AUTORADIOBUTTON,    4,72,56,12
-	RTEXT           "&Transparent Color:", IDC_STATIC,   68,46,64,8, SS_LEFT
-	EDITTEXT        SaveEdit1,  136,44,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "&Inverse Color:", IDC_STATIC,   68,62,64,8, SS_LEFT
-	EDITTEXT        SaveEdit2,  136,60,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "Hot spot &X:", IDC_STATIC,  68,78,64,8, SS_LEFT
-	EDITTEXT        SaveEdit3,  136,76,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "&Y:", IDC_STATIC,   160,78,12,8, SS_LEFT
-	EDITTEXT        SaveEdit4,  176,76,24,12, ES_AUTOHSCROLL | ES_LEFT
-	AUTOCHECKBOX    "&Fit image",   SaveFit, 4,104,55,12,  WS_TABSTOP | WS_GROUP
-	CONTROL         "T&ransparent", SaveFit1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,4,122,55,12
-	CONTROL         "I&nverse",     SaveFit2, "Button", BS_AUTORADIOBUTTON,           4,134,55,12
-	CONTROL         "&Hot spot",    SaveFit3, "Button", BS_AUTORADIOBUTTON,           4,146,55,12
-	PUSHBUTTON      "De&faults", SaveDef,    10,170,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,170,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,170,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,170,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "CUR - Windows Cursor", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,56
+  RTEXT "&DPI:", IDC_STATIC, 132,26,28,8, SS_LEFT
+  EDITTEXT SaveDPI, 164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
+  CONTROL "&Selected size", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 4,48,60,12
+  CONTROL "&16x16", SaveRad2, "Button", BS_AUTORADIOBUTTON, 4,60,56,12
+  CONTROL "&32x32", SaveRad3, "Button", BS_AUTORADIOBUTTON, 4,72,56,12
+  RTEXT "&Transparent Color:", IDC_STATIC, 68,46,64,8, SS_LEFT
+  EDITTEXT SaveEdit1, 136,44,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "&Inverse Color:", IDC_STATIC, 68,62,64,8, SS_LEFT
+  EDITTEXT SaveEdit2, 136,60,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "Hot spot &X:", IDC_STATIC, 68,78,64,8, SS_LEFT
+  EDITTEXT SaveEdit3, 136,76,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "&Y:", IDC_STATIC, 160,78,12,8, SS_LEFT
+  EDITTEXT SaveEdit4, 176,76,24,12, ES_AUTOHSCROLL | ES_LEFT
+  AUTOCHECKBOX "&Fit image", SaveFit, 4,104,55,12, WS_TABSTOP | WS_GROUP
+  CONTROL "T&ransparent", SaveFit1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,4,122,55,12
+  CONTROL "I&nverse", SaveFit2, "Button", BS_AUTORADIOBUTTON, 4,134,55,12
+  CONTROL "&Hot spot", SaveFit3, "Button", BS_AUTORADIOBUTTON, 4,146,55,12
+  PUSHBUTTON "De&faults", SaveDef, 10,170,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,170,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,170,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,170,35,14, 0
 END
 
-SaDLG2 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 188
+SaDLG2 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 188
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "GIF Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "GIF - Compuserve GIF format", IDC_STATIC,  52,4,144,8, SS_LEFT
-	RTEXT           "Colors:", IDC_STATIC,  12,19,36,8, SS_LEFT
-	LTEXT           "8-bit color palette", IDC_STATIC,  52,19,68,8, SS_LEFT
-	RTEXT           "Compression:", IDC_STATIC,     4,31,44,8, SS_LEFT
-	LTEXT           "LZW", IDC_STATIC,  52,31,40,8, SS_LEFT
-	CONTROL         "GIF8&7a", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,   132,18,56,12
-	CONTROL         "GIF8&9a", SaveRad2, "Button", BS_AUTORADIOBUTTON,  132,30,60,12
-	RTEXT           "&Delay (0.01 sec):", IDC_STATIC,  4,50,60,8, SS_LEFT
-	EDITTEXT        SaveEdit2, 68,48,24,12, ES_AUTOHSCROLL | ES_LEFT
-	AUTOCHECKBOX    "K&eep", SaveKeep, 96,48,28,12,  WS_TABSTOP | WS_GROUP
-	RTEXT           "&Transparent Color:", IDC_STATIC,   4,70,60,8, SS_LEFT
-	EDITTEXT        SaveEdit1,  68,68,24,12, ES_AUTOHSCROLL | ES_LEFT
-	AUTOCHECKBOX    "&Use Transparent Color", SaveCheck, 6,82,88,12,  WS_TABSTOP | WS_GROUP
-	CONTROL         "&Non-interlaced", SaveRad1b, "Button", BS_AUTORADIOBUTTON | WS_GROUP,    132,47,60,12
-	CONTROL         "&Interlaced", SaveRad2b, "Button", BS_AUTORADIOBUTTON,   132,59,56,12
-	RTEXT           "&Repeat:", SaveText1,  105,78,53,8, SS_LEFT
-	EDITTEXT        SaveEdit3, 162,76,30,12, ES_AUTOHSCROLL | ES_LEFT
-	AUTOCHECKBOX    "&Fit image",   SaveFit, 4,104,55,12,  WS_TABSTOP | WS_GROUP
-	PUSHBUTTON      "De&faults", SaveDef,    10,170,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,170,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,170,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,170,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "GIF - Compuserve GIF format", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "Colors:", IDC_STATIC, 12,19,36,8, SS_LEFT
+  LTEXT "8-bit color palette", IDC_STATIC, 52,19,68,8, SS_LEFT
+  RTEXT "Compression:", IDC_STATIC, 4,31,44,8, SS_LEFT
+  LTEXT "LZW", IDC_STATIC, 52,31,40,8, SS_LEFT
+  CONTROL "GIF8&7a", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 132,18,56,12
+  CONTROL "GIF8&9a", SaveRad2, "Button", BS_AUTORADIOBUTTON, 132,30,60,12
+  RTEXT "&Delay (0.01 sec):", IDC_STATIC, 4,50,60,8, SS_LEFT
+  EDITTEXT SaveEdit2, 68,48,24,12, ES_AUTOHSCROLL | ES_LEFT
+  AUTOCHECKBOX "K&eep", SaveKeep, 96,48,28,12, WS_TABSTOP | WS_GROUP
+  RTEXT "&Transparent Color:", IDC_STATIC, 4,70,60,8, SS_LEFT
+  EDITTEXT SaveEdit1, 68,68,24,12, ES_AUTOHSCROLL | ES_LEFT
+  AUTOCHECKBOX "&Use Transparent Color", SaveCheck, 6,82,88,12, WS_TABSTOP | WS_GROUP
+  CONTROL "&Non-interlaced", SaveRad1b, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 132,47,60,12
+  CONTROL "&Interlaced", SaveRad2b, "Button", BS_AUTORADIOBUTTON, 132,59,56,12
+  RTEXT "&Repeat:", SaveText1, 105,78,53,8, SS_LEFT
+  EDITTEXT SaveEdit3, 162,76,30,12, ES_AUTOHSCROLL | ES_LEFT
+  AUTOCHECKBOX "&Fit image", SaveFit, 4,104,55,12, WS_TABSTOP | WS_GROUP
+  PUSHBUTTON "De&faults", SaveDef, 10,170,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,170,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,170,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,170,35,14, 0
 END
 
-SaDLG3 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 188
+SaDLG3 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 188
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "GROB Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "GRO - HP GROB format", IDC_STATIC,     52,4,144,8, SS_LEFT
-	RTEXT           "Colors:", IDC_STATIC,  12,20,36,8, SS_LEFT
-	LTEXT           "1-bit black and white", IDC_STATIC,    52,20,72,8, SS_LEFT
-	CONTROL         "&ASCII", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,     8,34,60,12
-	CONTROL         "&Binary", SaveRad2, "Button", BS_AUTORADIOBUTTON,   8,46,56,12
-	CONTROL         "&Selected size", SaveRad1b, "Button", BS_AUTORADIOBUTTON | WS_GROUP,    8,68,56,12
-	CONTROL         "&131x64", SaveRad2b, "Button", BS_AUTORADIOBUTTON,  8,80,60,12
-	RTEXT           "&Number of Shades:", IDC_STATIC,    84,50,64,8, SS_LEFT
-	EDITTEXT        SaveEdit2,  152,48,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "&Gamma value:", IDC_STATIC,     84,70,64,8, SS_LEFT
-	EDITTEXT        SaveEdit1,  152,68,24,12, ES_AUTOHSCROLL | ES_LEFT
-	CONTROL "Scroll bar", SaveScroll, "ScrollBar", SBS_HORZ, 132,84,64,6
-	PUSHBUTTON      "De&faults", SaveDef,    10,170,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,170,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,170,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,170,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "GRO - HP GROB format", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "Colors:", IDC_STATIC, 12,20,36,8, SS_LEFT
+  LTEXT "1-bit black and white", IDC_STATIC, 52,20,72,8, SS_LEFT
+  CONTROL "&ASCII", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 8,34,60,12
+  CONTROL "&Binary", SaveRad2, "Button", BS_AUTORADIOBUTTON, 8,46,56,12
+  CONTROL "&Selected size", SaveRad1b, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 8,68,56,12
+  CONTROL "&131x64", SaveRad2b, "Button", BS_AUTORADIOBUTTON, 8,80,60,12
+  RTEXT "&Number of Shades:", IDC_STATIC, 84,50,64,8, SS_LEFT
+  EDITTEXT SaveEdit2, 152,48,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "&Gamma value:", IDC_STATIC, 84,70,64,8, SS_LEFT
+  EDITTEXT SaveEdit1, 152,68,24,12, ES_AUTOHSCROLL | ES_LEFT
+  CONTROL "Scroll bar", SaveScroll, "ScrollBar", SBS_HORZ, 132,84,64,6
+  PUSHBUTTON "De&faults", SaveDef, 10,170,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,170,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,170,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,170,35,14, 0
 END
 
-SaDLG4 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 188
+SaDLG4 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 188
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "ICO Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "ICO - Windows Icon", IDC_STATIC,    52,4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,56
-	RTEXT           "&DPI:", IDC_STATIC,  132,26,28,8, SS_LEFT
-	EDITTEXT        SaveDPI,    164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
-	CONTROL         "&Selected size", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,     4,44,60,12
-	CONTROL         "&16x16", SaveRad2, "Button", BS_AUTORADIOBUTTON,    4,56,56,12
-	CONTROL         "&32x32", SaveRad3, "Button", BS_AUTORADIOBUTTON,    4,68,56,12
-	RTEXT           "&Transparent Color:", IDC_STATIC,   80,58,64,8, SS_LEFT
-	EDITTEXT        SaveEdit1,  148,56,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "&Inverse Color:", IDC_STATIC,   80,74,64,8, SS_LEFT
-	EDITTEXT        SaveEdit2,  148,72,24,12, ES_AUTOHSCROLL | ES_LEFT
-	AUTOCHECKBOX    "&Fit image",   SaveFit, 4,104,55,12,  WS_TABSTOP | WS_GROUP
-	CONTROL         "T&ransparent", SaveFit1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,4,122,55,12
-	CONTROL         "I&nverse",     SaveFit2, "Button", BS_AUTORADIOBUTTON,           4,134,55,12
-	PUSHBUTTON      "De&faults", SaveDef,    10,170,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,170,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,170,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,170,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "ICO - Windows Icon", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,56
+  RTEXT "&DPI:", IDC_STATIC, 132,26,28,8, SS_LEFT
+  EDITTEXT SaveDPI, 164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
+  CONTROL "&Selected size", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 4,44,60,12
+  CONTROL "&16x16", SaveRad2, "Button", BS_AUTORADIOBUTTON, 4,56,56,12
+  CONTROL "&32x32", SaveRad3, "Button", BS_AUTORADIOBUTTON, 4,68,56,12
+  RTEXT "&Transparent Color:", IDC_STATIC, 80,58,64,8, SS_LEFT
+  EDITTEXT SaveEdit1, 148,56,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "&Inverse Color:", IDC_STATIC, 80,74,64,8, SS_LEFT
+  EDITTEXT SaveEdit2, 148,72,24,12, ES_AUTOHSCROLL | ES_LEFT
+  AUTOCHECKBOX "&Fit image", SaveFit, 4,104,55,12, WS_TABSTOP | WS_GROUP
+  CONTROL "T&ransparent", SaveFit1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,4,122,55,12
+  CONTROL "I&nverse", SaveFit2, "Button", BS_AUTORADIOBUTTON, 4,134,55,12
+  PUSHBUTTON "De&faults", SaveDef, 10,170,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,170,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,170,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,170,35,14, 0
 END
 
-SaDLG5 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 139
+SaDLG5 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 139
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "JPG Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "JPG - Joint Photographic Expert Group", IDC_STATIC,    52,4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,40
-	RTEXT           "&DPI:", IDC_STATIC,  132,26,28,8, SS_LEFT
-	EDITTEXT        SaveDPI,    164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "Co&mpression:", IDC_STATIC,     4,46,44,8, SS_LEFT
-	CONTROL         "", SaveCompress, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,   52,44,76,40
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "JPG - Joint Photographic Expert Group", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,40
+  RTEXT "&DPI:", IDC_STATIC, 132,26,28,8, SS_LEFT
+  EDITTEXT SaveDPI, 164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "Co&mpression:", IDC_STATIC, 4,46,44,8, SS_LEFT
+  CONTROL "", SaveCompress, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,44,76,40
 /**
-	RTEXT           "&Steps:", IDC_STATIC,  132,46,28,8, SS_LEFT
-	EDITTEXT        SaveEdit3,    164,44,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "&Steps:", IDC_STATIC, 132,46,28,8, SS_LEFT
+  EDITTEXT SaveEdit3, 164,44,24,12, ES_AUTOHSCROLL | ES_LEFT
 **/
-	LTEXT           "Color decimation:", IDC_STATIC,                                     4,74,110,8, SS_LEFT
-	CONTROL         "&1x1:1x1:1x1", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,   4,86,56,12
-	CONTROL         "&2x1:1x1:1x1", SaveRad2, "Button", BS_AUTORADIOBUTTON,              4,98,56,12
-	CONTROL         "2&x2:1x1:1x1", SaveRad3, "Button", BS_AUTORADIOBUTTON,             60,86,56,12
-	CONTROL         "&4x2:1x1:1x1", SaveRad4, "Button", BS_AUTORADIOBUTTON,             60,98,56,12
-	RTEXT           "&Quality:", IDC_STATIC,                 132, 69,28, 8, SS_LEFT
-	EDITTEXT        SaveEdit1,                               164, 67,24,12, ES_AUTOHSCROLL | ES_LEFT
-	CONTROL "Scroll bar", SaveScroll, "ScrollBar", SBS_HORZ, 132, 83,64, 6
-	LTEXT           "Good", IDC_STATIC,                      132, 90,32, 8, SS_LEFT  | WS_DISABLED
-	RTEXT           "Small", IDC_STATIC,                     164, 90,32, 8, SS_LEFT | WS_DISABLED
-	AUTOCHECKBOX    "", SaveCus,                             140,101,12,12, WS_TABSTOP | WS_GROUP
-	PUSHBUTTON      "C&ustom", SaveCustom,                   152,100,35,14, 0
-	PUSHBUTTON      "De&faults", SaveDef,    10,122,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,122,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,122,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,122,35,14, 0
+  LTEXT "Color decimation:", IDC_STATIC, 4,74,110,8, SS_LEFT
+  CONTROL "&1x1:1x1:1x1", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 4,86,56,12
+  CONTROL "&2x1:1x1:1x1", SaveRad2, "Button", BS_AUTORADIOBUTTON, 4,98,56,12
+  CONTROL "2&x2:1x1:1x1", SaveRad3, "Button", BS_AUTORADIOBUTTON, 60,86,56,12
+  CONTROL "&4x2:1x1:1x1", SaveRad4, "Button", BS_AUTORADIOBUTTON, 60,98,56,12
+  RTEXT "&Quality:", IDC_STATIC, 132, 69,28, 8, SS_LEFT
+  EDITTEXT SaveEdit1, 164, 67,24,12, ES_AUTOHSCROLL | ES_LEFT
+  CONTROL "Scroll bar", SaveScroll, "ScrollBar", SBS_HORZ, 132, 83,64, 6
+  LTEXT "Good", IDC_STATIC, 132, 90,32, 8, SS_LEFT | WS_DISABLED
+  RTEXT "Small", IDC_STATIC, 164, 90,32, 8, SS_LEFT | WS_DISABLED
+  AUTOCHECKBOX "", SaveCus, 140,101,12,12, WS_TABSTOP | WS_GROUP
+  PUSHBUTTON "C&ustom", SaveCustom, 152,100,35,14, 0
+  PUSHBUTTON "De&faults", SaveDef, 10,122,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,122,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,122,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,122,35,14, 0
 END
 
-SaDLG5a DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 230, 239
+SaDLG5a DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 230, 239
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Custom Quality"
 FONT 8, "MS Sans Serif"
 BEGIN
-	CONTROL         "&Luminance", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,  8, 5,60,12
-	CONTROL         "&Chrominance", SaveRad2, "Button", BS_AUTORADIOBUTTON,          68, 5,60,12
-	RTEXT           "DC:",IDC_STATIC,  8, 22,14,8, SS_LEFT
-	EDITTEXT        SaveQ,            24, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "1:",IDC_STATIC,  8, 34,14,8, SS_LEFT
-	EDITTEXT        SaveQ+1,          24, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "2:",IDC_STATIC,  8, 46,14,8, SS_LEFT
-	EDITTEXT        SaveQ+2,          24, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "3:",IDC_STATIC,  8, 58,14,8, SS_LEFT
-	EDITTEXT        SaveQ+3,          24, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "4:",IDC_STATIC,  8, 70,14,8, SS_LEFT
-	EDITTEXT        SaveQ+4,          24, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "5:",IDC_STATIC,  8, 82,14,8, SS_LEFT
-	EDITTEXT        SaveQ+5,          24, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "6:",IDC_STATIC,  8, 94,14,8, SS_LEFT
-	EDITTEXT        SaveQ+6,          24, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "7:",IDC_STATIC,  8,106,14,8, SS_LEFT
-	EDITTEXT        SaveQ+7,          24,104,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "8:",IDC_STATIC,  8,118,14,8, SS_LEFT
-	EDITTEXT        SaveQ+8,          24,116,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT            "9:",IDC_STATIC,  8,130,14,8, SS_LEFT
-	EDITTEXT        SaveQ+9,          24,128,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "10:",IDC_STATIC,  8,142,14,8, SS_LEFT
-	EDITTEXT        SaveQ+10,         24,140,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "11:",IDC_STATIC,  8,154,14,8, SS_LEFT
-	EDITTEXT        SaveQ+11,         24,152,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "12:",IDC_STATIC,  8,166,14,8, SS_LEFT
-	EDITTEXT        SaveQ+12,         24,164,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "13:",IDC_STATIC,  8,178,14,8, SS_LEFT
-	EDITTEXT        SaveQ+13,         24,176,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "14:",IDC_STATIC,  8,190,14,8, SS_LEFT
-	EDITTEXT        SaveQ+14,         24,188,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "15:",IDC_STATIC,  8,202,14,8, SS_LEFT
-	EDITTEXT        SaveQ+15,         24,200,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "16:",IDC_STATIC, 48, 22,14,8, SS_LEFT
-	EDITTEXT        SaveQ+16,         64, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "17:",IDC_STATIC, 48, 34,14,8, SS_LEFT
-	EDITTEXT        SaveQ+17,         64, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "18:",IDC_STATIC, 48, 46,14,8, SS_LEFT
-	EDITTEXT        SaveQ+18,         64, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "19:",IDC_STATIC, 48, 58,14,8, SS_LEFT
-	EDITTEXT        SaveQ+19,         64, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "20:",IDC_STATIC, 48, 70,14,8, SS_LEFT
-	EDITTEXT        SaveQ+20,         64, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "21:",IDC_STATIC, 48, 82,14,8, SS_LEFT
-	EDITTEXT        SaveQ+21,         64, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "22:",IDC_STATIC, 48, 94,14,8, SS_LEFT
-	EDITTEXT        SaveQ+22,         64, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "23:",IDC_STATIC, 48,106,14,8, SS_LEFT
-	EDITTEXT        SaveQ+23,         64,104,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "24:",IDC_STATIC, 48,118,14,8, SS_LEFT
-	EDITTEXT        SaveQ+24,         64,116,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "25:",IDC_STATIC, 48,130,14,8, SS_LEFT
-	EDITTEXT        SaveQ+25,         64,128,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "26:",IDC_STATIC, 48,142,14,8, SS_LEFT
-	EDITTEXT        SaveQ+26,         64,140,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "27:",IDC_STATIC, 48,154,14,8, SS_LEFT
-	EDITTEXT        SaveQ+27,         64,152,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "28:",IDC_STATIC, 48,166,14,8, SS_LEFT
-	EDITTEXT        SaveQ+28,         64,164,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "29:",IDC_STATIC, 48,178,14,8, SS_LEFT
-	EDITTEXT        SaveQ+29,         64,176,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "30:",IDC_STATIC, 48,190,14,8, SS_LEFT
-	EDITTEXT        SaveQ+30,         64,188,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "31:",IDC_STATIC, 48,202,14,8, SS_LEFT
-	EDITTEXT        SaveQ+31,         64,200,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "32:",IDC_STATIC, 88, 22,14,8, SS_LEFT
-	EDITTEXT        SaveQ+32,        104, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "33:",IDC_STATIC, 88, 34,14,8, SS_LEFT
-	EDITTEXT        SaveQ+33,        104, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "34:",IDC_STATIC, 88, 46,14,8, SS_LEFT
-	EDITTEXT        SaveQ+34,        104, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "35:",IDC_STATIC, 88, 58,14,8, SS_LEFT
-	EDITTEXT        SaveQ+35,        104, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "36:",IDC_STATIC, 88, 70,14,8, SS_LEFT
-	EDITTEXT        SaveQ+36,        104, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "37:",IDC_STATIC, 88, 82,14,8, SS_LEFT
-	EDITTEXT        SaveQ+37,        104, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "38:",IDC_STATIC, 88, 94,14,8, SS_LEFT
-	EDITTEXT        SaveQ+38,        104, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "39:",IDC_STATIC, 88,106,14,8, SS_LEFT
-	EDITTEXT        SaveQ+39,        104,104,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "40:",IDC_STATIC, 88,118,14,8, SS_LEFT
-	EDITTEXT        SaveQ+40,        104,116,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "41:",IDC_STATIC, 88,130,14,8, SS_LEFT
-	EDITTEXT        SaveQ+41,        104,128,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "42:",IDC_STATIC, 88,142,14,8, SS_LEFT
-	EDITTEXT        SaveQ+42,        104,140,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "43:",IDC_STATIC, 88,154,14,8, SS_LEFT
-	EDITTEXT        SaveQ+43,        104,152,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "44:",IDC_STATIC, 88,166,14,8, SS_LEFT
-	EDITTEXT        SaveQ+44,        104,164,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "45:",IDC_STATIC, 88,178,14,8, SS_LEFT
-	EDITTEXT        SaveQ+45,        104,176,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "46:",IDC_STATIC, 88,190,14,8, SS_LEFT
-	EDITTEXT        SaveQ+46,        104,188,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "47:",IDC_STATIC, 88,202,14,8, SS_LEFT
-	EDITTEXT        SaveQ+47,        104,200,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "48:",IDC_STATIC,128, 22,14,8, SS_LEFT
-	EDITTEXT        SaveQ+48,        144, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "49:",IDC_STATIC,128, 34,14,8, SS_LEFT
-	EDITTEXT        SaveQ+49,        144, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "50:",IDC_STATIC,128, 46,14,8, SS_LEFT
-	EDITTEXT        SaveQ+50,        144, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "51:",IDC_STATIC,128, 58,14,8, SS_LEFT
-	EDITTEXT        SaveQ+51,        144, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "52:",IDC_STATIC,128, 70,14,8, SS_LEFT
-	EDITTEXT        SaveQ+52,        144, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "53:",IDC_STATIC,128, 82,14,8, SS_LEFT
-	EDITTEXT        SaveQ+53,        144, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "54:",IDC_STATIC,128, 94,14,8, SS_LEFT
-	EDITTEXT        SaveQ+54,        144, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "55:",IDC_STATIC,128,106,14,8, SS_LEFT
-	EDITTEXT        SaveQ+55,        144,104,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "56:",IDC_STATIC,128,118,14,8, SS_LEFT
-	EDITTEXT        SaveQ+56,        144,116,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "57:",IDC_STATIC,128,130,14,8, SS_LEFT
-	EDITTEXT        SaveQ+57,        144,128,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "58:",IDC_STATIC,128,142,14,8, SS_LEFT
-	EDITTEXT        SaveQ+58,        144,140,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "59:",IDC_STATIC,128,154,14,8, SS_LEFT
-	EDITTEXT        SaveQ+59,        144,152,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "60:",IDC_STATIC,128,166,14,8, SS_LEFT
-	EDITTEXT        SaveQ+60,        144,164,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "61:",IDC_STATIC,128,178,14,8, SS_LEFT
-	EDITTEXT        SaveQ+61,        144,176,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "62:",IDC_STATIC,128,190,14,8, SS_LEFT
-	EDITTEXT        SaveQ+62,        144,188,20,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "63:",IDC_STATIC,128,202,14,8, SS_LEFT
-	EDITTEXT        SaveQ+63,        144,200,20,12, ES_AUTOHSCROLL | ES_LEFT
-	PUSHBUTTON      "De&faults", SaveDef,   180,100,40,14, 0
-	PUSHBUTTON      "&Best",     SaveBest,  180,120,40,14, 0
-	PUSHBUTTON      "&Worst",    SaveWorst, 180,140,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       95,222,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     140,222,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           185,222,35,14, 0
+  CONTROL "&Luminance", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 8, 5,60,12
+  CONTROL "&Chrominance", SaveRad2, "Button", BS_AUTORADIOBUTTON, 68, 5,60,12
+  RTEXT "DC:",IDC_STATIC, 8, 22,14,8, SS_LEFT
+  EDITTEXT SaveQ, 24, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "1:",IDC_STATIC, 8, 34,14,8, SS_LEFT
+  EDITTEXT SaveQ+1, 24, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "2:",IDC_STATIC, 8, 46,14,8, SS_LEFT
+  EDITTEXT SaveQ+2, 24, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "3:",IDC_STATIC, 8, 58,14,8, SS_LEFT
+  EDITTEXT SaveQ+3, 24, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "4:",IDC_STATIC, 8, 70,14,8, SS_LEFT
+  EDITTEXT SaveQ+4, 24, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "5:",IDC_STATIC, 8, 82,14,8, SS_LEFT
+  EDITTEXT SaveQ+5, 24, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "6:",IDC_STATIC, 8, 94,14,8, SS_LEFT
+  EDITTEXT SaveQ+6, 24, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "7:",IDC_STATIC, 8,106,14,8, SS_LEFT
+  EDITTEXT SaveQ+7, 24,104,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "8:",IDC_STATIC, 8,118,14,8, SS_LEFT
+  EDITTEXT SaveQ+8, 24,116,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "9:",IDC_STATIC, 8,130,14,8, SS_LEFT
+  EDITTEXT SaveQ+9, 24,128,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "10:",IDC_STATIC, 8,142,14,8, SS_LEFT
+  EDITTEXT SaveQ+10, 24,140,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "11:",IDC_STATIC, 8,154,14,8, SS_LEFT
+  EDITTEXT SaveQ+11, 24,152,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "12:",IDC_STATIC, 8,166,14,8, SS_LEFT
+  EDITTEXT SaveQ+12, 24,164,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "13:",IDC_STATIC, 8,178,14,8, SS_LEFT
+  EDITTEXT SaveQ+13, 24,176,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "14:",IDC_STATIC, 8,190,14,8, SS_LEFT
+  EDITTEXT SaveQ+14, 24,188,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "15:",IDC_STATIC, 8,202,14,8, SS_LEFT
+  EDITTEXT SaveQ+15, 24,200,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "16:",IDC_STATIC, 48, 22,14,8, SS_LEFT
+  EDITTEXT SaveQ+16, 64, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "17:",IDC_STATIC, 48, 34,14,8, SS_LEFT
+  EDITTEXT SaveQ+17, 64, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "18:",IDC_STATIC, 48, 46,14,8, SS_LEFT
+  EDITTEXT SaveQ+18, 64, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "19:",IDC_STATIC, 48, 58,14,8, SS_LEFT
+  EDITTEXT SaveQ+19, 64, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "20:",IDC_STATIC, 48, 70,14,8, SS_LEFT
+  EDITTEXT SaveQ+20, 64, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "21:",IDC_STATIC, 48, 82,14,8, SS_LEFT
+  EDITTEXT SaveQ+21, 64, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "22:",IDC_STATIC, 48, 94,14,8, SS_LEFT
+  EDITTEXT SaveQ+22, 64, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "23:",IDC_STATIC, 48,106,14,8, SS_LEFT
+  EDITTEXT SaveQ+23, 64,104,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "24:",IDC_STATIC, 48,118,14,8, SS_LEFT
+  EDITTEXT SaveQ+24, 64,116,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "25:",IDC_STATIC, 48,130,14,8, SS_LEFT
+  EDITTEXT SaveQ+25, 64,128,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "26:",IDC_STATIC, 48,142,14,8, SS_LEFT
+  EDITTEXT SaveQ+26, 64,140,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "27:",IDC_STATIC, 48,154,14,8, SS_LEFT
+  EDITTEXT SaveQ+27, 64,152,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "28:",IDC_STATIC, 48,166,14,8, SS_LEFT
+  EDITTEXT SaveQ+28, 64,164,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "29:",IDC_STATIC, 48,178,14,8, SS_LEFT
+  EDITTEXT SaveQ+29, 64,176,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "30:",IDC_STATIC, 48,190,14,8, SS_LEFT
+  EDITTEXT SaveQ+30, 64,188,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "31:",IDC_STATIC, 48,202,14,8, SS_LEFT
+  EDITTEXT SaveQ+31, 64,200,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "32:",IDC_STATIC, 88, 22,14,8, SS_LEFT
+  EDITTEXT SaveQ+32, 104, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "33:",IDC_STATIC, 88, 34,14,8, SS_LEFT
+  EDITTEXT SaveQ+33, 104, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "34:",IDC_STATIC, 88, 46,14,8, SS_LEFT
+  EDITTEXT SaveQ+34, 104, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "35:",IDC_STATIC, 88, 58,14,8, SS_LEFT
+  EDITTEXT SaveQ+35, 104, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "36:",IDC_STATIC, 88, 70,14,8, SS_LEFT
+  EDITTEXT SaveQ+36, 104, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "37:",IDC_STATIC, 88, 82,14,8, SS_LEFT
+  EDITTEXT SaveQ+37, 104, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "38:",IDC_STATIC, 88, 94,14,8, SS_LEFT
+  EDITTEXT SaveQ+38, 104, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "39:",IDC_STATIC, 88,106,14,8, SS_LEFT
+  EDITTEXT SaveQ+39, 104,104,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "40:",IDC_STATIC, 88,118,14,8, SS_LEFT
+  EDITTEXT SaveQ+40, 104,116,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "41:",IDC_STATIC, 88,130,14,8, SS_LEFT
+  EDITTEXT SaveQ+41, 104,128,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "42:",IDC_STATIC, 88,142,14,8, SS_LEFT
+  EDITTEXT SaveQ+42, 104,140,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "43:",IDC_STATIC, 88,154,14,8, SS_LEFT
+  EDITTEXT SaveQ+43, 104,152,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "44:",IDC_STATIC, 88,166,14,8, SS_LEFT
+  EDITTEXT SaveQ+44, 104,164,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "45:",IDC_STATIC, 88,178,14,8, SS_LEFT
+  EDITTEXT SaveQ+45, 104,176,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "46:",IDC_STATIC, 88,190,14,8, SS_LEFT
+  EDITTEXT SaveQ+46, 104,188,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "47:",IDC_STATIC, 88,202,14,8, SS_LEFT
+  EDITTEXT SaveQ+47, 104,200,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "48:",IDC_STATIC,128, 22,14,8, SS_LEFT
+  EDITTEXT SaveQ+48, 144, 20,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "49:",IDC_STATIC,128, 34,14,8, SS_LEFT
+  EDITTEXT SaveQ+49, 144, 32,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "50:",IDC_STATIC,128, 46,14,8, SS_LEFT
+  EDITTEXT SaveQ+50, 144, 44,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "51:",IDC_STATIC,128, 58,14,8, SS_LEFT
+  EDITTEXT SaveQ+51, 144, 56,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "52:",IDC_STATIC,128, 70,14,8, SS_LEFT
+  EDITTEXT SaveQ+52, 144, 68,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "53:",IDC_STATIC,128, 82,14,8, SS_LEFT
+  EDITTEXT SaveQ+53, 144, 80,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "54:",IDC_STATIC,128, 94,14,8, SS_LEFT
+  EDITTEXT SaveQ+54, 144, 92,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "55:",IDC_STATIC,128,106,14,8, SS_LEFT
+  EDITTEXT SaveQ+55, 144,104,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "56:",IDC_STATIC,128,118,14,8, SS_LEFT
+  EDITTEXT SaveQ+56, 144,116,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "57:",IDC_STATIC,128,130,14,8, SS_LEFT
+  EDITTEXT SaveQ+57, 144,128,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "58:",IDC_STATIC,128,142,14,8, SS_LEFT
+  EDITTEXT SaveQ+58, 144,140,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "59:",IDC_STATIC,128,154,14,8, SS_LEFT
+  EDITTEXT SaveQ+59, 144,152,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "60:",IDC_STATIC,128,166,14,8, SS_LEFT
+  EDITTEXT SaveQ+60, 144,164,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "61:",IDC_STATIC,128,178,14,8, SS_LEFT
+  EDITTEXT SaveQ+61, 144,176,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "62:",IDC_STATIC,128,190,14,8, SS_LEFT
+  EDITTEXT SaveQ+62, 144,188,20,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "63:",IDC_STATIC,128,202,14,8, SS_LEFT
+  EDITTEXT SaveQ+63, 144,200,20,12, ES_AUTOHSCROLL | ES_LEFT
+  PUSHBUTTON "De&faults", SaveDef, 180,100,40,14, 0
+  PUSHBUTTON "&Best", SaveBest, 180,120,40,14, 0
+  PUSHBUTTON "&Worst", SaveWorst, 180,140,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 95,222,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 140,222,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 185,222,35,14, 0
 END
 
-SaDLG6 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 88
+SaDLG6 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 88
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "PPM Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "PBM/PGM/PNM/PPM - Portable pixel map", IDC_STATIC,     52,4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,48
-	CONTROL         "&ASCII", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,     24,44,40,12
-	CONTROL         "&Binary", SaveRad2, "Button", BS_AUTORADIOBUTTON,   68,44,40,12
-	PUSHBUTTON      "De&faults", SaveDef,    10,68,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,68,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,68,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,68,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "PBM/PGM/PNM/PPM - Portable pixel map", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,48
+  CONTROL "&ASCII", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 24,44,40,12
+  CONTROL "&Binary", SaveRad2, "Button", BS_AUTORADIOBUTTON, 68,44,40,12
+  PUSHBUTTON "De&faults", SaveDef, 10,68,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,68,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,68,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,68,35,14, 0
 END
 
-SaDLG7 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 77
+SaDLG7 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 77
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "PCX Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "PCX/PCC - PC Paintbrush", IDC_STATIC,  52,4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,40
-	RTEXT           "Compression:", IDC_STATIC,     4,44,44,8, SS_LEFT
-	LTEXT           "RLE - Run Length Encoding", IDC_STATIC,    52,44,92,8, SS_LEFT
-	PUSHBUTTON      "De&faults", SaveDef,    10,60,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,60,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,60,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,60,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "PCX/PCC - PC Paintbrush", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,40
+  RTEXT "Compression:", IDC_STATIC, 4,44,44,8, SS_LEFT
+  LTEXT "RLE - Run Length Encoding", IDC_STATIC, 52,44,92,8, SS_LEFT
+  PUSHBUTTON "De&faults", SaveDef, 10,60,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,60,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,60,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,60,35,14, 0
 END
 
-SaDLG8 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 152, 72
+SaDLG8 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 152, 72
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "TGA Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "TGA - Targa", IDC_STATIC,  52,4,144,8, SS_LEFT
-	RTEXT           "Colors:", IDC_STATIC,  12,24,36,8, SS_LEFT
-	LTEXT           "24-bit RGB", IDC_STATIC,   52,24,92,8, SS_LEFT
-	RTEXT           "Compression:", IDC_STATIC,     4,40,44,8, SS_LEFT
-	LTEXT           "None", IDC_STATIC,    52,40,92,8, SS_LEFT
-	PUSHBUTTON      "Help", HelpHelp,       62,56,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           107,56,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "TGA - Targa", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "Colors:", IDC_STATIC, 12,24,36,8, SS_LEFT
+  LTEXT "24-bit RGB", IDC_STATIC, 52,24,92,8, SS_LEFT
+  RTEXT "Compression:", IDC_STATIC, 4,40,44,8, SS_LEFT
+  LTEXT "None", IDC_STATIC, 52,40,92,8, SS_LEFT
+  PUSHBUTTON "Help", HelpHelp, 62,56,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 107,56,35,14, 0
 END
 
-SaDLG9 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE    10, 10, 202, 104
+SaDLG9 DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 202, 104
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "TIF Save Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "File format:", IDC_STATIC,     8,4,40,8, SS_LEFT
-	LTEXT           "TIF - Tagged Image File Format", IDC_STATIC,   52,4,144,8, SS_LEFT
-	RTEXT           "&Colors:", IDC_STATIC,  12,26,36,8, SS_LEFT
-	CONTROL         "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     52,24,76,64
-	RTEXT           "&DPI:", IDC_STATIC,  132,26,28,8, SS_LEFT
-	EDITTEXT        SaveDPI,    164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
-	RTEXT           "Co&mpression:", IDC_STATIC,     4,46,44,8, SS_LEFT
-	CONTROL         "", SaveCompress, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,   52,44,76,48
-	CONTROL         "&Big Endian (Motorola style)", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP,   4,60,100,12
-	CONTROL         "&Little Endian (Intel Style)", SaveRad2, "Button", BS_AUTORADIOBUTTON,  4,72,100,12
-	RTEXT           "&Strip Size (lines):", IDC_STATIC,  108,70,60,8, SS_LEFT
-	EDITTEXT        SaveEdit1,  172,68,24,12, ES_AUTOHSCROLL | ES_LEFT
-	PUSHBUTTON      "De&faults", SaveDef,    10,88,40,14, 0
-	PUSHBUTTON      "Help", HelpHelp,       67,88,35,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     112,88,35,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,           157,88,35,14, 0
+  RTEXT "File format:", IDC_STATIC, 8,4,40,8, SS_LEFT
+  LTEXT "TIF - Tagged Image File Format", IDC_STATIC, 52,4,144,8, SS_LEFT
+  RTEXT "&Colors:", IDC_STATIC, 12,26,36,8, SS_LEFT
+  CONTROL "", SaveColors, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,24,76,64
+  RTEXT "&DPI:", IDC_STATIC, 132,26,28,8, SS_LEFT
+  EDITTEXT SaveDPI, 164,24,24,12, ES_AUTOHSCROLL | ES_LEFT
+  RTEXT "Co&mpression:", IDC_STATIC, 4,46,44,8, SS_LEFT
+  CONTROL "", SaveCompress, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 52,44,76,48
+  CONTROL "&Big Endian (Motorola style)", SaveRad1, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 4,60,100,12
+  CONTROL "&Little Endian (Intel Style)", SaveRad2, "Button", BS_AUTORADIOBUTTON, 4,72,100,12
+  RTEXT "&Strip Size (lines):", IDC_STATIC, 108,70,60,8, SS_LEFT
+  EDITTEXT SaveEdit1, 172,68,24,12, ES_AUTOHSCROLL | ES_LEFT
+  PUSHBUTTON "De&faults", SaveDef, 10,88,40,14, 0
+  PUSHBUTTON "Help", HelpHelp, 67,88,35,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 112,88,35,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 157,88,35,14, 0
 END
 
-SlDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 184, 36
+SlDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 184, 36
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Scanning for Graphics Files"
 FONT 8, "MS Sans Serif"
 BEGIN
-	CTEXT           " ", SlideStat1,    4,6,176,10, SS_LEFT
-	RTEXT           "Found file:", IDC_STATIC,  4,20,40,8, SS_LEFT
-	LTEXT           " ", SlideStat2,     48,20,128,8, SS_LEFT
+  CTEXT " ", SlideStat1, 4,6,176,10, SS_LEFT
+  RTEXT "Found file:", IDC_STATIC, 4,20,40,8, SS_LEFT
+  LTEXT " ", SlideStat2, 48,20,128,8, SS_LEFT
 END
 
-SlOptDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 233, 239
+SlOptDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 233, 239
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Slide Show Options"
 FONT 8, "MS Sans Serif"
 BEGIN
-	DEFPUSHBUTTON   "Done", IDOK,   176,218,40,14, 0
-	CTEXT           "", SlideDir,     12,8,216,8, SS_LEFT
-	PUSHBUTTON      "Re&fresh File List", SlideRef,   12,20,84,14, 0
-	PUSHBUTTON      "Chan&ge Root Directory", SlideRoot,   140,20,84,14, 0
-	CONTROL         "&Preemptive loading", SlideOpt5, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,  12,36,80,12
-	CONTROL         "Re&member view area", SlideOpt7, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,  12,52,80,12
-	CONTROL         "Rescan f&iles on loading", SlideOpt6, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     12,68,88,12
-	CONTROL         "Auto &save slide file", SlideOpt8, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    12,84,88,12
-	CONTROL         "&Auto advance", SlideOpt3, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    148,40,60,12
-	RTEXT           "&Delay (sec):", IDC_STATIC,    140,58,40,8, SS_LEFT
-	EDITTEXT        SlideSec,  188,56,28,12, ES_AUTOHSCROLL | ES_LEFT
-	CONTROL         "&Random order", SlideOpt4, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,     148,76,60,12
-	RTEXT           "Key", IDC_STATIC,   89,104,40,8, SS_RIGHT
-	LTEXT           "Show", IDC_STATIC, 131,104,40,8, SS_LEFT
-	LTEXT           "&Categories:", IDC_STATIC,     12,104,60,8, SS_LEFT
-	LISTBOX         SlideCatList,   12,116,140,68, LBS_EXTENDEDSEL | LBS_NOTIFY | LBS_SORT | WS_VSCROLL | WS_TABSTOP | LBS_USETABSTOPS
-	LTEXT           "Show cat.:", IDC_STATIC, 12,186,40,8, SS_LEFT
-	CONTROL         "&Yes", SlideShowY, "Button", BS_3STATE | WS_TABSTOP,    52,184,27,12
-	CONTROL         "&Never", SlideShowN, "Button", BS_3STATE | WS_TABSTOP,   79,184,31,12
-	LTEXT   "Images must match", IDC_STATIC, 12,198,70,8, SS_LEFT
-	CONTROL "A&ll", SlideOpt10a, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 82, 196, 25,  12
-	CONTROL "S&ome",SlideOpt10b, "Button", BS_AUTORADIOBUTTON,           107, 196, 30,  12
-	LTEXT   "categories marked Yes", IDC_STATIC, 140,198,95,8, SS_LEFT
-	PUSHBUTTON      "Ne&w Cat.", SlideNew,   160,119,52,14, 0
-	PUSHBUTTON      "&Edit Cat.", SlideEdit,   160,139,52,14, 0
-	PUSHBUTTON      "Dele&te Cat.", SlideDel,    160,159,52,14, 0
-	PUSHBUTTON      "Help", HelpHelp,    76,218,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,     126,218,40,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 176,218,40,14, 0
+  CTEXT "", SlideDir, 12,8,216,8, SS_LEFT
+  PUSHBUTTON "Re&fresh File List", SlideRef, 12,20,84,14, 0
+  PUSHBUTTON "Chan&ge Root Directory", SlideRoot, 140,20,84,14, 0
+  CONTROL "&Preemptive loading", SlideOpt5, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 12,36,80,12
+  CONTROL "Re&member view area", SlideOpt7, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 12,52,80,12
+  CONTROL "Rescan f&iles on loading", SlideOpt6, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 12,68,88,12
+  CONTROL "Auto &save slide file", SlideOpt8, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 12,84,88,12
+  CONTROL "&Auto advance", SlideOpt3, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 148,40,60,12
+  RTEXT "&Delay (sec):", IDC_STATIC, 140,58,40,8, SS_LEFT
+  EDITTEXT SlideSec, 188,56,28,12, ES_AUTOHSCROLL | ES_LEFT
+  CONTROL "&Random order", SlideOpt4, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 148,76,60,12
+  RTEXT "Key", IDC_STATIC, 89,104,40,8, SS_RIGHT
+  LTEXT "Show", IDC_STATIC, 131,104,40,8, SS_LEFT
+  LTEXT "&Categories:", IDC_STATIC, 12,104,60,8, SS_LEFT
+  LISTBOX SlideCatList, 12,116,140,68, LBS_EXTENDEDSEL | LBS_NOTIFY | LBS_SORT | WS_VSCROLL | WS_TABSTOP | LBS_USETABSTOPS
+  LTEXT "Show cat.:", IDC_STATIC, 12,186,40,8, SS_LEFT
+  CONTROL "&Yes", SlideShowY, "Button", BS_3STATE | WS_TABSTOP, 52,184,27,12
+  CONTROL "&Never", SlideShowN, "Button", BS_3STATE | WS_TABSTOP, 79,184,31,12
+  LTEXT "Images must match", IDC_STATIC, 12,198,70,8, SS_LEFT
+  CONTROL "A&ll", SlideOpt10a, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 82, 196, 25, 12
+  CONTROL "S&ome",SlideOpt10b, "Button", BS_AUTORADIOBUTTON, 107, 196, 30, 12
+  LTEXT "categories marked Yes", IDC_STATIC, 140,198,95,8, SS_LEFT
+  PUSHBUTTON "Ne&w Cat.", SlideNew, 160,119,52,14, 0
+  PUSHBUTTON "&Edit Cat.", SlideEdit, 160,139,52,14, 0
+  PUSHBUTTON "Dele&te Cat.", SlideDel, 160,159,52,14, 0
+  PUSHBUTTON "Help", HelpHelp, 76,218,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 126,218,40,14, 0
 END
 
-SlCatDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 167, 84
+SlCatDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 167, 84
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT           "N&ame:", IDC_STATIC,     12, 8,136,8, SS_LEFT
-	EDITTEXT        SlideName,   10, 20,146,12, ES_AUTOHSCROLL | ES_LEFT
-	LTEXT           "Show cat.:", IDC_STATIC, 10, 36,40,8, SS_LEFT
-	CONTROL         "&Yes", SlideShowY, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,    50, 34,27,12
-	CONTROL         "&Never", SlideShowN, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,   77, 34,31,12
-	LTEXT           "&Quick key:", IDC_STATIC,  10, 50,36,8, SS_LEFT
-	CONTROL         "", SlideQuick, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,     50,48,36,110
-	PUSHBUTTON      "Help", HelpHelp,    10, 68,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,      60, 68,40,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,   110, 68,40,14, 0
+  LTEXT "N&ame:", IDC_STATIC, 12, 8,136,8, SS_LEFT
+  EDITTEXT SlideName, 10, 20,146,12, ES_AUTOHSCROLL | ES_LEFT
+  LTEXT "Show cat.:", IDC_STATIC, 10, 36,40,8, SS_LEFT
+  CONTROL "&Yes", SlideShowY, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 50, 34,27,12
+  CONTROL "&Never", SlideShowN, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 77, 34,31,12
+  LTEXT "&Quick key:", IDC_STATIC, 10, 50,36,8, SS_LEFT
+  CONTROL "", SlideQuick, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 50,48,36,110
+  PUSHBUTTON "Help", HelpHelp, 10, 68,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 60, 68,40,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 110, 68,40,14, 0
 END
 
-SortDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 184, 72
+SortDLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 184, 72
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Sort"
 FONT 8, "MS Sans Serif"
 BEGIN
-	RTEXT           "&Sort by:", IDC_STATIC,     4,14,28,8, SS_LEFT
-	CONTROL         "", SortList, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,   36,12,140,224
-	CONTROL         "&Ascending", SortUp, "Button", BS_AUTORADIOBUTTON,  36,32,48,12
-	CONTROL         "&Descending", SortDown, "Button", BS_AUTORADIOBUTTON,     92,32,52,12
-	PUSHBUTTON      "Help", HelpHelp,    10, 56,40,14, 0
-	PUSHBUTTON      "Cancel", IDCANCEL,      90, 56,40,14, 0
-	DEFPUSHBUTTON   "Done", IDOK,   140, 56,40,14, 0
+  RTEXT "&Sort by:", IDC_STATIC, 4,14,28,8, SS_LEFT
+  CONTROL "", SortList, "Combobox", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 36,12,140,224
+  CONTROL "&Ascending", SortUp, "Button", BS_AUTORADIOBUTTON, 36,32,48,12
+  CONTROL "&Descending", SortDown, "Button", BS_AUTORADIOBUTTON, 92,32,52,12
+  PUSHBUTTON "Help", HelpHelp, 10, 56,40,14, 0
+  PUSHBUTTON "Cancel", IDCANCEL, 90, 56,40,14, 0
+  DEFPUSHBUTTON "Done", IDOK, 140, 56,40,14, 0
 END
 
-Sort2DLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE   10, 10, 144, 40
+Sort2DLG DIALOG MOVEABLE IMPURE LOADONCALL DISCARDABLE 10, 10, 144, 40
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 CAPTION "Calculating Sort Values"
 FONT 8, "MS Sans Serif"
 BEGIN
-	CTEXT           " ", SortStat,    4,6,140,10, SS_LEFT
-	PUSHBUTTON      "Cancel", IDCANCEL,  51,22,42,14, 0
+  CTEXT " ", SortStat, 4,6,140,10, SS_LEFT
+  PUSHBUTTON "Cancel", IDCANCEL, 51,22,42,14, 0
 END
 
-StdSaveDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24,  269, 134
+StdSaveDLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 269, 134
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP | 0x0004
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT "File &Name:", stc3,   6,   6,  76,  9
-	CONTROL "", edt1, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD | ES_OEMCONVERT, 6,    16,  90,  12
-	CONTROL "", lst1, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 6,    32,  90,  68
-	LTEXT "&Directories:", -1, 110,   6,  92,   9
-	LTEXT "",            stc1, 110,  18,  92,   9, SS_NOPREFIX
-	CONTROL "", lst2, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 110,  32,  92,  68
-	LTEXT "List Files of &Type:", stc2, 6,  104,  90,   9
-	CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP | WS_CHILD, 6,  114,  90,  16
-	LTEXT "Dri&ves:", stc4,      110, 104,  92,  9
-	CONTROL "", cmb2, "combobox", CBS_SORT | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED | CBS_DROPDOWNLIST | WS_CHILD | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 110, 114,  92, 68
-	DEFPUSHBUTTON "Done", IDOK,       213,  6, 50, 14, WS_GROUP
-	PUSHBUTTON "Cancel", IDCANCEL,  213, 24, 50, 14, WS_GROUP
-	PUSHBUTTON " Help ", HelpHelp,      213, 42, 50, 14, WS_GROUP
+  LTEXT "File &Name:", stc3, 6, 6, 76, 9
+  CONTROL "", edt1, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD | ES_OEMCONVERT, 6, 16, 90, 12
+  CONTROL "", lst1, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 6, 32, 90, 68
+  LTEXT "&Directories:", -1, 110, 6, 92, 9
+  LTEXT "", stc1, 110, 18, 92, 9, SS_NOPREFIX
+  CONTROL "", lst2, "listbox", LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_CHILD | WS_BORDER | WS_TABSTOP | LBS_OWNERDRAWFIXED, 110, 32, 92, 68
+  LTEXT "List Files of &Type:", stc2, 6, 104, 90, 9
+  CONTROL "", cmb1, "combobox", CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP | WS_CHILD, 6, 114, 90, 16
+  LTEXT "Dri&ves:", stc4, 110, 104, 92, 9
+  CONTROL "", cmb2, "combobox", CBS_SORT | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED | CBS_DROPDOWNLIST | WS_CHILD | CBS_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 110, 114, 92, 68
+  DEFPUSHBUTTON "Done", IDOK, 213, 6, 50, 14, WS_GROUP
+  PUSHBUTTON "Cancel", IDCANCEL, 213, 24, 50, 14, WS_GROUP
+  PUSHBUTTON " Help ", HelpHelp, 213, 42, 50, 14, WS_GROUP
 END
 
 
