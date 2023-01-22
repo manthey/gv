@@ -1,4 +1,6 @@
 #include <windows.h>
+#include <winuser.h>
+#include <dwmapi.h>
 #include <commctrl.h>
 #include <direct.h>
 #include <math.h>
@@ -32,7 +34,8 @@ float AspectX=0, AspectY=0, AspectXY[4]={1,1}, PreviewGamma,
 long BackUpdate=-1, BitsPixel=8, bmpi, Busy=0, CopyMode=0, curheight,
      curwidth, dither16num=-1, Down=0, DownX, DownY, EditCat, extrax=0,
      extray=0, FindType=2, Focus[2]={-1,-1}, FilterType=1, HalfSizeBatch=0,
-     LastNum=-1, Letter=0, Lock=0, Msg=2, MultiOpen=0, MultiSave=0, NewCopy,
+     LastNum=-1, leftBorder=0, Letter=0, Lock=0, Msg=2, MultiOpen=0,
+     MultiSave=0, NewCopy,
      NextNum, ODown[8], oldh, oldi, oldw, OrigH, OrigW, OrigX=0, OrigY=0,
      PalChange=0, PMode=0, PreCoorMax, PrepTrans=-1, PreviewArea[8],
      PreviewInv, PreviewOpt=0, PreviewTrans, PreviewXY[2], PrevSaveX=600,
@@ -896,7 +899,7 @@ void drop_file(HANDLE drop)
   open_pic_mid(Hwnd, opfile, 0);
   if (n>1)
     open_pic_new(Hwnd, name);
-  GetWindowRect(Hwnd, &rect);
+  get_window_rect(Hwnd, &rect);
   OrigX = rect.left;  OrigY = rect.top;
 }
 
@@ -1157,6 +1160,17 @@ char *find_space(char *text)
     if (strchr(text+first, '"'))
       text = strchr(text+first, '"');
   return(strchr(text, ' '));
+}
+
+BOOL get_window_rect(HWND Hwnd, RECT *rect) {
+  RECT alt;
+  GetWindowRect(Hwnd, &alt);
+  HRESULT res = DwmGetWindowAttribute(Hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, rect, sizeof(RECT));
+  if (!res) {
+    leftBorder = rect->left - alt.left;
+    return 1;
+  }
+  return GetWindowRect(Hwnd, rect);
 }
 
 BOOL CALLBACK grey_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
@@ -1576,7 +1590,7 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
       SetCapture(hwnd); break;
     case WM_MBUTTONUP: if (Down) move(wp, lp&0xFFFF, lp>>16, 1); break;
     case WM_MOUSEMOVE: if (Down) move(wp, lp&0xFFFF, lp>>16, 0); break;
-    case WM_MOVE: GetWindowRect(hwnd, &rect);
+    case WM_MOVE: get_window_rect(hwnd, &rect);
       OrigX = rect.left;  OrigY = rect.top;
       return(1);
     case WM_PAINT: if (IsIconic(hwnd)) break;
@@ -1830,7 +1844,7 @@ void no_letter(HWND hwnd)
   w2 = View[2]-View[0];  h2 = View[3]-View[1];
   if (!w2)  w2 = 1;  if (!h2)  h2 = 1;
   GetClientRect(hwnd, &r);
-  GetWindowRect(hwnd, &r2);
+  get_window_rect(hwnd, &r2);
   w = r.right;  h = r.bottom;
   if (w-w2*h/h2>1)
     w = w2*h/h2;
@@ -2353,7 +2367,7 @@ void prep_undo(HWND hwnd)
   RECT rect;
 
   EnableMenuItem(Hmenu, MenuUndo, MFS_ENABLED);
-  GetWindowRect(hwnd, &rect);
+  get_window_rect(hwnd, &rect);
   x = rect.left;  w = rect.right-x;
   y = rect.top;   h = rect.bottom-y;
   if (x==Undo[0] && y==Undo[1] && w==Undo[2] && h==Undo[3] &&
@@ -5033,14 +5047,14 @@ void set_client(HWND hwnd, long x, long y, long w, long h, long paint)
   MoveWindow(hwnd, x, y, w+extrax, h+extray, paint);
   while ((dw>0 || dh>0) && count<10) {
     GetClientRect(hwnd, &rect);
-    dh = h-(rect.bottom-rect.top);
     dw = w-(rect.right-rect.left);
+    dh = h-(rect.bottom-rect.top);
     if (dw || dh) {
       if (rect.bottom==rect.top)  inch += GetSystemMetrics(SM_CYMENU);
       else                        inch += dh;
       incw += dw;
       count++;
-      MoveWindow(hwnd, x, y, w+incw+extrax, h+inch+extray, paint); } }
+      MoveWindow(hwnd, x-leftBorder, y, w+incw+extrax, h+inch+extray, paint); } }
 }
 
 void set_font(HDC dc, long type, long size, long fore, long back)
@@ -6851,7 +6865,7 @@ void topmost(void)
   RECT rect;
 
   Topmost ^= 1;  recheck(Hwnd, 0);
-  GetWindowRect(Hwnd, &rect);
+  get_window_rect(Hwnd, &rect);
   if (Topmost)
     SetWindowPos(Hwnd, HWND_TOPMOST, rect.left, rect.top,
                  rect.right-rect.left, rect.bottom-rect.top, SWP_SHOWWINDOW);
@@ -6867,7 +6881,7 @@ void undo(HWND hwnd)
   long x, y, w, h;
   RECT rect;
 
-  GetWindowRect(hwnd, &rect);
+  get_window_rect(hwnd, &rect);
   x = rect.left;  w = rect.right-x;
   y = rect.top;   h = rect.bottom-y;
   prep_undo(hwnd);
@@ -6956,7 +6970,7 @@ int APIENTRY WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR argv, int winmode)
   if (!Topmost)
     ShowWindow(hwnd, winmode);
   else {
-    GetWindowRect(Hwnd, &rect);
+    get_window_rect(Hwnd, &rect);
     if (winmode==SW_SHOWDEFAULT)
       ShowWindow(hwnd, SW_SHOWNOACTIVATE);
     else
@@ -7032,7 +7046,7 @@ void write_ini(long offset)
   if (offset && !(Lock&1)) {
     x += 24;  if (x>400) x = 0;
     y += 24;  if (y>300) y = 0; }
-  GetWindowRect(Hwnd, &rect);
+  get_window_rect(Hwnd, &rect);
   if (Lock&1) {
     x = rect.left;  y = rect.top; }
   for (i=0; key[i*3]; i++) {
@@ -7115,7 +7129,7 @@ void write_ini(long offset)
 
 void zoom(float mag, long style)
 /* Zoom the current window in the specified manner.
- * Enter: float *mag: magnitude of zoom.
+ * Enter: float mag: magnitude of zoom.
  *        long style: 0-relative magnitude, 1-absolute magnitude, 2-step
  *                    magnitude.                                6/3/96-DWM */
 {
@@ -7128,7 +7142,9 @@ void zoom(float mag, long style)
   sy = my = GetSystemMetrics(SM_CYFULLSCREEN)-extrax-
             GetSystemMetrics(SM_CYMENU);
   GetClientRect(Hwnd, &rect);
-  GetWindowRect(Hwnd, &r2);
+  get_window_rect(Hwnd, &r2);
+  rect.bottom -= leftBorder*2;
+  rect.right -= leftBorder*2;
   if (style==2 && !mag)  del = 1;
   if (!(View[2]-View[0]+del))  View[2]++;
   if (!(View[3]-View[1]+del))  View[3]++;

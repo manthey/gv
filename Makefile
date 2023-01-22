@@ -11,7 +11,7 @@ all: gv.exe gvlib.lib mem.lib gvlib.dll
 
 
 gv.exe: gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res
-	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib
+	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib dwmapi.lib
 
 gv.res: gv.rc gvrc.h
 	rc $(RC_OPTS) gv.rc
