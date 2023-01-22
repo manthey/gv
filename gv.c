@@ -5027,17 +5027,20 @@ void set_client(HWND hwnd, long x, long y, long w, long h, long paint)
  *        long paint: 0-don't redraw, 1-redraw.                10/7/96-DWM */
 {
   RECT rect;
-  long d=1, inc=0, count=0;
+  long dw=1, dh=0, incw=0, inch=0, count=0;
 
   if (IsZoomed(hwnd))  return;
   MoveWindow(hwnd, x, y, w+extrax, h+extray, paint);
-  while (d>0 && count<10) {
+  while ((dw>0 || dh>0) && count<10) {
     GetClientRect(hwnd, &rect);
-    if ((d=(h-(rect.bottom-rect.top)))>0) {
-      if (rect.bottom==rect.top)  inc += GetSystemMetrics(SM_CYMENU);
-      else                        inc += d;
+    dh = h-(rect.bottom-rect.top);
+    dw = w-(rect.right-rect.left);
+    if (dw || dh) {
+      if (rect.bottom==rect.top)  inch += GetSystemMetrics(SM_CYMENU);
+      else                        inch += dh;
+      incw += dw;
       count++;
-      MoveWindow(hwnd, x, y, w+extrax, h+inc+extray, paint); } }
+      MoveWindow(hwnd, x, y, w+incw+extrax, h+inch+extray, paint); } }
 }
 
 void set_font(HDC dc, long type, long size, long fore, long back)
@@ -6214,6 +6217,16 @@ void slide_refresh(long remove, HWND hwnd)
           if (((ulong *)(slide->file+FE*j+0x3C))[0]<
               ((ulong *)(slide2->file+FE*i+0x3C))[0])
             slide->file[FE*j+0xC] = -1;
+          if (((ulong *)(slide->file+FE*j+0x38))[0]!=
+              ((ulong *)(slide2->file+FE*i+0x38))[0] ||
+              ((ulong *)(slide->file+FE*j+0x3C))[0]!=
+              ((ulong *)(slide2->file+FE*i+0x3C))[0]) {
+            /* changed size, so remove thumbnail, view position, and flag */
+            slide_delete(j, 1);
+            memset(slide->file+FE*j+0x24, 0, 8);
+            ((ulong *)(slide->file+FE*j+0x20))[0] &= 0xBFFFFFFF;
+            memset(slide->file+FE*j+0x06, 0, 0x2C-0x06);
+          }
           memcpy(slide->file+FE*j+0x38, slide2->file+FE*i+0x38, 8);
           found = 1; } }
     if (!found) {
