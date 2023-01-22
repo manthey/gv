@@ -25,7 +25,7 @@ deploy:
     tag: 'gv-latest'
     release: 'Release gv-latest'
     auth_token:
-      secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
+      secure: sH9xlvrR2D9eLJk/0iAJFV20bzughsiBC2BCWnzZunyMZodYDTcHa8DX+d8fYm7L
     artifact: gv.exe, gvlib.dll, gvlib.lib, gvlib.h, mem.lib, mem.h
     force_update: true
     on:
@@ -35,7 +35,7 @@ deploy:
     tag: $(appveyor_repo_tag_name)
     release: Release $(appveyor_repo_tag_name)
     auth_token:
-      secure: PGsGUDU6oqIy7zCyTMwIWlzf4TbJtuIgqmWb9ZLqNlM13AAaxWfDlzDlG+0CyHFx
+      secure: sH9xlvrR2D9eLJk/0iAJFV20bzughsiBC2BCWnzZunyMZodYDTcHa8DX+d8fYm7L
     artifact: gv.exe, gvlib.dll, gvlib.lib, gvlib.h, mem.lib, mem.h
     force_update: true
     on:
