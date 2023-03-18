@@ -936,7 +936,7 @@ STATIC uchar *load_graphic(char *name)
         && total[2]!=0xA)) && !(total[17]&0xD0))                  type = 7;
     (*fseek2)(fptr, 0, SEEK_SET);
     memset(pspec, 0, LENPSPEC);
-    if (type<=1) {
+    if (type<1 || (strlen(name) > 4 && !stricmp(name + strlen(name) - 4, ".nef"))) {
       if (new=load_pil(fptr)) {
         type = 13;
         (*fclose2)(fptr);
@@ -1819,19 +1819,27 @@ STATIC uchar *load_pil(FILE *fptr)
   /* The command uses -u to prevent buffering and ensure stdin and stdout are
    * in binary mode.  This copies memory far too many times. */
   char *command = "python -u -c \"\n"
-    "import six, sys, PIL.Image\n"
-    "import os, msvcrt\n"
-    "if sys.version_info >= (3, 0):\n"
-    "  src = sys.stdin.buffer\n"
-    "  dest = sys.stdout.buffer\n"
-    "else:\n"
-    "  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)\n"
-    "  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)\n"
-    "  src = sys.stdin\n"
-    "  dest = sys.stdout\n"
-    "inp = six.BytesIO(src.read())\n"
-    "buf = six.BytesIO()\n"
-    "PIL.Image.open(inp).convert('RGB').save(buf, format='PPM')\n"
+    "import io, sys, PIL.Image\n"
+    "try:\n"
+    "  from pillow_heif import register_heif_opener\n"
+    "  register_heif_opener()\n"
+    "  from pillow_heif import register_avif_opener\n"
+    "  register_avif_opener()\n"
+    "except Exception:\n"
+    "  pass\n"
+    "src = sys.stdin.buffer\n"
+    "dest = sys.stdout.buffer\n"
+    "inp = io.BytesIO(src.read())\n"
+    "buf = io.BytesIO()\n"
+    "try:\n"
+    "  import rawpy\n"
+    "  inp.seek(0)\n"
+    "  rgb = rawpy.imread(inp).postprocess()\n"
+    "  img = PIL.Image.fromarray(rgb.astype('uint8'), 'RGB')\n"
+    "except Exception:\n"
+    "  inp.seek(0)\n"
+    "  img = PIL.Image.open(inp).convert('RGB')\n"
+    "img.save(buf, format='PPM')\n"
     "dest.write(buf.getvalue())\"";
 
   dest = pipe_file_to_command(command, fptr, fread2, 512*1024*1024, &destlen);
