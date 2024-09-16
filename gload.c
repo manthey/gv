@@ -1991,7 +1991,7 @@ STATIC uchar *load_tif(FILE *fptr)
  *                                                             2/21/95-DWM */
 {
   short ifd=0, ifd2=0, orient=0;
-  long end, temp, temp2, i, j, pic[8]={8,1,1,1,0,0,-1,1}, part=ppart;
+  long end, temp, temp2, i, j, pic[8]={1,1,1,1,0,0,-1,1}, part=ppart;
   long trydcs=1, *offset=0, *count, onum;
   char *Grey, *tag;
 
