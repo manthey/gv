@@ -82,21 +82,21 @@ def make_img(w, h, seed):
             px[x, y] = (nxt() & 255, nxt() & 255, nxt() & 255)
     return img
 
-os.makedirs('pil', exist_ok=True)
+os.makedirs('tests/pil', exist_ok=True)
 cases = []
 base = make_img(61, 37, 42)
-cases.append(('pil/p256.gif', base.convert('P', palette=Image.ADAPTIVE,
-                                             colors=256)))
-cases.append(('pil/p16.gif', base.convert('P', palette=Image.ADAPTIVE,
-                                          colors=16)))
-cases.append(('pil/p2.gif', base.convert('P', palette=Image.ADAPTIVE,
-                                         colors=2)))
-cases.append(('pil/p16i.gif', base.convert('P', palette=Image.ADAPTIVE,
-                                           colors=16)))
-cases.append(('pil/rgb.tif', base))
-cases.append(('pil/grey.tif', base.convert('L')))
-cases.append(('pil/pal.tif', base.convert('P', palette=Image.ADAPTIVE,
-                                          colors=256)))
+cases.append(('tests/pil/p256.gif', base.convert('P', palette=Image.ADAPTIVE,
+                                                colors=256)))
+cases.append(('tests/pil/p16.gif', base.convert('P', palette=Image.ADAPTIVE,
+                                                colors=16)))
+cases.append(('tests/pil/p2.gif', base.convert('P', palette=Image.ADAPTIVE,
+                                               colors=2)))
+cases.append(('tests/pil/p16i.gif', base.convert('P', palette=Image.ADAPTIVE,
+                                                 colors=16)))
+cases.append(('tests/pil/rgb.tif', base))
+cases.append(('tests/pil/grey.tif', base.convert('L')))
+cases.append(('tests/pil/pal.tif', base.convert('P', palette=Image.ADAPTIVE,
+                                                colors=256)))
 for name, img in cases:
     kw = {}
     if name.endswith('.gif'):
