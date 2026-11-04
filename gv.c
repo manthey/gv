@@ -34,7 +34,7 @@ float AspectX=0, AspectY=0, AspectXY[4]={1,1}, PreviewGamma,
 long BackUpdate=-1, BitsPixel=8, bmpi, Busy=0, CopyMode=0, curheight,
      curwidth, dither16num=-1, Down=0, DownX, DownY, EditCat, extrax=0,
      extray=0, FindType=2, Focus[2]={-1,-1}, FilterType=1, HalfSizeBatch=0,
-     LastNum=-1, leftBorder=0, Letter=0, Lock=0, Msg=2, MultiOpen=0,
+     LastNum=-1, leftBorder=0, Letter=0, Lock=0, Msg=0, MultiOpen=0,
      MultiSave=0, NewCopy,
      NextNum, ODown[8], oldh, oldi, oldw, OrigH, OrigW, OrigX=0, OrigY=0,
      PalChange=0, PMode=0, PreCoorMax, PrepTrans=-1, PreviewArea[8],
@@ -55,7 +55,6 @@ char No[]="No", Yes[]="Yes", SZero[]="";
 char *key[]={
   "Enlarge",SZero,0,
   "Errors",No,Yes,
-  "Sole",Yes,No,
   "LastDir",SZero,0,
   "WindowPos",SZero,0,
   "FileFilter",SZero,0,
@@ -1536,7 +1535,6 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         break;
       case MenuSlSave: slide_save(Hwnd, 0); break;
       case MenuSlSaveAs: slide_save(Hwnd, 1); break;
-      case MenuSole: Msg ^= 2; recheck(hwnd, 0); break;
       case MenuSpiff:
         if ((Interpolate&0x1C00)==0x1C00)  Interpolate &= ~0x1C00;
         else                               Interpolate += 0x0400;
@@ -1660,17 +1658,6 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         if (Lock&4) { i = Lock;  Lock |= 1;  zoom(1, 0);  Lock = i;  break; }
         InvalidateRect(hwnd, 0, 0);
         rescale |= 1; } break;
-    case WM_TIMER: if (wp!=1 || !TimerOn) break;
-      if (LoadPart<2)
-        cursor(0);
-      Minpwidth = Minpheight = 0;
-      for (i=0; ((Msg&2) || (i<NumPart/100+1 && i<100)) && LoadPart; i++)
-        newpic = load_graphic(0);
-      if (!LoadPart) {
-        KillTimer(hwnd, 0);
-        TimerOn = 0;
-        open_pic_end(hwnd); }
-      /* fall through */
     default: return(DefWindowProc(hwnd, msg, wp, lp)); }
   return(0);
 }
@@ -2063,7 +2050,7 @@ void open_pic_mid(HWND hwnd, char *name, long preremove)
     part--;
     strchr(temp, '?')[0] = 0; }
   strcpy(opfile, temp);
-  LoadPart = 0-((Msg&2) || titleimage[0]);
+  LoadPart = -1;
   cursor(1);
   ppart = (MultiOpen!=0)-1;
   if (part>0)  ppart = part;
@@ -2072,11 +2059,7 @@ void open_pic_mid(HWND hwnd, char *name, long preremove)
   if (!newpic && (perr>>8)==0x18) {
     slide_open_mid();
     return; }
-  if (LoadPart<=0)
-    open_pic_end(hwnd);
-  else {
-    TimerOn = 1;
-    SetTimer(hwnd, 1, 0, 0); }
+  open_pic_end(hwnd);
 }
 
 void open_pic_new(HWND hwnd, char *name)
@@ -4156,67 +4139,66 @@ void read_ini(void)
     switch (i) {
       case 0: sscanf(text, "%ld", &Redox); break;
       case 1: Msg = (Msg&0xFFFE)+def; break;
-      case 2: Msg = (Msg&0xFFFD)+(!def)*2; break;
-      case 3: if (strlen(text)) strcpy(opendir, text); break;
-      case 4: Undo[2] = -1;
+      case 2: if (strlen(text)) strcpy(opendir, text); break;
+      case 3: Undo[2] = -1;
         sscanf(text, "%ld%*c%ld%*c%ld%*c%ld", Undo, Undo+1, Undo+2, Undo+3);
         OrigX = Undo[0];  OrigY = Undo[1]; break;
-      case 5: sscanf(text, "%ld", &FilterType); break;
-      case 6: Reduce = def; break;
-      case 7: Dither = def; break;
-      case 8: sscanf(text, "%ld", &Letter); break;
-      case 9: sscanf(text, "%ld", &Lock);  Lock &= 0xFFF7; break;
-      case 10: sscanf(text, "%f%*c%f*c%f*c%f", &AspectX, &AspectY, AspectXY,
+      case 4: sscanf(text, "%ld", &FilterType); break;
+      case 5: Reduce = def; break;
+      case 6: Dither = def; break;
+      case 7: sscanf(text, "%ld", &Letter); break;
+      case 8: sscanf(text, "%ld", &Lock);  Lock &= 0xFFF7; break;
+      case 9: sscanf(text, "%f%*c%f*c%f*c%f", &AspectX, &AspectY, AspectXY,
                       AspectXY+1); break;
-      case 11: Topmost = def; break;
-      case 12: sscanf(text, "%f%*c%f%*c%f%*c%f%*c%f%*c%ld", PrintMarg,
+      case 10: Topmost = def; break;
+      case 11: sscanf(text, "%f%*c%f%*c%f%*c%f%*c%f%*c%ld", PrintMarg,
                       PrintMarg+1, PrintMarg+2, PrintMarg+3, PrintMarg+4,
                       &PrintSet); break;
-      case 13: Msg = (Msg&0xFFFB)+def*4; break;
-      case 14: sscanf(text, "%ld", &PreviewOpt); break;
-      case 15: if (strlen(text)) strcpy(savedir, text); break;
-      case 16: sscanf(text, "%ld%*c%ld", &SaveFilt, &SaveOpt); break;
-      case 17: MultiOpen = def; break;
-      case 18: if (strlen(text)) strcpy(opendir+256, text); break;
-      case 19: if (strlen(text)) strcpy(savedir+256, text); break;
-      case 20: if (strlen(text)) strcpy(opendir+512, text); break;
-      case 21: if (strlen(text)) strcpy(savedir+512, text); break;
-      case 22: if (strlen(text)) strcpy(titleimage+1, text);
+      case 12: Msg = (Msg&0xFFFB)+def*4; break;
+      case 13: sscanf(text, "%ld", &PreviewOpt); break;
+      case 14: if (strlen(text)) strcpy(savedir, text); break;
+      case 15: sscanf(text, "%ld%*c%ld", &SaveFilt, &SaveOpt); break;
+      case 16: MultiOpen = def; break;
+      case 17: if (strlen(text)) strcpy(opendir+256, text); break;
+      case 18: if (strlen(text)) strcpy(savedir+256, text); break;
+      case 19: if (strlen(text)) strcpy(opendir+512, text); break;
+      case 20: if (strlen(text)) strcpy(savedir+512, text); break;
+      case 21: if (strlen(text)) strcpy(titleimage+1, text);
         else {
           strcpy(titleimage+1, inifile);
           sprintf(titleimage+1+strlen(titleimage+1)-3, "TIF"); } break;
-      case 23: for (j=0; j<(long)sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++) {
+      case 22: for (j=0; j<(long)sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++) {
           sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace.length))+j)); }
           break;
-      case 24: if (strlen(text)) strcpy(opendir+768, text); break;
-      case 25: if (strlen(text)) strcpy(savedir+768, text); break;
-      case 26: sscanf(text, "%ld", &SlideOpt); break;
-      case 27: sscanf(text, "%ld", &SlideDelay); break;
-      case 28: for (j=0; j<(long)sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++) {
+      case 23: if (strlen(text)) strcpy(opendir+768, text); break;
+      case 24: if (strlen(text)) strcpy(savedir+768, text); break;
+      case 25: sscanf(text, "%ld", &SlideOpt); break;
+      case 26: sscanf(text, "%ld", &SlideDelay); break;
+      case 27: for (j=0; j<(long)sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++) {
           sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace2.length))+j)); }
           break;
-      case 29: sscanf(text, "%ld", &SlideTx); break;
-      case 30: sscanf(text, "%ld", &SlideTy); break;
-      case 31: sscanf(text, "%ld%*c%ld%*c%ld", &SortVal, &SortDir, &FindType);
+      case 28: sscanf(text, "%ld", &SlideTx); break;
+      case 29: sscanf(text, "%ld", &SlideTy); break;
+      case 30: sscanf(text, "%ld%*c%ld%*c%ld", &SortVal, &SortDir, &FindType);
         break;
-      case 32: if (strlen(text)) strcpy(opendir+1024, text); break;
-      case 33: if (strlen(text)) strcpy(lastview,     text); break;
-      case 34: if (strlen(text)) strcpy(lastview+256, text); break;
-      case 35: if (strlen(text)) strcpy(lastview+512, text); break;
-      case 36: if (strlen(text)) strcpy(lastview+768, text); break;
-      case 37: if (strlen(text)) strcpy(savedir+1024, text); break;
-      case 38: sscanf(text, "%ld%*c%ld", &PrevSaveX, &PrevSaveY); break;
-      case 39: break;  // regnum
-      case 40: if (strlen(text) && strlen(text)<255) strcpy(RegName, text);
+      case 31: if (strlen(text)) strcpy(opendir+1024, text); break;
+      case 32: if (strlen(text)) strcpy(lastview,     text); break;
+      case 33: if (strlen(text)) strcpy(lastview+256, text); break;
+      case 34: if (strlen(text)) strcpy(lastview+512, text); break;
+      case 35: if (strlen(text)) strcpy(lastview+768, text); break;
+      case 36: if (strlen(text)) strcpy(savedir+1024, text); break;
+      case 37: sscanf(text, "%ld%*c%ld", &PrevSaveX, &PrevSaveY); break;
+      case 38: break;  // regnum
+      case 39: if (strlen(text) && strlen(text)<255) strcpy(RegName, text);
         break;
-      case 41: if (strlen(text) && strlen(text)==8) strcpy(RegPass, text);
+      case 40: if (strlen(text) && strlen(text)==8) strcpy(RegPass, text);
         break;
-      case 42: Interpolate = def;
+      case 41: Interpolate = def;
         j = -1;  sscanf(text, "0x%lx", &j);  if (j<0)  sscanf(text, "%lx", &j);
         if (j>=0) { Interpolate = j; } break;
-      case 43: HalfSizeBatch = def; break;
-      case 44: if (strlen(text)) strcpy(savedir+5*256, text); break;
-      case 45: MultiSave = def; break;
+      case 42: HalfSizeBatch = def; break;
+      case 43: if (strlen(text)) strcpy(savedir+5*256, text); break;
+      case 44: MultiSave = def; break;
       default: ; } }
   memcpy(SaveRec, SaveDefault, SAVEFORMATS*SAVELEN);
   for (i=0; i<SAVEFORMATS; i++) {
@@ -4325,7 +4307,6 @@ void recheck(HWND hwnd, long refresh)
   sprintf(text, "&Increase Delay -- %ld sec\t+", SlideDelay);
   ModifyMenu(Hmenu, MenuSlInc, 0, MenuSlInc, text);
   CheckMenuItem(Hmenu, MenuSlMan,   MF_CHECKED*(!(SlideOpt&8)));
-  CheckMenuItem(Hmenu, MenuSole,    MF_CHECKED*((Msg&2)/2));
   sprintf(text, "&Spiff -- %s\tF", spifftbl[(Interpolate&0x1C00)>>10]);
   ModifyMenu(Hmenu, MenuSpiff, 0, MenuSpiff, text);
   CheckMenuItem(Hmenu, MenuSpiff,   MF_CHECKED*((Interpolate&0x1C00)!=0));
@@ -7128,66 +7109,65 @@ void write_ini(long offset)
     switch (i) {
       case 0: text = t2;  sprintf(t2, "%ld", Redox); break;
       case 1: if (Msg&1)  text = key[i*3+2]; break;
-      case 2: if (!(Msg&2))  text = key[i*3+2]; break;
-      case 3: text = opendir; break;
-      case 4: text = t2;  sprintf(t2, "%ld,%ld,%ld,%ld", x, y, rect.right-
+      case 2: text = opendir; break;
+      case 3: text = t2;  sprintf(t2, "%ld,%ld,%ld,%ld", x, y, rect.right-
                                   rect.left, rect.bottom-rect.top); break;
-      case 5: text = t2;  sprintf(t2, "%ld", FilterType); break;
-      case 6: if (Reduce) text = key[i*3+2]; break;
-      case 7: if (Dither) text = key[i*3+2]; break;
-      case 8: text = t2;  sprintf(t2, "%ld", Letter); break;
-      case 9: text = t2;  sprintf(t2, "%ld", Lock); break;
-      case 10:text = t2;  sprintf(t2, "%g,%g,%g,%g", AspectX, AspectY,
+      case 4: text = t2;  sprintf(t2, "%ld", FilterType); break;
+      case 5: if (Reduce) text = key[i*3+2]; break;
+      case 6: if (Dither) text = key[i*3+2]; break;
+      case 7: text = t2;  sprintf(t2, "%ld", Letter); break;
+      case 8: text = t2;  sprintf(t2, "%ld", Lock); break;
+      case 9: text = t2;  sprintf(t2, "%g,%g,%g,%g", AspectX, AspectY,
                                   AspectXY[0], AspectXY[1]); break;
-      case 11: if (Topmost)  text = key[i*3+2]; break;
-      case 12: text = t2;  sprintf(t2, "%g,%lg,%g,%g,%g,%ld", PrintMarg[0],
+      case 10: if (Topmost)  text = key[i*3+2]; break;
+      case 11: text = t2;  sprintf(t2, "%g,%lg,%g,%g,%g,%ld", PrintMarg[0],
                       PrintMarg[1], PrintMarg[2], PrintMarg[3], PrintMarg[4],
                       PrintSet); break;
-      case 13: if (Msg&4)  text = key[i*3+2]; break;
-      case 14: text = t2;  sprintf(t2, "%ld", PreviewOpt); break;
-      case 15: text = savedir; break;
-      case 16: text = t2;  sprintf(t2, "%ld,%ld", SaveFilt, SaveOpt); break;
-      case 17: if (MultiOpen)  text = key[i*3+2]; break;
-      case 18: text = opendir+256; break;
-      case 19: text = savedir+256; break;
-      case 20: text = opendir+512; break;
-      case 21: text = savedir+512; break;
-      case 22: text = titleimage+1; break;
-      case 23: text = t2;  t2[0] = 0;
+      case 12: if (Msg&4)  text = key[i*3+2]; break;
+      case 13: text = t2;  sprintf(t2, "%ld", PreviewOpt); break;
+      case 14: text = savedir; break;
+      case 15: text = t2;  sprintf(t2, "%ld,%ld", SaveFilt, SaveOpt); break;
+      case 16: if (MultiOpen)  text = key[i*3+2]; break;
+      case 17: text = opendir+256; break;
+      case 18: text = savedir+256; break;
+      case 19: text = opendir+512; break;
+      case 20: text = savedir+512; break;
+      case 21: text = titleimage+1; break;
+      case 22: text = t2;  t2[0] = 0;
         GetWindowPlacement(Hwnd, &WinPlace);
         for (j=0; j<(long)sizeof(WINDOWPLACEMENT); j++)
           sprintf(t2+strlen(t2), "%02X", ((uchar *)(&WinPlace.length))[j]);
         break;
-      case 24: text = opendir+768; break;
-      case 25: text = savedir+768; break;
-      case 26: text = t2;  sprintf(t2, "%ld", SlideOpt); break;
-      case 27: text = t2;  sprintf(t2, "%ld", SlideDelay); break;
-      case 28: text = t2;  t2[0] = 0;
+      case 23: text = opendir+768; break;
+      case 24: text = savedir+768; break;
+      case 25: text = t2;  sprintf(t2, "%ld", SlideOpt); break;
+      case 26: text = t2;  sprintf(t2, "%ld", SlideDelay); break;
+      case 27: text = t2;  t2[0] = 0;
         for (j=0; j<(long)sizeof(WINDOWPLACEMENT); j++)
           sprintf(t2+strlen(t2), "%02X", ((uchar *)(&WinPlace2.length))[j]);
         break;
-      case 29: text = t2;  sprintf(t2, "%ld", SlideTx); break;
-      case 30: text = t2;  sprintf(t2, "%ld", SlideTy); break;
-      case 31: text = t2;  sprintf(t2, "%ld,%ld,%ld", SortVal, SortDir,
+      case 28: text = t2;  sprintf(t2, "%ld", SlideTx); break;
+      case 29: text = t2;  sprintf(t2, "%ld", SlideTy); break;
+      case 30: text = t2;  sprintf(t2, "%ld,%ld,%ld", SortVal, SortDir,
                                    FindType); break;
-      case 32: text = opendir+1024; break;
-      case 33: text = lastview;     break;
-      case 34: text = lastview+256; break;
-      case 35: text = lastview+512; break;
-      case 36: text = lastview+768; break;
-      case 37: text = savedir+1024; break;
-      case 38: text = t2;  sprintf(t2, "%ld,%ld", PrevSaveX, PrevSaveY); break;
-      case 39: continue; // regnum
-      case 40: text = RegName; break;
-      case 41: text = RegPass; break;
-      case 42: if (Interpolate==1) text = key[i*3+2];
+      case 31: text = opendir+1024; break;
+      case 32: text = lastview;     break;
+      case 33: text = lastview+256; break;
+      case 34: text = lastview+512; break;
+      case 35: text = lastview+768; break;
+      case 36: text = savedir+1024; break;
+      case 37: text = t2;  sprintf(t2, "%ld,%ld", PrevSaveX, PrevSaveY); break;
+      case 38: continue; // regnum
+      case 39: text = RegName; break;
+      case 40: text = RegPass; break;
+      case 41: if (Interpolate==1) text = key[i*3+2];
         if (Interpolate>1) {  text = t2;  sprintf(t2, "0x%lX", Interpolate); }
         break;
-      case 43: if (HalfSizeBatch) text = key[i*3+2]; break;
-      case 44: text = savedir+5*256; break;
-      case 45: if (MultiSave)  text = key[i*3+2]; break;
+      case 42: if (HalfSizeBatch) text = key[i*3+2]; break;
+      case 43: text = savedir+5*256; break;
+      case 44: if (MultiSave)  text = key[i*3+2]; break;
       default: continue; }
-    if (i!=4 || !IsIconic(Hwnd))
+    if (i!=3 || !IsIconic(Hwnd))
       WritePrivateProfileString(inihead, key[i*3], text, inifile); }
   for (i=0; i<SAVEFORMATS; i++) {
     sprintf(text2, "SaveOption%ld", i);

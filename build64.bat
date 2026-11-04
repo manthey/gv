@@ -7,6 +7,9 @@ rem just a zip download from https://github.com/mstorsjo/llvm-mingw/releases
 rem If the toolchain is not already on disk, it is downloaded and extracted
 rem automatically.  Requires Windows 10 1803 or later (for curl.exe / tar.exe;
 rem PowerShell fallbacks are used when they are missing).
+rem The script can be run from a plain command prompt, by double-clicking it
+rem in Explorer, or from a Git Bash shell ("cmd //c build64.bat" or
+rem "./build64.bat").
 rem
 rem The official build uses MSVC + nmake (see Makefile / appveyor.yml).  This
 rem script reproduces it with clang; the C code is portable to both.
@@ -29,29 +32,34 @@ if "%TOOLCHAIN_DIR%"=="" set "TOOLCHAIN_DIR=C:\tools\mingw64-dl"
 cd /d "%~dp0"
 
 rem ---- Locate or download the compiler --------------------------------------
+rem Use the absolute paths of the Windows system curl and tar.  A Git Bash
+rem environment puts its own MSYS tools first on PATH, and GNU tar cannot
+rem handle "C:\..." paths ("tar: Cannot connect to C: resolve failed"), so
+rem a plain "tar" lookup is not portable.
+set "CURL=%SystemRoot%\System32\curl.exe"
+set "TAR=%SystemRoot%\System32\tar.exe"
+
 set "CC_DIR="
 for /d %%D in ("%TOOLCHAIN_DIR%\llvm-mingw-*-ucrt-x86_64") do set "CC_DIR=%%~fD"
 if defined CC_DIR goto :have_toolchain
 
 echo llvm-mingw toolchain not found in %TOOLCHAIN_DIR%
-echo Downloading %LLVM_MINGW_URL% ...
 if not exist "%TOOLCHAIN_DIR%" mkdir "%TOOLCHAIN_DIR%"
 
 set "ZIP_PATH=%TOOLCHAIN_DIR%\%LLVM_MINGW_ZIP%"
 if exist "%ZIP_PATH%" goto :extract
 
-where curl >nul 2>nul
-if not errorlevel 1 (
-    curl -L -o "%ZIP_PATH%" "%LLVM_MINGW_URL%" || goto :dl_fail
+echo Downloading %LLVM_MINGW_URL% ...
+if exist "%CURL%" (
+    "%CURL%" -L -o "%ZIP_PATH%" "%LLVM_MINGW_URL%" || goto :dl_fail
 ) else (
     powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -Uri '%LLVM_MINGW_URL%' -OutFile '%ZIP_PATH%'" || goto :dl_fail
 )
 
 :extract
 echo Extracting %ZIP_PATH% ...
-where tar >nul 2>nul
-if not errorlevel 1 (
-    tar -xf "%ZIP_PATH%" -C "%TOOLCHAIN_DIR%" || goto :dl_fail
+if exist "%TAR%" (
+    "%TAR%" -xf "%ZIP_PATH%" -C "%TOOLCHAIN_DIR%" || goto :dl_fail
 ) else (
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -Path '%ZIP_PATH%' -DestinationPath '%TOOLCHAIN_DIR%' -Force" || goto :dl_fail
 )

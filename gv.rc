@@ -95,7 +95,6 @@ MainMenu MENU {
   MENUITEM SEPARATOR
   MENUITEM "&Error Messages", MenuError
   MENUITEM "&Warning Messages", MenuWarn
-  MENUITEM "&Sole Process", MenuSole
   MENUITEM "Always On &Top", MenuTop
   MENUITEM SEPARATOR
   MENUITEM "Link E&xtensions", MenuExt }

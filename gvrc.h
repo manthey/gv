@@ -72,7 +72,6 @@
 #define  MenuZL100      507
 #define  MenuError      508
 #define  MenuWarn       509
-#define  MenuSole       510
 #define  MenuTop        511
 #define  MenuExt        512
 #define MenuInfo        6
