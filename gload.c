@@ -1,4 +1,3 @@
-#ifndef LIBRARY
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +6,6 @@
 #include "process.h"
 #include "gload.h"
 #define STATIC
-#endif
 
 #define itag  ((short *)tag)
 #define ltag  ((long *)tag)
@@ -25,11 +23,12 @@ STATIC char zagtbl[]={ 0, 1, 8,16, 9, 2, 3,10, 17,24,32,25,18,11, 4, 5,
                       12,19,26,33,40,48,41,34, 27,20,13, 6, 7,14,21,28,
                       35,42,49,56,57,50,43,36, 29,22,15,23,30,37,44,51,
                       58,59,52,45,38,31,39,46, 53,60,61,54,47,55,62,63};
-STATIC FILE *(*fopen2)(char *name, char *mode)=fopen;
+STATIC FILE *(*fopen2)(const char *name, const char *mode)=fopen;
 STATIC size_t (*fread2)(void *buffer, size_t size, size_t count, FILE *fptr)=fread;
-STATIC size_t (*fwrite2)(void *buffer, size_t size, size_t count,FILE *fptr)=fwrite;
+STATIC size_t (*fwrite2)(const void *buffer, size_t size, size_t count,FILE *fptr)=fwrite;
 STATIC int (*fclose2)(FILE *fptr)=fclose;
 STATIC int (*fseek2)(FILE *fptr, long offset, int origin)=fseek;
+STATIC char *jpgcustomquant = 0;
 STATIC long (*ftell2)(FILE *fptr)=ftell;
 STATIC char software[TIF_MAXSOFTWARELEN], serial[TIF_MAXSERIALLEN],
        tifmodel[TIF_MAXMODELLEN];
@@ -264,15 +263,13 @@ STATIC void bgr_to_rgb(uchar *image, long siz)
  *        long size: number of values to convert.  Each value is 3 bytes.
  *                                                             2/26/96-DWM */
 {
-  __asm {
-          mov esi, image
-          mov ecx, siz
-bgrrgb1:  mov al, [esi]
-          xchg al, [esi+2]
-          mov [esi], al
-          add esi, 03
-          loop   bgrrgb1
-    }
+  long i;
+  uchar t;
+
+  for (i=0; i<siz; i++) {
+    t = image[i*3];
+    image[i*3] = image[i*3+2];
+    image[i*3+2] = t; }
 }
 
 STATIC short endian(short *x)
@@ -365,8 +362,8 @@ STATIC long jpeg_decode(uchar *src, long offset, long len, uchar *dchuff,
       val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
       neg = !(val&0x8000);
       val = (val&0x7FFF)>>(16-val2);
-      if (neg)  dest[zagtbl[d]] = (val-nvaltbl[val2])*quant[d];
-      else      dest[zagtbl[d]] = (pvaltbl[val2]+val)*quant[d];
+      if (neg)  dest[(uchar)zagtbl[(uchar)d]] = (val-nvaltbl[val2])*quant[d];
+      else      dest[(uchar)zagtbl[(uchar)d]] = (pvaltbl[val2]+val)*quant[d];
       bit += val2;
       while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
     d++; }
@@ -405,7 +402,7 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
   static short nvaltbl[]={0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,
                           16383,32767};
   static short pvaltbl[]={0,1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,
-                          16384,32768};
+                          16384,(short)-32768};  /* 32768 wraps, as always here */
   static long run;
 
   p = offset>>3;  bit = offset&7;
@@ -436,11 +433,11 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
   if (!first && run) {
     if (succ && spec0)
       for (d=spec0; d<=spec1; d++)
-        if (dest[zagtbl[d]]) {
+        if (dest[(uchar)zagtbl[(uchar)d]]) {
           val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
           if (val&0x8000) {
-            if (dest[zagtbl[d]]>0)  dest[zagtbl[d]] += quant[d];
-            else                    dest[zagtbl[d]] -= quant[d]; }
+            if (dest[(uchar)zagtbl[(uchar)d]]>0)  dest[(uchar)zagtbl[(uchar)d]] += quant[d];
+            else                    dest[(uchar)zagtbl[(uchar)d]] -= quant[d]; }
           bit++;
           while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
     run--;  return((p<<3)+bit); }
@@ -460,11 +457,11 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
       run = val-1;
       if (succ)
         for (; d<=spec1; d++)
-          if (dest[zagtbl[d]]) {
+          if (dest[(uchar)zagtbl[(uchar)d]]) {
             val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
             if (val&0x8000) {
-              if (dest[zagtbl[d]]>0)  dest[zagtbl[d]] += quant[d];
-              else                    dest[zagtbl[d]] -= quant[d]; }
+              if (dest[(uchar)zagtbl[(uchar)d]]>0)  dest[(uchar)zagtbl[(uchar)d]] += quant[d];
+              else                    dest[(uchar)zagtbl[(uchar)d]] -= quant[d]; }
             bit++;
             while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
       return((p<<3)+bit); }
@@ -474,28 +471,28 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
         val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
         neg = !(val&0x8000);
         val = (val&0x7FFF)>>(16-val2);
-        if (neg)  dest[zagtbl[d]] = (val-nvaltbl[val2])*quant[d];
-        else      dest[zagtbl[d]] = (pvaltbl[val2]+val)*quant[d]; }
+        if (neg)  dest[(uchar)zagtbl[(uchar)d]] = (val-nvaltbl[val2])*quant[d];
+        else      dest[(uchar)zagtbl[(uchar)d]] = (pvaltbl[val2]+val)*quant[d]; }
       bit += val2;
       while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
     else {
       i = (val2>>4)+1;  j = d;
       for (k=0; i && d<=spec1+1; )
-        if (dest[zagtbl[d]]) { d++;  k++; }
+        if (dest[(uchar)zagtbl[(uchar)d]]) { d++;  k++; }
         else                 { d++;  i--; }
       d--;
       if (val2&0xF) {
         val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
-        if (val&0x8000)  dest[zagtbl[d]] = quant[d];
-        else             dest[zagtbl[d]] = -quant[d];
+        if (val&0x8000)  dest[(uchar)zagtbl[(uchar)d]] = quant[d];
+        else             dest[(uchar)zagtbl[(uchar)d]] = -quant[d];
         bit++;
         while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
       for (i=0; i<k; i++) {
-        while (!dest[zagtbl[j]]) j++;
+        while (!dest[(uchar)zagtbl[(uchar)j]]) j++;
         val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
         if (val&0x8000) {
-          if (dest[zagtbl[j]]>0)  dest[zagtbl[j]] += quant[j];
-          else                    dest[zagtbl[j]] -= quant[j]; }
+          if (dest[(uchar)zagtbl[(uchar)j]]>0)  dest[(uchar)zagtbl[(uchar)j]] += quant[j];
+          else                    dest[(uchar)zagtbl[(uchar)j]] -= quant[j]; }
         bit++;
         while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); }
         j++; } }
@@ -509,24 +506,13 @@ STATIC void jpeg_shift(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/5/96-DWM */
 {
-  __asm {
-          mov edi, dest
-          mov esi, source
-          mov ecx, 0x040
-jshift1:  mov eax, [esi]
-          sar eax, 0x13
-          cmp ax, 0x80
-          jl      jshift2
-          mov al, 0x7F
-          jmp     jshift3
-jshift2:  cmp ax, 0xFF80
-          jge     jshift3
-          mov al, 0x80
-jshift3:  mov [edi], al
-          inc edi
-          add esi, 0x04
-          loop    jshift1
-    }
+  long i, v;
+
+  for (i=0; i<0x40; i++) {
+    v = source[i] >> 19;             /* arithmetic shift, as in the asm */
+    if (v > 127)       dest[i] = 0x7F;
+    else if (v < -128) dest[i] = 0x80;
+    else               dest[i] = (uchar)v; }
 }
 
 STATIC void jpeg_shift_add(uchar *dest, long *source)
@@ -535,24 +521,13 @@ STATIC void jpeg_shift_add(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/7/96-DWM */
 {
-  __asm {
-          mov edi, dest
-          mov esi, source
-          mov ecx, 0x40
-jshifta1: mov eax, [esi]
-          sar eax, 0x13
-          add ax, 0x80
-          cmp ax, 0x100
-          jb      jshifta3
-          jge     jshifta2
-          xor al, al
-          jmp     jshifta3
-jshifta2: mov al, 0xFF
-jshifta3: mov [edi], al
-          inc edi
-          add esi, 0x04
-          loop    jshifta1
-    }
+  long i, v;
+
+  for (i=0; i<0x40; i++) {
+    v = (source[i] >> 19) + 128;     /* arithmetic shift, as in the asm */
+    if (v > 255)      dest[i] = 0xFF;
+    else if (v < 0)   dest[i] = 0x00;
+    else              dest[i] = (uchar)v; }
 }
 
 STATIC void jpeg_undct(long *res, char *dest, long w, long rw, long rh, long add)
@@ -597,8 +572,8 @@ STATIC void jpeg_undct(long *res, char *dest, long w, long rw, long rh, long add
     oldd = d;
     switch (rw) {
       case 1: memcpy(dest+d, out+s, 8);  s+=8;  d+=8; break;
-      case 2: for (i=0; i<8; i++,s++,d+=rw)
-          dest[d] = dest[d+1] = out[s]; break;
+      case 2: for (i=0; i<8; i++,s++,d+=rw) {
+          dest[d] = dest[d+1] = out[s]; } break;
       case 4: for (i=0; i<8; i++,s++,d+=rw) {
           dest[d] = dest[d+1] = out[s];
           ((short *)(dest+d))[1] = ((short *)(dest+d))[0]; } break;
@@ -809,7 +784,7 @@ STATIC uchar *load_gif(FILE *fptr)
  *                    of image this is.                        2/25/96-DWM */
 {
   uchar *new, *gif;
-  long size, i;
+  long size;
 
   (*fseek2)(fptr, 0, SEEK_END);
   size = (*ftell2)(fptr);
@@ -838,8 +813,6 @@ STATIC uchar *load_gif(FILE *fptr)
     perr = 0x805;  free2(new);  return(0); }
   if (pinter)
     uninterlace(new+768, 0);
-  for (i=0; i<768; i++)
-    new[i] = new[i]*4.048;
   pinter = 1;
   return(new);
 }
@@ -909,9 +882,9 @@ STATIC uchar *load_graphic(char *name)
  *                    the image.  pwidth, pheight, and pinter tell what sort
  *                    of image this is.                        2/25/96-DWM */
 {
-  static long i, j, scale, type;
+  static long type;
   static uchar *new, total[18];
-  static FILE *fptr, *fptr2;
+  static FILE *fptr;
 
   if (LoadPart<0 || name) {
     perr = 0;
@@ -937,7 +910,7 @@ STATIC uchar *load_graphic(char *name)
     (*fseek2)(fptr, 0, SEEK_SET);
     memset(pspec, 0, LENPSPEC);
     if (type<1 || (strlen(name) > 4 && !stricmp(name + strlen(name) - 4, ".nef"))) {
-      if (new=load_pil(fptr)) {
+      if ((new=load_pil(fptr))) {
         type = 13;
         (*fclose2)(fptr);
       }
@@ -966,7 +939,7 @@ STATIC uchar *load_graphic(char *name)
     default: perr = 0;  return(0); }
   if (!new && type >= 2 && type !=12 && type !=13) {
     if ((fptr=(*fopen2)(name, "rb"))) {
-      if (new=load_pil(fptr)) {
+      if ((new=load_pil(fptr))) {
         type = 13;
         perr = 0;
       }
@@ -994,11 +967,11 @@ STATIC uchar *load_groa(FILE *fptr)
   char header[50], *h;
 
   (*fread2)(header, 1, 50, fptr);
-  if (h=strstr(header, "GROB"))
+  if ((h=strstr(header, "GROB")))
     size = h-header+4;
   (*fseek2)(fptr, size, SEEK_SET);
   pwidth = pheight = 0;
-  fscanf(fptr, "%d%*c%d", &pwidth, &pheight);
+  fscanf(fptr, "%ld%*c%ld", &pwidth, &pheight);
   if (pwidth<=0 || pheight<=0) {
     perr = 0x805;  (*fclose2)(fptr);  return(0); }
   pinter = 1;
@@ -1013,7 +986,7 @@ STATIC uchar *load_groa(FILE *fptr)
   d = 768;
   for (j=0; j<pheight; j++)
     for (i=0; i<pwidth; i+=8) {
-      fscanf(fptr, "%2x", &t);
+      fscanf(fptr, "%2lx", &t);
       for (k=0; k<8 && i+k<pwidth; k++, d++)
         if (!(t&mask[k]))
           new[d] = 1; }
@@ -1199,7 +1172,7 @@ STATIC uchar *load_jpg(FILE *fptr)
   static uchar *new, *jpg, *temp, *temp2, *huff, *hufflen, *quant, *dres;
   static uchar *crop, *dres2, *dres3;
   static long res[64], dy, fsize, s, d, val, restart, h, i, j, k, l, r, w;
-  static long mw, mh, start, size, com[28], rr[8], ncom, hl[16], dcbase[4];
+  static long mw, mh, start=0, size, com[28], rr[8], ncom=0, hl[16], dcbase[4];
   static long x, y, Y, Cb, Cr, mw8, mh8, *ytbl, C, M, K, ycck;
   static long *ytbl2, *ytbl3, *ytbl4, lastr, rnum, orient;
   static long ln[16]={32768,16384,8192,4096,2048,1024,512,256,128,64,32,16,8,4,2,1};
@@ -1231,6 +1204,7 @@ STATIC uchar *load_jpg(FILE *fptr)
       val = jpg[s]*256+jpg[s+1];
       switch (val) {
         case 0xFFC1: pspec[3] = 1;                /* Extended frame header */
+          /* fall through */
         case 0xFFC0: if (jpg[s+4]!=8) {           /* Baseline frame header */
             perr = 0xB04;  free2(jpg);  free2(huff);  return(0); }
           if (part<0) break;
@@ -1320,7 +1294,7 @@ STATIC uchar *load_jpg(FILE *fptr)
         default: if (jpg[s]==0xFF && jpg[s+1]!=0 && jpg[s+1]!=0xDA) break;
           temp = memchr(jpg+s+1, 0xFF, fsize-s-1);
           if (!temp)  s = fsize;
-          else        s = temp-jpg; continue; }
+          else    { s = temp-jpg; }  continue; }
       if (val==0xFFD9 && part<=-1) break;               // had been just <1
       if ((val>=0xFFC0 && val<=0xFFCF) || val==0xFFDA || val==0xFFDB ||
           val==0xFFDA || (val>=0xFFE0 && val<=0xFFEF) || val==0xFFFE)
@@ -1341,7 +1315,7 @@ STATIC uchar *load_jpg(FILE *fptr)
     ((short *)(pspec+4))[0] = jpg[0xE]*256+jpg[0xF];
     pspec[6] = (mw==2)+(mh==2)+2*(mw==4);
     pspec[8] = quant[58];
-    ((long *)(pspec+0xC))[0] = (long)(pquant);
+    jpgcustomquant = (char *)pquant;
     mw8 = mw*8;  mh8 = mh*8;
     for (i=0; i<ncom; i++) {
       rr[i]   = mw/com[i*7+1];
@@ -1444,7 +1418,7 @@ STATIC uchar *load_jpg(FILE *fptr)
       for (i=1; i<pheight; i++)
         memmove(new+i*pwidth*3, new+i*w*3, pwidth*3);
       size = pwidth*pheight*3; }
-    if (jpg=realloc2(new, size))
+    if ((jpg=realloc2(new, size)))
       new = jpg; }
   new = reorient(new, orient);
   return(new);
@@ -1464,7 +1438,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
 {
   uchar *new, *temp, *temp2, *hufflen, *quant, *dres, *crop, *dres2, *dres3;
   long dy, s, d, val, restart, h, i, j, k, l, r, w, firstspec;
-  long mw, mh, start, size, com[28], rr[8], ncom, hl[16], dcbase[4];
+  long mw, mh, size, com[28], rr[8], ncom, hl[16], dcbase[4];
   long x, y, Y, Cb, Cr, mw8, mh8, *ytbl, succ, C, M, K, ycck;
   long *ytbl2, *ytbl3, *ytbl4, lastr, rnum;
   static long ln[16]={32768,16384,8192,4096,2048,1024,512,256,128,64,32,16,8,4,2,1};
@@ -1522,7 +1496,6 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
               memset(temp, jpg[h], ln[l-1]);
               temp += ln[l-1]; } } break;
       case 0xFFDA: if (!part) {                             /* Scan header */
-          start = s+2+jpg[s+2]*256+jpg[s+3];
           for (i=0; i<jpg[s+4]; i++) {
             com[i*7+4] = jpg[s+5+i*2];
             com[i*7+5] = jpg[s+6+i*2]>>4;
@@ -1560,7 +1533,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
       default: if (jpg[s]==0xFF && jpg[s+1]!=0 && jpg[s+1]!=0xDA) break;
         temp = memchr(jpg+s+1, 0xFF, fsize-s-1);
         if (!temp)  s = fsize;
-        else        s = temp-jpg; continue; }
+        else    { s = temp-jpg; }  continue; }
     if (val==0xFFD9 && part<=-1) break;        // had been just <-1
     if (val<0xFFD0 || val>0xFFD9)  s += 2 + jpg[s+2]*256 + jpg[s+3];
     else if (val!=0xFFFF)          s += 2;
@@ -1579,7 +1552,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
   ((short *)(pspec+4))[0] = jpg[0xE]*256+jpg[0xF];
   pspec[6] = (mw==2)+(mh==2)+2*(mw==4);
   pspec[8] = quant[58];
-  ((long *)(pspec+0xC))[0] = (long)(pquant);
+  jpgcustomquant = (char *)pquant;
   mw8 = mw*8;  mh8 = mh*8;
   for (i=0; i<ncom; i++) {
     rr[i]   = mw/com[i*7+1];
@@ -1713,7 +1686,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
       for (i=1; i<pheight; i++)
         memmove(new+i*pwidth*3, new+i*w*3, pwidth*3);
       size = pwidth*pheight*3; }
-    if (jpg=realloc2(new, size))
+    if ((jpg=realloc2(new, size)))
       new = jpg; }
   return(new);
 }
@@ -1730,7 +1703,7 @@ STATIC uchar *load_pcx(FILE *fptr)
  *                    of image this is.                        2/26/96-DWM */
 {
   uchar head[128], *new, *pcx;
-  long scan, bits, size, i, j, d, s, k, fsize, w;
+  long scan, bits, size, i, j, d, s, k, fsize, w=0;
 
   pspec[0] = 7;
   (*fseek2)(fptr, 0, SEEK_END);
@@ -1847,7 +1820,7 @@ STATIC uchar *load_pil(FILE *fptr)
     perr = ProcessError;
     return 0;
   }
-  sscanf(dest, "P6%ld%ld%*d%*c%n", &pwidth, &pheight, &offset);
+  sscanf(dest, "P6%ld%ld%*d%*c%ln", &pwidth, &pheight, &offset);
   if (destlen-offset < pwidth * pheight * 3) {
     free2(dest);
     return 0;
@@ -1992,7 +1965,7 @@ STATIC uchar *load_tif(FILE *fptr)
 {
   short ifd=0, ifd2=0, orient=0;
   long end, temp, temp2, i, j, pic[8]={1,1,1,1,0,0,-1,1}, part=ppart;
-  long trydcs=1, *offset=0, *count, onum;
+  long trydcs=1, *offset=0, *count=0, onum;
   char *Grey, *tag;
 
   (*fseek2)(fptr, 0, SEEK_SET);
@@ -2042,7 +2015,7 @@ STATIC uchar *load_tif(FILE *fptr)
         if (pic[2]<0 || pic[2]>=6) {
           perr = 0x1204; free2(tag); free2(offset);
           (*fclose2)(fptr);  return(0); }
-        if (pic[2]==2 || pic[2]>=5)  pinter = 0; break;
+        if (pic[2]==2 || pic[2]>=5) { pinter = 0; } break;
       case 0x10A: if (ltag[i*7+3]==2)  pic[4] = 1; break;
       case 0x110: if (ltag[i*7+1]<=4)  break;
         (*fseek2)(fptr, ltag[i*7+2], SEEK_SET);
@@ -2055,7 +2028,7 @@ STATIC uchar *load_tif(FILE *fptr)
         break;
       case 0x115: pic[7] = ltag[i*7+3]; break;
       case 0x116: pic[6] = ltag[i*7+3]; break;
-      case 0x117: temp = 0;
+      case 0x117: temp = 0;  /* fall through */
       case 0x111: if (itag[i*14]==0x111)  temp = ltag[i*7+1];
         if (!offset) {
           onum = ltag[i*7+1];
@@ -2072,15 +2045,18 @@ STATIC uchar *load_tif(FILE *fptr)
           (*fread2)(offset+temp, itag[i*14+1]-(itag[i*14+1]==3), ltag[i*7+1],
                 fptr);
           switch (itag[i*14+1]) {
-            case 1: for (j=ltag[i*7+1]-1; j>=0; j--)
-              offset[temp+j] = ((unsigned char *)(offset+temp))[j]; break;
+            case 1: for (j=ltag[i*7+1]-1; j>=0; j--) {
+              offset[temp+j] = ((unsigned char *)(offset+temp))[j]; } break;
             case 3: for (j=ltag[i*7+1]-1; j>=0; j--) {
               if (end)  endian(((unsigned short *)(offset+temp))+j);
               offset[temp+j] = ((unsigned short *)(offset+temp))[j]; } break;
-            case 4: if (end)  for (j=0; j<ltag[i*7+1]; j++)
-              endianl(offset+temp+j); } } break;
-      case 0x11A: case 0x11B: if (ltag[i*7+4])
-        ((short *)(pspec+6))[0] = ltag[i*7+3]/ltag[i*7+4]; break;
+            case 4: if (end) {
+              for (j=0; j<ltag[i*7+1]; j++)
+                endianl(offset+temp+j); } } } break;
+      case 0x11A: case 0x11B:
+        if (ltag[i*7+4]) {
+          ((short *)(pspec+6))[0] = ltag[i*7+3]/ltag[i*7+4]; }
+        break;
       case 0x11C: if (ltag[i*7+3]!=1) {
           perr = 0x1304;  free2(tag);  free2(offset);
           (*fclose2)(fptr);  return(0); }
@@ -2166,335 +2142,6 @@ STATIC uchar *load_tif(FILE *fptr)
   return(Grey);
 }
 
-STATIC long lzw(uchar *dest, uchar *source, uchar *buf, long len, long maxlen,
-                short numbits)
-/* Compress a set of data using the LZW compression scheme.  Note that if the
- *  destination buffer is filled, there will not be an eof code written.  In
- *  the worst case, the LZW routine will produce output which is 1.391 times
- *  the size of the original input.
- * Enter: long dest: absolute memory location for compressed data.
- *        long source: memory location for data to compress.
- *        char *buf: 28k of work space.
- *        long len: length of data to compress.  Must be at least 2 bytes.
- *        long maxlen: length of output buffer.  Must be at least 8 bytes.
- *        int numbits: number of bits to begin.
- * Exit:  long len: length of compressed data, including eof. 12/11/94-DWM */
-{
-  uchar codesize, initcodesize;
-  ushort clearcode, eof, firstfree, freecode, maxcode, initmaxcode, incode,
-         nextlink;
-  long finlen;
-
-  __asm {
-          xor ebx, ebx
-          mov ecx, maxlen                    ;zero out the destination buffer
-          shr ecx, 0x02
-          dec ecx
-          mov edx, dest
-          xor eax, eax
-lzw1:     mov [edx], eax
-          add edx, 0x04
-          loop    lzw1
-          mov ecx, maxlen
-          and ecx, 0x03
-          add ecx, 0x04
-lzw2:     mov [edx], al
-          inc edx
-          loop    lzw2
-          mov eax, dest                   ;almost the same beginning as unlzw
-          sub eax, 0x04
-          add maxlen, eax
-          mov al, BYTE PTR numbits
-          mov cl, al
-          mov dx, 0x01
-          shl dx, cl
-          mov clearcode, dx
-          mov cx, dx
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          mov maxcode, cx
-          mov initmaxcode, cx
-          mov edx, dest
-          xor cx, cx
-          xor eax, eax
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov incode, ax
-          mov ax, clearcode
-lzw3:     mov edi, eax                                    ;add code to output
-          shl eax, cl
-          or  [edx], eax
-          add cl, codesize
-          xor eax, eax
-          mov al, cl
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          cmp edx, maxlen
-          jge     lzw14
-          cmp di, eof
-          je      lzw14
-          cmp di, clearcode
-          jne     lzw7
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          xor eax, eax
-          xor ebx, ebx
-lzw4:     mov [esi+ebx], eax
-          add bx, 0x04
-          cmp bx, 0x2000
-          jne     lzw4
-          mov nextlink, bx
-          jmp     lzw7
-lzw5:     mov ax, [esi+edi+1]                         ;continue building code
-          mov incode, ax
-          jmp     lzw7
-lzw6:     mov ax, [esi+ebx+1]
-          mov incode, ax
-lzw7:     xor eax, eax                                       ;build next code
-          cmp len, 0x00
-          je      lzw12
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov bx, incode
-          shl bx, 0x01
-          mov edi, ebx
-          sub edi, 0x03
-          mov bx, [esi+ebx]
-lzw8:     test bx, bx
-          je      lzw10
-          cmp [esi+ebx], al
-          je      lzw6
-          xor edi, edi
-          mov di, [esi+ebx+3]
-          test edi, edi
-          je      lzw9
-          cmp [esi+edi], al
-          je      lzw5
-          mov bx, [esi+edi+3]
-          jmp     lzw8
-lzw9:     mov edi, ebx
-lzw10:    mov bx, nextlink
-          mov [esi+edi+3], bx
-          add nextlink, 0x05
-          mov [esi+ebx], al
-          xor edi, edi
-          mov di, freecode
-          mov [esi+ebx+1], edi
-          mov di, incode
-          mov incode, ax
-          shl edi, cl
-          or  [edx], edi
-          add cl, codesize
-          mov ax, cx
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          cmp edx, maxlen
-          jge     lzw14
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw7
-          inc codesize
-          shl maxcode, 0x01
-          cmp codesize, 0x0C
-          jl      lzw7
-          jg      lzw11
-          sub maxcode, 0x01
-          jmp     lzw7
-lzw11:    dec codesize
-          mov ax, clearcode
-          jmp     lzw3
-lzw12:    mov ax, incode                                     ;write last code
-          shl eax, cl
-          or  [edx], eax
-          add cl, codesize
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw13
-          cmp codesize, 0x0C
-          jne     lzw13
-          inc codesize
-lzw13:    xor eax, eax
-          mov ax, eof
-          jmp     lzw3
-lzw14:    xor eax, eax                               ;return total lzw length
-          mov al, cl
-          add al, 0x07
-          shr al, 0x03
-          add eax, edx
-          sub eax, dest
-          mov finlen, eax
-    }
-  return(finlen);
-}
-
-STATIC long lzwlen(uchar *source, uchar *buf, long len, short numbits)
-/* Compute the length that data compressed with the lzw compression scheme
- *  will end up being.  No actual data is written.
- * Enter: long source: memory location for data to compress.
- *        char *buf: 28k of work space.
- *        long len: length of data to compress.  Must be at least 2 bytes.
- *        int numbits: number of bits to begin.
- * Exit:  long len: length of compressed data, including eof. 12/11/94-DWM */
-{
-  uchar codesize, initcodesize;
-  ushort clearcode, eof, firstfree, freecode, maxcode, initmaxcode, incode,
-         nextlink;
-  long finlen;
-
-  __asm {
-          xor ebx, ebx
-          mov al, BYTE PTR numbits
-          mov cl, al
-          mov dx, 0x01
-          shl dx, cl
-          mov clearcode, dx
-          mov cx, dx
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          mov maxcode, cx
-          mov initmaxcode, cx
-          xor edx, edx
-          xor cx, cx
-          xor eax, eax
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov incode, ax
-          mov ax, clearcode
-lzw3:     mov edi, eax                                    ;add code to output
-          shl eax, cl
-          add cl, codesize
-          xor eax, eax
-          mov al, cl
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          cmp di, eof
-          je      lzw14
-          cmp di, clearcode
-          jne     lzw7
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          xor eax, eax
-          xor ebx, ebx
-lzw4:     mov [esi+ebx], eax
-          add bx, 0x04
-          cmp bx, 0x2000
-          jne     lzw4
-          mov nextlink, bx
-          jmp     lzw7
-lzw5:     mov ax, [esi+edi+1]                         ;continue building code
-          mov incode, ax
-          jmp     lzw7
-lzw6:     mov ax, [esi+ebx+1]
-          mov incode, ax
-lzw7:     xor eax, eax                                       ;build next code
-          cmp len, 0x00
-          je      lzw12
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov bx, incode
-          shl bx, 0x01
-          mov edi, ebx
-          sub edi, 0x03
-          mov bx, [esi+ebx]
-lzw8:     test bx, bx
-          je      lzw10
-          cmp [esi+ebx], al
-          je      lzw6
-          xor edi, edi
-          mov di, [esi+ebx+3]
-          test edi, edi
-          je      lzw9
-          cmp [esi+edi], al
-          je      lzw5
-          mov bx, [esi+edi+3]
-          jmp     lzw8
-lzw9:     mov edi, ebx
-lzw10:    mov bx, nextlink
-          mov [esi+edi+3], bx
-          add nextlink, 0x05
-          mov [esi+ebx], al
-          xor edi, edi
-          mov di, freecode
-          mov [esi+ebx+1], edi
-          mov di, incode
-          mov incode, ax
-          add cl, codesize
-          mov ax, cx
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw7
-          inc codesize
-          shl maxcode, 0x01
-          cmp codesize, 0x0C
-          jl      lzw7
-          jg      lzw11
-          sub maxcode, 0x01
-          jmp     lzw7
-lzw11:    dec codesize
-          mov ax, clearcode
-          jmp     lzw3
-lzw12:    mov ax, incode                                     ;write last code
-          add cl, codesize
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw13
-          cmp codesize, 0x0C
-          jne     lzw13
-          inc codesize
-lzw13:    mov ax, eof
-          jmp     lzw3
-lzw14:    xor eax, eax                               ;return total lzw length
-          mov al, cl
-          add al, 0x07
-          shr al, 0x03
-          add eax, edx
-          mov finlen, eax
-    }
-  return(finlen);
-}
-
 STATIC void plane_to_rgb(uchar *image, long w, long h)
 /* Convert a file in the format of the red,green,and blue planes (organized
  *  on a line by line basis) to RGB triplets.
@@ -2546,7 +2193,7 @@ STATIC long ppm_number(FILE *fptr, long scale)
 {
   long num, val;
 
-  while (!(val=fscanf(fptr, "%d", &num)))
+  while (!(val=fscanf(fptr, "%ld", &num)))
     fscanf(fptr, "%*[^\n\r]%*c");
   if (val<0)  return(-1);
   if (!scale)  return(num);
@@ -2599,11 +2246,11 @@ STATIC long read_tif(uchar *grey, long *count, long *offset, long *pic,
     udata = 0;  ul = 0;
     if (pic[1]!=1) {
       if (!(udata=(char *)malloc2(sl+3))) {
-        if (cl) free2(cdata);  return(1); }
+        if (cl) { free2(cdata); }  return(1); }
       ul = 1; }
     count[s] = (*fread2)(cdata, 1, count[s], fptr);
     if (count[s]<=0) {
-      if (cl) free2(cdata);  if (ul) free2(udata);  return(1); }
+      if (cl) { free2(cdata); }  if (ul) { free2(udata); }  return(1); }
     switch (pic[1]) {
       case 1: udata = cdata;  cdata = 0; ul = cl; break;   /* Uncompressed */
       case 2: unccitt_mode2(udata, cdata, sl, count[s], pic[4], x); break;
@@ -2616,7 +2263,7 @@ STATIC long read_tif(uchar *grey, long *count, long *offset, long *pic,
     if (cdata) { if (cl) free2(cdata);  cdata = 0; }
     if (pic[3]==2) {                             /* Differencing predictor */
       if (pic[0]!=8) {
-        if (ul) free2(udata);  return(1); }
+        if (ul) { free2(udata); }  return(1); }
       for (l=0; l<pic[7]; l++)
         for (k=0; k<pic[6] && k<y-j; k++)
           for (i=1; i<x; i++)
@@ -2745,7 +2392,7 @@ STATIC void reorder_tif(uchar *dest, uchar *tag, long num, long end, FILE *fptr)
         if (end) { for (j=0; j<4; j++)  endian(itemp+j); }
         ldest[i*7+3] = itemp[0];  ldest[i*7+4] = itemp[1];
         ldest[i*7+5] = itemp[2];  ldest[i*7+6] = itemp[3]; break;
-      case 5: ldest[i*7+1] *= 2;
+      case 5: ldest[i*7+1] *= 2;  /* fall through */
       case 4: if (ldest[i*7+1]<=1) {
           ldest[i*7+3] = ldest[i*7+2];
           ldest[i*7+2]=ldest[i*7+4]=ldest[i*7+5]=ldest[i*7+6] = 0; break; }
@@ -3158,7 +2805,7 @@ STATIC long unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
     x = rx = 0;  rl = 0;  ox = oldrun[0];  orx = 1;
     while (x<w) {
       unccitt_prep_bits(input, &s, &sb, &cur, srclen, bitorder);
-      for (i=0; i<ccittcode[i+2]!=-2; i+=3)
+      for (i=0; ccittcode[i+2]!=-2; i+=3)
         if (ccittcode[i]==(cur&mask[ccittcode[i+1]]))
           break;
       if (ccittcode[i+2]==-2) { sb++;  continue; }
@@ -3212,10 +2859,10 @@ STATIC long unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
               rl += ccittwhite[i+2];  x += ccittwhite[i+2];
               if (ccittwhite[i+2]<64) break; }
             run[rx] = rl;  rx++;  rl = 0; }
-          if (rx)  while (ox<=x && ox<w) {
-            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; } break;
-        case 2: if (rx)  while (ox<=x && ox<w) {  /* Repeat a previous run */
-            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; }
+          if (rx) { while (ox<=x && ox<w) {
+            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; } } break;
+        case 2: if (rx) { while (ox<=x && ox<w) {  /* Repeat a previous run */
+            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; } }
           run[rx] = ox-x+rl;  rx++;  rl = 0;  x = ox;
           ox += oldrun[orx];  orx++;
           break;
@@ -3393,221 +3040,155 @@ STATIC void undct_1d_alt(long *src, long *dest)
 STATIC void ungif(uchar *dest, uchar *source, long srclen)
 /* Decode any GIF file.  The file must be completely stored in memory, and
  *  there must be sufficient space to store the uncompressed image, including
- *  space for a color map (768 bytes).  The original data is modified.  Note
- *  that interlaced images will still be interlaced.  Three global values are
- *  set: pwidth, pheight, and pinter.  Bit 0 of pinter is 0 if the image is
- *  not interlaced, and 1 if it is.  Bit 1 of pinter is 1 if a transparent
- *  color is specified.  Bit 2 of pinter is 0 if the image is reset between
- *  frames, 1 if it persists.  Bits 8-15 contain the transparent color.  Bits
- *  16-31 contain the delay time in 1/100ths of a second.
- * Enter: long dest: pointer to absolute memory location for final image.
- *        long source: pointer to source informtaion.
- *        long srclen: length of source data.                   5/1/94-DWM */
+ *  space for a color map (768 bytes).  Note that interlaced images will
+ *  still be interlaced.  Global values are set:  pwidth and pheight hold
+ *  the image size (pwidth is -1 if the file could not be decoded), and
+ *  pinter holds:  bit 0: image is interlaced;  bit 1: a transparent color
+ *  is specified;  bit 2: the image persists between frames;  bits 8-15:
+ *  the transparent color;  bits 16-31: the delay time in 1/100ths second.
+ *  The color table of the selected image is written to dest as RGB bytes
+ *  (0-255), and the pixels to dest+768.  If ppart selects an image other
+ *  than the first, earlier images are skipped.  If more images follow the
+ *  decoded one, bit 0x80 is set in pspec[1].  The Netscape loop count is
+ *  stored in pspec+0x10.  Image offsets within the file are ignored; the
+ *  image is decoded linearly, as in the original version.
+ * Enter: uchar *dest: pointer to memory for the palette and the image.
+ *        uchar *source: pointer to the GIF file data.
+ *        long srclen: length of source data.                   2026-DWM */
 {
-  uchar bitspixel, background;
-  ushort totalx, totaly, xstart, ystart, xlength, ylength, xxend, yend,
-         bitmask, part;
-  long palsub;
+  uchar *p = source, *end = source+srclen, *pal = dest, *pix = dest+768;
+  uchar *comp, *q, label, flags, minbits, b;
+  long part = ppart, entries, size, i, found = 0, imagew, imageh;
 
-  __asm {
-          mov eax, ppart
-          mov part, ax
-          xor eax, eax                                     ;read first header
-          xor ecx, ecx
-          mov pinter, eax
-          mov pwidth, 0x0A
-          mov pheight, 0x0A
-          mov palsub, eax
-          mov esi, source
-          add srclen, esi
-          mov eax, [esi]
-          cmp eax, 0x38464947
-          jne     ungif18
-          mov ax, [esi+6]
-          mov totalx, ax
-          mov ax, [esi+8]
-          mov totaly, ax
-          mov al, [esi+0x0A]
-          and al, 0x07
-          inc al
-          mov bitspixel, al
-          mov al, [esi+0x0B]
-          mov background,al
-          cmp BYTE PTR [esi+0x0C], 00      ;pixel aspect ratio
-//          jne     ungif18
-          mov cl, bitspixel                                    ;read colormap
-          mov ax, 0x01
-          shl ax, cl
-          mov cx, ax
-          dec ax
-          mov bitmask, ax
-          mov bl, [esi+0x0A]
-          add esi, 0x0D
-          mov edi, dest
-          add dest, 0x0300
-          test bl, 0x80
-          je      ungif2
-          mov WORD PTR palsub, 0x0300
-ungif1:   mov eax, [esi]
-          shr eax, 0x02
-          and eax, 0x3F3F3F
-          mov [edi], eax
-          add edi, 0x03
-          add esi, 0x03
-          loop    ungif1
-ungif2:   cmp BYTE PTR [esi], 0x2C                      ;check for extensions
-          je      ungif6
-          cmp BYTE PTR [esi], 0x21                       ;record transparency
-          jne     ungif5
-          cmp part, 0x00
-          jg      ungif3
-          cmp BYTE PTR [esi+1], 0xF9
-          jne     ungifb
-          mov ax, [esi+4]
-          shl eax, 0x10
-          mov pinter, eax
-          xor eax, eax
-          mov al, [esi+3]
-          and al, 0x04
-          or  pinter, eax
-          xor eax, eax
-          test BYTE PTR [esi+3], 0x01
-          je      ungif3
-          mov ah,  [esi+6]
-          mov al, 0x02
-          mov WORD PTR pinter, ax
-          jmp     ungif3
-ungifb:   cmp BYTE PTR [esi+1], 0xFF
-          jne     ungif3
-          cmp DWORD PTR [esi+2], 0x54454E0B
-          jne     ungif3
-          mov ax, [esi+0x10]
-          mov WORD PTR [pspec+0x10], ax
-ungif3:   add esi, 0x02
-          cmp esi, srclen
-          jae     ungif18
-ungif4:   xor ebx, ebx
-          mov bl, BYTE PTR [esi]
-          inc bx
-          add esi, ebx
-          cmp esi, srclen
-          jae     ungif18
-          cmp bl, 0x01
-          jne     ungif4
-          jmp     ungif2
-ungif5:   inc esi
-          cmp esi, srclen
-          jae     ungif18
-          jmp     ungif2
-ungif6:   cmp part, 0x00                                     ;ignore an image
-          jle     ungif7
-          dec part
-          test BYTE PTR [esi+9], 0x80
-          je      ungifa
-          mov cl, [esi+9]
-          and cl, 0x07
-          inc cl
-          mov eax, 0x01
-          shl eax, cl
-          add esi, eax
-          add esi, eax
-          add esi, eax
-ungifa:   add esi, 0x0B
-          cmp esi, srclen
-          jae     ungif18
-          jmp     ungif4
-ungif7:   mov ax, [esi+1]                                       ;read header2
-          mov xstart, ax
-          mov bx, [esi+3]
-          mov ystart, bx
-          mov cx, [esi+5]
-          mov xlength, cx
-          mov WORD PTR pwidth, cx
-          mov dx, [esi+7]
-          mov ylength, dx
-          mov WORD PTR pheight, dx
-          add ax, cx
-          dec ax
-          mov xxend, ax
-          add bx, dx
-          dec bx
-          mov yend, bx
-          test BYTE PTR [esi+9], 0x40
-          je      ungif8
-          inc pinter
-ungif8:   test BYTE PTR [esi+9], 0x80                    ;read image colormap
-          je      ungif10
-          mov cl, BYTE PTR [esi+9]
-          and cl, 0x07
-          inc cl
-          mov ax, 0x01
-          shl ax, cl
-          mov cx, ax
-          mov edi, dest
-          sub edi, 0x0300
-ungif9:   mov eax, [esi+0x0A]
-          shr eax, 0x02
-          and eax, 0x3F3F3F
-          mov [edi], eax
-          add edi, 0x03
-          add esi, 0x03
-          cmp esi, srclen
-          jae     ungif18
-          loop    ungif9
-ungif10:  mov al, [esi+0x0A]       ;determine starting number of bits / pixel
-          mov bitspixel, al
-          add esi, 0x0B                          ;elminate block length bytes
-          cmp esi, srclen
-          jae     ungif17
-          mov source, esi
-          mov edi, esi
-          xor ch, ch
-ungif11:  mov cl, [esi]
-          cmp cl, 0x00
-          je      ungif13
-          inc esi
-          cmp esi, srclen
-          jae     ungif17
-ungif12:  mov al, [esi]
-          mov [edi], al
-          inc esi
-          cmp esi, srclen
-          jae     ungif17
-          inc edi
-          loop    ungif12
-          jmp     ungif11
-ungif13:  inc esi                                ;check for additional images
-          cmp esi, srclen
-          jae     ungif17
-ungif14:  cmp BYTE PTR [esi], 0x2C
-          je      ungif16
-          cmp BYTE PTR [esi], 0x21                       ;record transparency
-          jne     ungif17
-          add esi, 0x02
-          cmp esi, srclen
-          jae     ungif17
-ungif15:  xor ebx, ebx
-          mov bl, BYTE PTR [esi]
-          inc bx
-          add esi, ebx
-          cmp esi, srclen
-          jae     ungif17
-          cmp bl, 0x01
-          jne     ungif15
-          jmp     ungif14
-ungif16:  or  [pspec+1], 0x80
-ungif17:  xor eax, eax                                      ;decompress image
-          mov al, bitspixel
-          push eax
-          sub edi, source
-          push edi
-          push MAXGSIZE
-          push source
-          push dest
-          call    unlzw
-          add esp, 0x14
-ungif18:
+  pinter = 0;
+  pwidth = pheight = -1;
+  memset(pal, 0, 768);            /* the palette is fully owned here */
+  if (srclen < 13 || memcmp(p, "GIF8", 4))
+    return;
+  /* logical screen descriptor */
+  flags = p[10];
+  p += 13;
+  if (flags & 0x80) {             /* global color table */
+    entries = 3L << ((flags & 0x07)+1);
+    if (p+entries > end)
+      return;
+    for (i=0; i<entries && i<768; i++)
+      pal[i] = p[i];
+    p += entries;
+  }
+  for (;;) {                      /* scan the blocks of the GIF file */
+    if (p >= end)
+      break;
+    b = *p;
+    if (b == 0x3B)                /* trailer */
+      break;
+    if (b != 0x2C && b != 0x21) { /* unknown block: resync, as before */
+      p++;
+      continue;
     }
+    if (b == 0x21) {              /* extension */
+      long delay, transindex;
+      label = (p+1 < end ? p[1] : 0);
+      p += 2;
+      if (part > 0 || p >= end)
+        continue;                 /* extensions of skipped images are skipped */
+      if (label == 0xF9 && end-p >= 6 && p[0] >= 4) {
+        /* graphic control: transparency, persistence, and delay time */
+        flags = p[1];
+        delay = (ushort)(((long)p[2])+256*p[3]);
+        transindex = p[4];
+        pinter |= delay << 16;
+        if (flags & 0x04)
+          pinter |= 0x04;
+        if (flags & 0x01)
+          pinter = (pinter & 0xFFFF0000L) | 0x02L | (transindex << 8);
+      }
+      else if (label == 0xFF && end-p >= 19 && p[0] == 11 &&
+               !memcmp(p+2, "NETSCAPE2.0", 11) && p[13] == 3 && p[14] == 1) {
+        /* netscape looping extension: the number of times to play */
+        ((short *)(pspec+0x10))[0] = (short)(((long)p[15])+256*p[16]);
+      }
+      while (p < end) {           /* skip the sub-blocks of the extension */
+        size = *p++;
+        if (!size)
+          break;
+        p += size;
+      }
+      continue;
+    }
+    /* image descriptor */
+    if (end-p < 10)
+      break;
+    flags = p[9];
+    if (flags & 0x40)             /* interlaced image (rows in GIF pass order) */
+      pinter |= 1;
+    imagew = p[5]+256*p[6];       /* the image descriptor's size fields */
+    imageh = p[7]+256*p[8];
+    size = 10;
+    if (flags & 0x80) {           /* local color table: replaces the palette */
+      entries = 3L << ((flags & 0x07)+1);
+      if (p+10+entries > end)
+        break;
+      for (i=0; i<entries && i<768; i++)
+        pal[i] = p[10+i];
+      size += entries;
+    }
+    if (end-p < size+1)
+      break;
+    if (part > 0) {               /* skip this image */
+      part--;
+      p += size;
+      while (p < end) {           /* skip the LZW data sub-blocks */
+        size = *p++;
+        if (!size)
+          break;
+        p += size;
+      }
+      continue;
+    }
+    minbits = p[size];
+    p += size+1;
+    /* collect the LZW data, stripping the sub-block headers in place */
+    comp = q = p;
+    while (p < end) {
+      size = *p++;
+      if (!size)
+        break;
+      if (p+size > end)
+        break;
+      memmove(q, p, size);
+      q += size;
+      p += size;
+    }
+    /* the width and height come from the image descriptor */
+    pwidth = imagew;
+    pheight = imageh;
+    /* decode the image (LZW decompression handles the rest) */
+    unlzw(pix, comp, MAXGSIZE, (long)(q-comp), (short)minbits);
+    found = 1;
+    /* check for a subsequent image (pspec records "more images") */
+    while (p < end) {
+      b = *p;
+      if (b == 0x2C) {
+        pspec[1] |= 0x80;
+        break;
+      }
+      if (b == 0x21) {            /* skip an extension */
+        p += 2;
+        while (p < end) {
+          size = *p++;
+          if (!size)
+            break;
+          p += size;
+        }
+        continue;
+      }
+      p++;
+    }
+    break;                        /* only one image is decoded */
+  }
+  if (!found)
+    pwidth = pheight = -1;
 }
 
 STATIC void uninterlace(char *addr, long rev)
@@ -3636,309 +3217,6 @@ STATIC void uninterlace(char *addr, long rev)
   free2(buf);
 }
 
-STATIC void unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
-             short numbits)
-/* LZW decode data until the specified number of bytes have been created or
- *  an eof code is encountered.  This routine only works on LZW data which
- *  was created from 8 bit samples and has a maximum code length of 12 bits.
- *  Even through the data must have been created from 8 bit samples, it may
- *  have had fewer significant bits, hence the numbits parameter.
- * Enter: long dest: pointer to absolute memory location for unlzwed data.
- *        long source: pointer to source informtaion.
- *        long maxlen: maximum size of destination.
- *        long srclen: number of bytes in source.
- *        int numbits: bit size of data to decompact.         12/10/94-DWM */
-{
-  uchar codesize, initcodesize, pos;
-  ushort clearcode, eof, firstfree, freecode, maxcode, bitmask, codemask,
-         initcodemask, initmaxcode, oldcode, incode, finchar;
-
-  __asm {
-          xor ebx, ebx
-          mov eax, dest
-          add maxlen, eax
-          mov al, BYTE PTR numbits
-          mov cl, al
-          mov dx, 0x01
-          shl dx, cl
-          mov clearcode, dx
-          mov cx, dx
-          mov bitmask, dx
-          dec bitmask
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          mov freecode, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          mov maxcode, cx
-          mov initmaxcode, cx
-          mov edx, dest                                     ;begin LZW decode
-          mov esi, source
-          add srclen, esi
-          mov pos, 0x00
-          mov ax, bitmask
-          shl ax, 0x01
-          inc ax
-          mov codemask, ax
-          mov initcodemask, ax
-          xor edi, edi
-unlzw1:   mov eax, [esi]                                      ;read next code
-          mov cl, pos
-          shr eax, cl
-          add cl, codesize
-          cmp cl, 0x08
-          jl      unlzw2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzw7
-          cmp cl, 0x08
-          jl      unlzw2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzw7
-unlzw2:   mov pos, cl
-          and ax, codemask
-          cmp ax, eof
-          je      unlzw7
-          cmp ax, clearcode
-          jne     unlzw3
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initcodemask
-          mov codemask, ax
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          mov eax, [esi]
-          mov cl, pos
-          shr eax, cl
-          add cl, codesize
-          mov pos, cl
-          and ax, codemask
-          mov oldcode, ax
-          and ax, bitmask
-          mov finchar, ax
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          jb      unlzw1
-          jmp     unlzw7
-unlzw3:   mov incode, ax                                        ;process code
-          cmp ax, freecode
-          jl      unlzw4
-          mov ax, oldcode
-          mov bx, finchar
-          mov [outcode+edi], bl
-          inc edi
-unlzw4:   cmp ax, bitmask
-          jle     unlzw5
-          mov bx, ax
-          mov cl, [suffix+ebx]
-          mov [outcode+edi], cl
-          inc edi
-          shl bx, 0x01
-          mov ax, [prefix+ebx]
-          jmp     unlzw4
-unlzw5:   mov finchar, ax
-          mov [outcode+edi], al
-          inc edi
-unlzw6:   mov al, [outcode+edi-1]
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          je      unlzw7
-          dec edi
-          jne     unlzw6
-          mov bx, freecode
-          mov ax, finchar
-          mov [suffix+ebx], al
-          shl bx, 0x01
-          mov cx, oldcode
-          mov [prefix+ebx], cx
-          mov bx, incode
-          mov oldcode, bx
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jl      unlzw1
-          cmp codesize, 0x0C
-          jge     unlzw1
-          inc codesize
-          shl codemask, 0x01
-          inc codemask
-          shl maxcode, 0x01
-          jmp     unlzw1
-unlzw7:
-    }
-}
-
-STATIC void unlzwtif(uchar *dest, uchar *source, long maxlen, long srclen)
-/* TIFF LZW decode data until the specified number of bytes have been created
- *  or an eof code is encountered.  This routine only works on LZW data which
- *  was created from 8 bit samples and has a maximum code length of 12 bits.
- *  This routine only works on TIFF style LZW data.
- * Enter: long dest: pointer to absolute memory location for unlzwed data.
- *        long source: pointer to source informtaion.
- *        long maxlen: maximum size of destination.
- *        long srclen: length of input data.                  12/10/94-DWM */
-{
-  uchar codesize, initcodesize, pos;
-  ushort clearcode, eof, firstfree, freecode, maxcode, bitmask, codemask,
-         initcodemask, initmaxcode, oldcode, incode, finchar;
-
-  __asm {
-          xor ebx, ebx
-          mov eax, dest
-          add maxlen, eax
-          mov al, 0x8
-          mov dx, 0x0100
-          mov clearcode, dx
-          mov cx, dx
-          mov bitmask, dx
-          dec bitmask
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          mov freecode, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          dec cx                               ;Remove line for GIF style LZW
-          mov maxcode, cx
-          mov initmaxcode, cx
-          mov edx, dest                                     ;begin LZW decode
-          mov esi, source
-          add srclen, esi
-          mov pos, 0x00
-          mov ax, bitmask
-          shl ax, 0x01
-          inc ax
-          mov codemask, ax
-          mov initcodemask, ax
-          xor edi, edi
-unlzwt1:  mov eax, [esi]                                      ;read next code
-          mov ch, al                 ;These 7 lines are the same as bswap eax
-          mov cl, ah
-          shl ecx, 0x10
-          shr eax, 0x10
-          mov ch, al
-          mov cl, ah
-          mov eax, ecx
-          mov cl, 0x20
-          sub cl, pos
-          sub cl, codesize
-          shr eax, cl            ;Remove from bswap to here for GIF style LZW
-          mov cl, pos      ;Add shr eax, cl after this line for GIF style LZW
-          add cl, codesize
-          cmp cl, 0x08
-          jl      unlzwt2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzwt7
-          cmp cl, 0x08
-          jl      unlzwt2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzwt7
-unlzwt2:  mov pos, cl
-          and ax, codemask
-          cmp ax, eof
-          je      unlzwt7
-          cmp ax, clearcode
-          jne     unlzwt3
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initcodemask
-          mov codemask, ax
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          mov eax, [esi]
-          mov ch, al                 ;These 7 lines are the same as bswap eax
-          mov cl, ah
-          shl ecx, 0x10
-          shr eax, 0x10
-          mov ch, al
-          mov cl, ah
-          mov eax, ecx
-          mov cl, 0x20
-          sub cl, pos
-          sub cl, codesize
-          shr eax, cl            ;Remove from bswap to here for GIF style LZW
-          mov cl, pos      ;Add shr eax, cl after this line for GIF style LZW
-          add cl, codesize
-          mov pos, cl
-          and ax, codemask
-          mov oldcode, ax
-          and ax, bitmask
-          mov finchar, ax
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          jl      unlzwt1
-          jmp     unlzwt7
-unlzwt3:  mov incode, ax                                        ;process code
-          cmp ax, freecode
-          jl      unlzwt4
-          mov ax, oldcode
-          mov bx, finchar
-          mov [outcode+edi], bl
-          inc edi
-unlzwt4:  cmp ax, bitmask
-          jle     unlzwt5
-          mov bx, ax
-          mov cl, [suffix+ebx]
-          mov [outcode+edi], cl
-          inc edi
-          shl bx, 0x01
-          mov ax, [prefix+ebx]
-          jmp     unlzwt4
-unlzwt5:  mov finchar, ax
-          mov [outcode+edi], al
-          inc edi
-unlzwt6:  mov al, [outcode+edi-1]
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          je      unlzwt7
-          dec edi
-          jne     unlzwt6
-          mov bx, freecode
-          mov ax, finchar
-          mov [suffix+ebx], al
-          shl bx, 0x01
-          mov cx, oldcode
-          mov [prefix+ebx], cx
-          mov bx, incode
-          mov oldcode, bx
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jl      unlzwt1
-          cmp codesize, 0x0C
-          jge     unlzwt1
-          inc codesize
-          shl codemask, 0x01
-          inc codemask
-          shl maxcode, 0x01
-          inc maxcode                          ;Remove line for GIF style LZW
-          jmp     unlzwt1
-unlzwt7:
-    }
-}
-
 STATIC long unrle(uchar *output, uchar *input, long ln, long srclen)
 /* Uncompress data using a run-length encoding scheme.  The size of the
  *  output is unpredicatable.  Decompression ends when len characters have
@@ -3949,53 +3227,40 @@ STATIC long unrle(uchar *output, uchar *input, long ln, long srclen)
  *        long srclen: maximum length of input.
  * Exit:  long len: length of rle code used.                  11/30/92-DWM */
 {
-  long finlen;
+  uchar *ip = input, *op = output, n, v;
+  uchar *opend;
+  long count;
 
-  __asm {
-          mov edi, input
-          mov esi, output
-          mov ecx, esi
-          add ecx, ln
-          cmp ecx, esi
-          jne     unrle1
-          mov ecx, 0xFFFFFFFF
-unrle1:   mov al, [edi]
-          inc edi
-          dec srclen
-          jl      unrle6
-          cmp al, 0x80
-          ja      unrle3
-          je      unrle6
-          inc al
-unrle2:   mov ah, [edi]
-          inc edi
-          dec srclen
-          jl      unrle6
-          mov [esi], ah
-          inc esi
-          cmp esi, ecx
-          jae     unrle6
-          dec al
-          jne     unrle2
-          jmp     unrle5
-unrle3:   mov ah, [edi]
-          inc edi
-          dec srclen
-          jl      unrle6
-          dec al
-unrle4:   mov [esi], ah
-          inc esi
-          cmp esi, ecx
-          jae     unrle6
-          inc al
-          jne     unrle4
-unrle5:   cmp esi, ecx
-          jb      unrle1
-unrle6:   mov eax, edi
-          sub eax, input
-          mov finlen, eax
+  /* The end pointer is one past the last output byte; 0 for ln means the
+   *  output size is unlimited (as in the asm, which used 0xFFFFFFFF). */
+  opend = ln ? output+ln : (uchar *)-1L;
+  for (;;) {
+    n = *ip++;                       /* read, then check, as the asm does */
+    if (--srclen < 0)  break;
+    if (n > 0x80) {                  /* run of the next byte, 257-n times */
+      v = *ip++;
+      if (--srclen < 0)  break;
+      count = 257-n;
+      do {
+        *op++ = v;
+        if (op >= opend)  goto done;
+      } while (--count);
     }
-  return(finlen);
+    else if (n == 0x80)              /* end of RLE code */
+      break;
+    else {                           /* n+1 literal bytes */
+      count = n+1;
+      do {
+        v = *ip++;
+        if (--srclen < 0)  goto done;
+        *op++ = v;
+        if (op >= opend)  goto done;
+      } while (--count);
+    }
+    if (op >= opend)  break;
+  }
+done:
+  return((long)(ip-input));
 }
 
 STATIC void vertical_flip(uchar *image, long w, long h)

@@ -2,16 +2,23 @@
 #  vcc
 #  nmake
 # CL_OPTS=/O2 /GL /W4 /w34244 /wd4996 /w34305 /wd4706 /wd4057 /wd4127 /nologo
-CL_OPTS=/O2 /GL /W2 /w24101 /w34244 /w34305 /nologo
-LINK_OPTS=/LTCG /nologo
+# Optimized for maximum executable speed:
+#  /O2      - full speed optimization
+#  /GL /LTCG - whole-program optimization at link time
+#  /Gw /Gy  - per-global and per-function sections, better LTCG dead-code removal
+#  /GS-     - omit buffer security checks (small speed win, slight safety loss)
+#  /fp:fast - relaxed floating point (reassociates/replaces with faster ops)
+CL_OPTS=/O2 /GL /Gw /Gy /GS- /fp:fast /W2 /w24101 /w34244 /w34305 /nologo
+LINK_OPTS=/LTCG /OPT:REF /OPT:ICF /nologo
 LIB_OPTS=/LTCG /nologo
+CLIB_OPTS=$(CL_OPTS)
 RC_OPTS=/n /nologo
 
 all: gv.exe gvlib.lib mem.lib gvlib.dll
 
 
-gv.exe: gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res
-	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib dwmapi.lib
+gv.exe: gload.obj gsave.obj lzw.obj gv.obj gvlib.obj mem.obj process.obj gv.res
+	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj lzw.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib dwmapi.lib
 
 gv.res: gv.rc gvrc.h
 	rc $(RC_OPTS) gv.rc
@@ -28,6 +35,8 @@ mem.obj: mem.c mem.h
 	cl /c $(CL_OPTS) mem.c
 process.obj: process.c process.h mem.h
 	cl /c $(CL_OPTS) process.c
+lzw.obj: lzw.c gload.h
+	cl /c $(CL_OPTS) lzw.c
 
 
 gvlib.lib: lib.obj

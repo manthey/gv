@@ -7,7 +7,7 @@
 #define NAMELEN    4096
 #define SAVEFORMATS  10
 #define SAVELEN      18
-#define SUBVERSION   14
+#define SUBVERSION   15
 #define UNDOLEN      12
 #define VERSION       1
 
@@ -18,25 +18,27 @@ typedef struct {
   long delay, filter, tx, ty, ttop, tsel;
   ulong option; } SlideList;
 
-BOOL CALLBACK about            (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK batch_dialog     (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK find_dialog      (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK grey_dialog      (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK null_dialog      (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK open_dialog      (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK open_slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK preview_save_dialog(HWND hdlg,ulong msg,WPARAM wp, LPARAM lp);
-BOOL CALLBACK register_dialog  (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK save_dialog      (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK saveopt_dialog   (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK slide_dialog     (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK sort_dialog      (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-BOOL CALLBACK sort2_dialog     (HWND hdlg, ulong msg, WPARAM wp, LPARAM lp);
-VOID CALLBACK preview_move_wait(HWND hwnd, ulong msg, ulong id, long time);
-VOID CALLBACK preview_pic      (HWND hwnd, ulong msg, ulong id, long time);
-VOID CALLBACK preview_timer    (HWND hwnd, ulong msg, ulong id, long time);
-VOID CALLBACK scroll_wait      (HWND hwnd, ulong msg, ulong id, long time);
-VOID CALLBACK timer            (HWND hwnd, ulong msg, ulong id, long time);
+INT_PTR CALLBACK about            (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK batch_dialog     (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK find_dialog      (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK grey_dialog      (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK null_dialog      (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK open_dialog      (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK open_slide_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK preview_save_dialog(HWND hdlg, UINT msg, WPARAM wp,
+                                     LPARAM lp);
+INT_PTR CALLBACK register_dialog  (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK save_dialog      (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK saveopt_dialog   (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK slide_dialog     (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK sort_dialog      (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+INT_PTR CALLBACK sort2_dialog     (HWND hdlg, UINT msg, WPARAM wp, LPARAM lp);
+VOID CALLBACK preview_move_wait(HWND hwnd, UINT msg, UINT_PTR id,
+                                DWORD time);
+VOID CALLBACK preview_pic      (HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+VOID CALLBACK preview_timer    (HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+VOID CALLBACK scroll_wait      (HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+VOID CALLBACK timer            (HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
 LRESULT CALLBACK main_loop     (HWND hwnd, ulong msg, WPARAM wp, LPARAM lp);
 LRESULT CALLBACK preview_loop  (HWND hwnd, ulong msg, WPARAM wp, LPARAM lp);
 void    create_savepic_area(long w, long h);

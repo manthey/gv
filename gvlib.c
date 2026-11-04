@@ -1,4 +1,3 @@
-#ifndef LIBRARY
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +7,6 @@
 #include "gvlib.h"
 #include "gload.h"
 #define STATIC
-#endif
 
 STATIC uchar dithertbl1[2048], dithertbl3[]={0,0,1,2,3,4,5,6,7,8,9,10,12,14,16,18},
        *Mfile;
@@ -24,13 +22,12 @@ HBITMAPINFO BitmapToBMP(HBITMAP gmem, HPALETTE gpal, HDC hdc)
  * Exit:  HBITMAPINFO bmp: handle to the regular bitmap.        4/5/97-DWM */
 {
   char *dest=0, *buf;
-  long w, h, bits, obits, scan, pal, i;
+  long w, h, bits, scan, pal, i;
   BITMAP data;
   HANDLE hdest;
 
   GetObject(gmem, sizeof(BITMAP), &data);
   w = data.bmWidth;  h = data.bmHeight;  bits = data.bmBitsPixel;
-  obits = bits;
   if (hdc && bits>8)  bits = 24;
   if (bits<=8)       { scan = (w+3)&0xFFFFC;  pal = 1024; }
   else if (bits==16) { scan = (w*2+3)&0xFFFFC;  pal = 0; }
@@ -285,7 +282,7 @@ STATIC void fill_gv(GV *gv, long err)
       gv->fs.jpg.decimation = pspec[6];
       gv->fs.jpg.quality = ((long *)(pspec+8))[0];
       gv->fs.jpg.usecustom = pspec[7];
-      gv->fs.jpg.customquant = ((char **)(pspec+0xC))[0];
+      gv->fs.jpg.customquant = jpgcustomquant;
       gv->fs.jpg.spectralsteps = ((short *)(pspec+0x10))[0];
       gv->fs.jpg.succesivesteps = ((short *)(pspec+0x12))[0]; break;
     case GV_PPM:
@@ -361,7 +358,7 @@ STATIC void fill_spec(GV *gv)
       pspec[6] = gv->fs.jpg.decimation;
       ((long *)(pspec+8))[0] = gv->fs.jpg.quality;
       pspec[7] = gv->fs.jpg.usecustom;
-      ((char **)(pspec+0xC))[0] = gv->fs.jpg.customquant;
+      jpgcustomquant = gv->fs.jpg.customquant;
       ((short *)(pspec+0x10))[0] = gv->fs.jpg.spectralsteps;
       ((short *)(pspec+0x12))[0] = gv->fs.jpg.succesivesteps; break;
     case GV_PPM:
@@ -477,8 +474,12 @@ HBITMAPINFO LoadBMP(GV *gv)
   if (fopen2==fopen && gv->name)  if (!gv->name[0]) {
     fopen2 = mopen2;  fread2 = mread;  fclose2 = mclose;
     fseek2 = mseek;  ftell2 = mtell;  fwrite2 = mwrite;
-    Mlen = ((long *)(gv->name+1))[1];
-    gv->name = (char *)(((long *)(gv->name+1))[0]); }
+    /* The caller passed a block in place of a file name: byte 0 is a zero
+     *  marker, then a pointer to the memory file, then its length.  The
+     *  pointer is kept 8-byte aligned so the layout is the same for 32 and
+     *  64 bit builds.                                        2026-DWM */
+    Mlen = ((long *)(gv->name+8))[1];
+    gv->name = (char *)(((void **)(gv->name+8))[0]); }
   pic = load_graphic(gv->name);
   fopen2 = fopen;  fread2 = fread;  fclose2 = fclose;
   fseek2 = fseek;  ftell2 = ftell;  fwrite2 = fwrite;
@@ -510,8 +511,12 @@ HANDLE LoadGraphic(GV *gv)
   if (fopen2==fopen && gv->name)  if (!gv->name[0]) {
     fopen2 = mopen2;  fread2 = mread;  fclose2 = mclose;
     fseek2 = mseek;  ftell2 = mtell;  fwrite2 = mwrite;
-    Mlen = ((long *)(gv->name+1))[1];
-    gv->name = (char *)(((long *)(gv->name+1))[0]); }
+    /* The caller passed a block in place of a file name: byte 0 is a zero
+     *  marker, then a pointer to the memory file, then its length.  The
+     *  pointer is kept 8-byte aligned so the layout is the same for 32 and
+     *  64 bit builds.                                        2026-DWM */
+    Mlen = ((long *)(gv->name+8))[1];
+    gv->name = (char *)(((void **)(gv->name+8))[0]); }
   pic = load_graphic(gv->name);
   fopen2 = fopen;  fread2 = fread;  fclose2 = fclose;
   fseek2 = fseek;  ftell2 = ftell;  fwrite2 = fwrite;
@@ -530,7 +535,7 @@ STATIC int mclose(FILE *fptr)
   return(0);
 }
 
-STATIC FILE *mopen(char *name, char *mode)
+STATIC FILE *mopen(const char *name, const char *mode)
 /* Open a "file" in memory for reading or writing.  Although this accepts the
  *  same parameters as fopen, they are not handled identically.  Only one
  *  memory file can be open at a time.  Any call to mopen will abandon a
@@ -545,7 +550,7 @@ STATIC FILE *mopen(char *name, char *mode)
  *                    okay.                                    2/22/97-DWM */
 {
   if (name) {
-    Mfile = name;
+    Mfile = (char *)name;   /* writable only in memory-file mode */
     Mlen = size2(name)+Mpad; }
   else {
     if (Mminlen>0)  Mfile = malloc2(Mminlen);
@@ -557,7 +562,7 @@ STATIC FILE *mopen(char *name, char *mode)
   return((FILE *)-1);
 }
 
-STATIC FILE *mopen2(char *name, char *mode)
+STATIC FILE *mopen2(const char *name, const char *mode)
 /* Open a "file" in memory for reading or writing.  Although this accepts the
  *  same parameters as fopen, they are not handled identically.  Only one
  *  memory file can be open at a time.  Any call to mopen will abandon a
@@ -572,14 +577,14 @@ STATIC FILE *mopen2(char *name, char *mode)
  *                    okay.                                    2/22/97-DWM */
 {
   if (name)
-    Mfile = name;
+    Mfile = (char *)name;   /* writable: this is the memory file itself */
   else
     return(0);
   Mpos = 0;
   return((FILE *)-1);
 }
 
-STATIC size_t mread(char *buffer, size_t size, size_t count, FILE *fptr)
+STATIC size_t mread(void *buffer, size_t size, size_t count, FILE *fptr)
 /* Read data from a memory buffer.  This mimicks the fread function,
  *  including EOF behavior.
  * Enter: void *buffer: location to store data.
@@ -590,18 +595,19 @@ STATIC size_t mread(char *buffer, size_t size, size_t count, FILE *fptr)
 {
   long len;
   char bm[]="BM\0\0\0\0\0\0\0\0\0\0\0\0";
+  char *b = (char *)buffer;
 
   len = Mlen-Mpos;
   if (size*count > (size_t)len)
     count = len/size;
   len = size*count;
   if (Mpos-Mpad<0 && len+Mpos-Mpad>0) {
-    memcpy(buffer, bm, min(14, Mpad-Mpos));
-    buffer += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
+    memcpy(b, bm, min(14, Mpad-Mpos));
+    b += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
   else if (Mpos-Mpad<0) {
-    memcpy(buffer, bm, min(14, len));  Mpos += len;  len = 0; }
+    memcpy(b, bm, min(14, len));  Mpos += len;  len = 0; }
   if (len) {
-    memcpy(buffer, Mfile+Mpos-Mpad, len);
+    memcpy(b, Mfile+Mpos-Mpad, len);
     Mpos += len; }
   return(count);
 }
@@ -632,7 +638,7 @@ STATIC long mtell(FILE *fptr)
   return(Mpos);
 }
 
-STATIC size_t mwrite(char *buffer, size_t size, size_t count, FILE *fptr)
+STATIC size_t mwrite(const void *buffer, size_t size, size_t count, FILE *fptr)
 /* Write data to a memory buffer.  This mimicks the fwrite function,
  *  including EOF behavior.
  * Enter: void *buffer: location to store data.
@@ -643,6 +649,7 @@ STATIC size_t mwrite(char *buffer, size_t size, size_t count, FILE *fptr)
 {
   long len;
   uchar *file;
+  char *b = (char *)buffer;
 
   len = Mlen-Mpos;
   if (size*count > (size_t)len) {
@@ -654,11 +661,11 @@ STATIC size_t mwrite(char *buffer, size_t size, size_t count, FILE *fptr)
       Mlen = Mpos+size*count; } }
   len = size*count;
   if (Mpos-Mpad<0 && len+Mpos-Mpad>0) {
-    buffer += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
+    b += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
   else if (Mpos-Mpad<0) {
     Mpos += len;  len = 0; }
   if (len) {
-    memcpy(Mfile+Mpos-Mpad, buffer, len);
+    memcpy(Mfile+Mpos-Mpad, b, len);
     Mpos += len; }
   return(count);
 }
@@ -696,8 +703,8 @@ STATIC uchar *palettize_graphic(long w, long h, long pinter, uchar *pic,
       dithertbl2[i+300] = (j&0xFC)<<3;
       dithertbl2[i+600] =  j      >>3; }
     dithernum = 0; }
-  if ((!pal && !pinter) || ((long)pal)==-1) {
-    UniformPal = (((long)pal)==-1);
+  if ((!pal && !pinter) || pal==(uchar *)-1) {
+    UniformPal = (pal==(uchar *)-1);
     if (!(exact=palettize(pic, w, h, 1))) {
       UniformPal = 0;
       return(0); }
@@ -943,7 +950,8 @@ STATIC void scale_pic_grey(uchar *dest, uchar *source, long srcw, long destw,
   double stepx, stepy, gamma;
   uchar *s, *pic=0;
 
-  if (Interpolate&0x1C00) if (pic=malloc2(simgw*simgh)) {     /* Autospiff */
+  if (Interpolate&0x1C00)  pic = malloc2(simgw*simgh);
+  if (pic) {                     /* Autospiff */
     for (j=0, s=source; j<simgh; j++, s+=srcw)
       memcpy(pic+simgw*j, s, simgw);
     srcw = simgw;
@@ -971,7 +979,7 @@ STATIC void scale_pic_grey(uchar *dest, uchar *source, long srcw, long destw,
         break;
       default: gamma = 1; }
     else             gamma = 1;
-    if (gamma>10)  gamma = 10;  if (gamma<0.1)  gamma = 0.1;
+    if (gamma>10) { gamma = 10; }  if (gamma<0.1) { gamma = 0.1; }
     for (i=0; i<256; i++) {
       if (i<=a)       hist[i] = 0;
       else if (i>=b)  hist[i] = 255;
@@ -1012,35 +1020,40 @@ STATIC void scale_pic_grey(uchar *dest, uchar *source, long srcw, long destw,
   else
     for (j=d=0,s=source; j<h; j++, d+=destw-w)
       switch (inter) {
-        case 1: for (i=0; i<w; i++, d++)
+        case 1: for (i=0; i<w; i++, d++) {
           dest[d] = ((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w])*vfac[j+h])>>18;
+          }
           break;
-        case 2: for (i=0; i<w; i++, d++)
+        case 2: for (i=0; i<w; i++, d++) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2])*vfac[j+h2])>>18];
+          }
           break;
-        case 3: for (i=0; i<w; i++, d++)
+        case 3: for (i=0; i<w; i++, d++) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2]+s[vert[j]+horz[i+w3]]*hfac[i+w3])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h]+horz[i+w3]]*hfac[i+w3])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h2]+horz[i+w3]]*hfac[i+w3])*vfac[j+h2]+
                     (s[vert[j+h3]+horz[i]]*hfac[i]+s[vert[j+h3]+horz[i+w]]*hfac[i+w]+s[vert[j+h3]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h3]+horz[i+w3]]*hfac[i+w3])*vfac[j+h3])>>18];
+          }
           break;
-        case 4: for (i=0; i<w; i++, d++)
+        case 4: for (i=0; i<w; i++, d++) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2]+s[vert[j]+horz[i+w3]]*hfac[i+w3]+s[vert[j]+horz[i+w4]]*hfac[i+w4])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h]+horz[i+w4]]*hfac[i+w4])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h2]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h2]+horz[i+w4]]*hfac[i+w4])*vfac[j+h2]+
                     (s[vert[j+h3]+horz[i]]*hfac[i]+s[vert[j+h3]+horz[i+w]]*hfac[i+w]+s[vert[j+h3]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h3]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h3]+horz[i+w4]]*hfac[i+w4])*vfac[j+h3]+
                     (s[vert[j+h4]+horz[i]]*hfac[i]+s[vert[j+h4]+horz[i+w]]*hfac[i+w]+s[vert[j+h4]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h4]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h4]+horz[i+w4]]*hfac[i+w4])*vfac[j+h4])>>18];
+          }
           break;
-        case 5: for (i=0; i<w; i++, d++)
+        case 5: for (i=0; i<w; i++, d++) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2]+s[vert[j]+horz[i+w3]]*hfac[i+w3]+s[vert[j]+horz[i+w4]]*hfac[i+w4]+s[vert[j]+horz[i+w5]]*hfac[i+w5])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h]+horz[i+w5]]*hfac[i+w5])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h2]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h2]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h2]+horz[i+w5]]*hfac[i+w5])*vfac[j+h2]+
                     (s[vert[j+h3]+horz[i]]*hfac[i]+s[vert[j+h3]+horz[i+w]]*hfac[i+w]+s[vert[j+h3]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h3]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h3]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h3]+horz[i+w5]]*hfac[i+w5])*vfac[j+h3]+
                     (s[vert[j+h4]+horz[i]]*hfac[i]+s[vert[j+h4]+horz[i+w]]*hfac[i+w]+s[vert[j+h4]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h4]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h4]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h4]+horz[i+w5]]*hfac[i+w5])*vfac[j+h4]+
                     (s[vert[j+h5]+horz[i]]*hfac[i]+s[vert[j+h5]+horz[i+w]]*hfac[i+w]+s[vert[j+h5]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h5]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h5]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h5]+horz[i+w5]]*hfac[i+w5])*vfac[j+h5])>>18];
+          }
         break; }
   free2(pic);
   free2(horz);
@@ -1070,7 +1083,8 @@ HBITMAPINFO ScaleBMP(HBITMAPINFO bmp, long neww, long newh, long color,
   b = lock2(bmp);
   if (!(neww&3) && b->biSize==40)
     if (!(b->biWidth&3) && b->biWidth && b->biHeight && b->biPlanes==1 &&
-        b->biSizeImage==b->biWidth*3*b->biHeight && b->biBitCount==24 &&
+        b->biSizeImage==(DWORD)((long)b->biWidth*3*b->biHeight) &&
+        b->biBitCount==24 &&
         color!=-1) {
       if (!(b2=malloc2(40+neww*newh*3))) {
         unlock2(b);  return(0); }

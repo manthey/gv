@@ -163,9 +163,10 @@ typedef struct GV {
     struct PCX pcx;
     struct TGA tga;
     struct TIF tif; } fs;
-  FILE *(*fopenb)(char *name, char *mode);
+  FILE *(*fopenb)(const char *name, const char *mode);
   size_t (*freadb)(void *buffer, size_t size, size_t count, FILE *fptr);
-  size_t (*fwriteb)(void *buffer, size_t size, size_t count, FILE *fptr);
+  size_t (*fwriteb)(const void *buffer, size_t size, size_t count,
+                    FILE *fptr);
   int (*fcloseb)(FILE *fptr);
   int (*fseekb)(FILE *fptr, long offset, int origin);
   long (*ftellb)(FILE *fptr);

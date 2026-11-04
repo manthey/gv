@@ -1,0 +1,20 @@
+@SET MSVCC=C:\Users\manthey\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0
+@SET INCLUDE1="%MSVCC%\WinSDK\Include"
+@SET INCLUDE2="%MSVCC%\VC\include"
+
+:: "%MSVCC%\WinSDK\Bin\rc.exe" /?
+"%MSVCC%\WinSDK\Bin\rc.exe" /nologo /n /i %INCLUDE1% /i %INCLUDE2% gv.rc
+
+:: "%MSVCC%\VC\Bin\cl.exe" /?
+
+@SET CL=/nologo /O2 /Ot /GA /I%INCLUDE1% /I%INCLUDE2% 
+
+"%MSVCC%\VC\Bin\cl.exe" /c gload.c
+"%MSVCC%\VC\Bin\cl.exe" /c gsave.c
+"%MSVCC%\VC\Bin\cl.exe" /c gv.c
+"%MSVCC%\VC\Bin\cl.exe" /c gvlib.c
+"%MSVCC%\VC\Bin\cl.exe" /c mem.c
+"%MSVCC%\VC\Bin\cl.exe" /c process.c
+
+"%MSVCC%\VC\Bin\cl.exe" gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res /link /OUT:gv.exe /libpath:"%MSVCC%\VC\Lib" /libpath:"%MSVCC%\WinSDK\Lib" advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib 
+
