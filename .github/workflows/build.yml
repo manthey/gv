@@ -23,7 +23,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Put cl, link, rc and nmake on the PATH (VS2022, 64-bit host/target).
       - name: Set up MSVC
@@ -72,7 +72,7 @@ jobs:
           copy mem.h dist\
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gv-win64
           path: dist/*
@@ -82,7 +82,7 @@ jobs:
       # "on: appveyor_repo_tag: true" deployment.
       - name: Release (tag)
         if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: Release ${{ github.ref_name }}
           files: dist/*
@@ -92,7 +92,7 @@ jobs:
       # that release (the version is stamped from the release's tag).
       - name: Release (published)
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/*
           fail_on_unmatched_files: true
