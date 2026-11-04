@@ -2,9 +2,16 @@
 #  vcc
 #  nmake
 # CL_OPTS=/O2 /GL /W4 /w34244 /wd4996 /w34305 /wd4706 /wd4057 /wd4127 /nologo
-CL_OPTS=/O2 /GL /W2 /w24101 /w34244 /w34305 /nologo
-LINK_OPTS=/LTCG /nologo
+# Optimized for maximum executable speed:
+#  /O2      - full speed optimization
+#  /GL /LTCG - whole-program optimization at link time
+#  /Gw /Gy  - per-global and per-function sections, better LTCG dead-code removal
+#  /GS-     - omit buffer security checks (small speed win, slight safety loss)
+#  /fp:fast - relaxed floating point (reassociates/replaces with faster ops)
+CL_OPTS=/O2 /GL /Gw /Gy /GS- /fp:fast /W2 /w24101 /w34244 /w34305 /nologo
+LINK_OPTS=/LTCG /OPT:REF /OPT:ICF /nologo
 LIB_OPTS=/LTCG /nologo
+CLIB_OPTS=$(CL_OPTS)
 RC_OPTS=/n /nologo
 
 all: gv.exe gvlib.lib mem.lib gvlib.dll

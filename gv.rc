@@ -274,8 +274,8 @@ ICON4 ICON gvicon4.ico
 CursorNull CURSOR MOVEABLE PURE LOADONCALL DISCARDABLE nocursor.cur
 
 VersionGV VERSIONINFO
-  FILEVERSION 1,0,0,0
-  PRODUCTVERSION 1,0,0,0
+  FILEVERSION 1,15,0,0
+  PRODUCTVERSION 1,15,0,0
   FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
   FILEFLAGS 0
   FILEOS VOS_NT_WINDOWS32
@@ -290,10 +290,10 @@ BEGIN
       VALUE "FileDescription", "Graphic Viewer\0"
       VALUE "OriginalFilename", "GV.EXE\0"
       VALUE "ProductName", "Graphic Viewer\0"
-      VALUE "FileVersion", "1.0\0"
-      VALUE "ProductVersion", "1.0\0"
+      VALUE "FileVersion", "1.15\0"
+      VALUE "ProductVersion", "1.15\0"
       VALUE "Programmer", "David Manthey\0"
-      VALUE "LegalCopyright", "Copyright 1996-2017 by David Manthey\0"
+      VALUE "LegalCopyright", "Copyright 1996-2026 by David Manthey\0"
     END
   END
   BLOCK "VarFileInfo"
@@ -310,7 +310,7 @@ BEGIN
   ICON ICON1, IDC_STATIC, 10,6,19,20
   CTEXT "Graphic Viewer", IDC_STATIC, 38,4,96,8, SS_LEFT
   CTEXT "", AbDate, 38,14,96,8, SS_LEFT
-  CTEXT "Copyright 1996-2017 by David Manthey", IDC_STATIC, 17,36,129,8, SS_LEFT
+  CTEXT "Copyright 1996-2026 by David Manthey", IDC_STATIC, 17,36,129,8, SS_LEFT
   CTEXT "email: manthey@orbitals.com", IDC_STATIC, 17,57,129,8, SS_LEFT
   CTEXT "URL: http://www.orbitals.com/gv", IDC_STATIC, 17,66,129,10, SS_LEFT
   DEFPUSHBUTTON "Done", IDOK, 55,82,51,14, 0

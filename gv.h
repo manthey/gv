@@ -7,7 +7,7 @@
 #define NAMELEN    4096
 #define SAVEFORMATS  10
 #define SAVELEN      18
-#define SUBVERSION   14
+#define SUBVERSION   15
 #define UNDOLEN      12
 #define VERSION       1
 

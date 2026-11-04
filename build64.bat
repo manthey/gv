@@ -79,7 +79,12 @@ rem All warnings are failures.  The two exceptions are codebase idioms:
 rem - pointer-sign: char * and uchar * are used interchangeably throughout
 rem - unused-parameter: Windows callback signatures require unused parameters
 set "WARN=-Wall -Wextra -Wno-pointer-sign -Wno-unused-parameter -Werror"
-set "CFLAGS=-O2 -fms-extensions %WARN% -I."
+rem Optimized for maximum executable speed:
+rem  -O3            - aggressive optimization
+rem  -march=x86-64-v2 - use SSE4.2/POPCNT (any x86-64 CPU since ~2009)
+rem  -flto          - whole-program optimization at link time
+set "CFLAGS=-O3 -march=x86-64-v2 -flto -fms-extensions %WARN% -I."
+set "LINKFLAGS=-march=x86-64-v2 -flto"
 
 rem Resource file
 "%WINDRES%" -I . gv.rc -O coff -o build64\gv.res || goto :fail
@@ -89,10 +94,11 @@ for %%F in (gload gsave lzw gv gvlib mem process lib) do (
 )
 
 rem gv.exe
-"%CC%" build64\gload.o build64\gsave.o build64\lzw.o build64\gv.o build64\gvlib.o build64\mem.o build64\process.o build64\gv.res -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -ldwmapi -o build64\gv.exe -mwindows || goto :fail
+"%CC%" build64\gload.o build64\gsave.o build64\lzw.o build64\gv.o build64\gvlib.o build64\mem.o build64\process.o build64\gv.res %LINKFLAGS% -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -ldwmapi -o build64\gv.exe -mwindows || goto :fail
+if not exist build64\gv.exe goto :fail
 
 rem gvlib.dll
-"%CC%" build64\lib.o build64\mem.o -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\gvlib.dll -shared || goto :fail
+"%CC%" build64\lib.o build64\mem.o %LINKFLAGS% -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\gvlib.dll -shared || goto :fail
 
 rem Import libraries
 "%AR%" rcs build64\gvlib.lib build64\lib.o || goto :fail
@@ -103,8 +109,8 @@ rem They use the gvlib API (LIBRARY-defined code), so link the gvlib.lib
 rem archive (built from lib.o) plus mem.o.
 "%CC%" -c %CFLAGS% tests\rawdump.c -o build64\rawdump.o || goto :fail
 "%CC%" -c %CFLAGS% tests\asmconv_test.c -o build64\asmconv_test.o || goto :fail
-"%CC%" build64\rawdump.o build64\gvlib.lib build64\mem.o -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\rawdump.exe || goto :fail
-"%CC%" build64\asmconv_test.o build64\gvlib.lib build64\mem.o -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\asmconv_test.exe || goto :fail
+"%CC%" build64\rawdump.o build64\gvlib.lib build64\mem.o %LINKFLAGS% -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\rawdump.exe || goto :fail
+"%CC%" build64\asmconv_test.o build64\gvlib.lib build64\mem.o %LINKFLAGS% -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\asmconv_test.exe || goto :fail
 
 echo.
 echo Build succeeded:

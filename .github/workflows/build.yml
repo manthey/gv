@@ -1,0 +1,112 @@
+# Build GV (Graphic Viewer), 64-bit, with MSVC + nmake (the official build).
+#
+# Replaces the former AppVeyor configuration:
+#  - every push to master updates a rolling "gv-latest" GitHub release
+#  - pushing a tag, or publishing a release in the GitHub UI, builds that
+#    tag's version (stamped from the tag name) and publishes the artifacts
+#    to the release
+name: Build
+
+on:
+  push:
+    branches: [master]
+    tags: ['*']
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Put cl, link, rc and nmake on the PATH (VS2022, 64-bit host/target).
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+
+      # On a tag or release build, stamp the source version from the tag name
+      # (e.g. tag "1.16" or "v1.16" becomes VERSION 1 / SUBVERSION 16 and
+      # FileVersion 1.16).  Tags not matching N.N are built as-is.
+      - name: Stamp version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}" -replace '^v', ''
+          if ($tag -match '^(\d+)\.(\d+)$') {
+            $major = $Matches[1]; $minor = $Matches[2]
+            (Get-Content gv.h) -replace '#define SUBVERSION\s+\d+', "#define SUBVERSION   $minor" | Set-Content gv.h
+            $rc = Get-Content gv.rc -Raw
+            $rc = $rc -replace 'FILEVERSION \d+,\d+,\d+,\d+', ('FILEVERSION ' + "$major`,$minor,0,0")
+            $rc = $rc -replace 'PRODUCTVERSION \d+,\d+,\d+,\d+', ('PRODUCTVERSION ' + "$major`,$minor,0,0")
+            $rc = $rc -replace '"FileVersion", "[0-9.]*', ('"FileVersion", "' + "$major.$minor")
+            $rc = $rc -replace '"ProductVersion", "[0-9.]*', ('"ProductVersion", "' + "$major.$minor")
+            Set-Content gv.rc $rc
+            Write-Host "Version stamped from tag: $major.$minor"
+          } else {
+            Write-Host "Tag '$tag' does not match N.N; building source version unchanged."
+          }
+
+      - name: Build
+        run: nmake
+
+      - name: List build results
+        run: dir gv.exe gvlib.dll gvlib.lib mem.lib
+
+      - name: Collect artifacts
+        run: |
+          mkdir dist
+          copy gv.exe dist\
+          copy gvlib.dll dist\
+          copy gvlib.lib dist\
+          copy gvlib.h dist\
+          copy mem.lib dist\
+          copy mem.h dist\
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gv-win64
+          path: dist/*
+
+      # Tag push (e.g. created alongside a release in the UI): create a
+      # release for the tag, mirroring the old AppVeyor
+      # "on: appveyor_repo_tag: true" deployment.
+      - name: Release (tag)
+        if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          files: dist/*
+          fail_on_unmatched_files: true
+
+      # Release published in the GitHub UI: attach the built artifacts to
+      # that release (the version is stamped from the release's tag).
+      - name: Release (published)
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
+
+      # Push to master: update the rolling "gv-latest" release, mirroring the
+      # old AppVeyor "tag: gv-latest, force_update: true" deployment.
+      - name: Release (rolling gv-latest)
+        if: github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+          gh release view gv-latest 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create gv-latest --title 'Release gv-latest' --notes 'Latest build of GV from master.'
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+          gh release upload gv-latest dist/* --clobber
+          if ($LASTEXITCODE -ne 0) { exit 1 }

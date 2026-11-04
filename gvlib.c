@@ -595,18 +595,19 @@ STATIC size_t mread(void *buffer, size_t size, size_t count, FILE *fptr)
 {
   long len;
   char bm[]="BM\0\0\0\0\0\0\0\0\0\0\0\0";
+  char *b = (char *)buffer;
 
   len = Mlen-Mpos;
   if (size*count > (size_t)len)
     count = len/size;
   len = size*count;
   if (Mpos-Mpad<0 && len+Mpos-Mpad>0) {
-    memcpy(buffer, bm, min(14, Mpad-Mpos));
-    buffer += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
+    memcpy(b, bm, min(14, Mpad-Mpos));
+    b += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
   else if (Mpos-Mpad<0) {
-    memcpy(buffer, bm, min(14, len));  Mpos += len;  len = 0; }
+    memcpy(b, bm, min(14, len));  Mpos += len;  len = 0; }
   if (len) {
-    memcpy(buffer, Mfile+Mpos-Mpad, len);
+    memcpy(b, Mfile+Mpos-Mpad, len);
     Mpos += len; }
   return(count);
 }
@@ -648,6 +649,7 @@ STATIC size_t mwrite(const void *buffer, size_t size, size_t count, FILE *fptr)
 {
   long len;
   uchar *file;
+  char *b = (char *)buffer;
 
   len = Mlen-Mpos;
   if (size*count > (size_t)len) {
@@ -659,11 +661,11 @@ STATIC size_t mwrite(const void *buffer, size_t size, size_t count, FILE *fptr)
       Mlen = Mpos+size*count; } }
   len = size*count;
   if (Mpos-Mpad<0 && len+Mpos-Mpad>0) {
-    buffer += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
+    b += (Mpad-Mpos);  len -= (Mpad-Mpos);  Mpos = Mpad; }
   else if (Mpos-Mpad<0) {
     Mpos += len;  len = 0; }
   if (len) {
-    memcpy(Mfile+Mpos-Mpad, buffer, len);
+    memcpy(Mfile+Mpos-Mpad, b, len);
     Mpos += len; }
   return(count);
 }
