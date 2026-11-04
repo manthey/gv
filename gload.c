@@ -1242,6 +1242,7 @@ STATIC uchar *load_jpg(FILE *fptr)
             pspec[1] |= 0x80; break; }
           part--;
           if (part!=-1) break;
+          start = s+2+jpg[s+2]*256+jpg[s+3];
           for (i=0; i<jpg[s+4]; i++) {
             com[i*7+4] = jpg[s+5+i*2];
             com[i*7+5] = jpg[s+6+i*2]>>4;
