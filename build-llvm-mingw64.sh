@@ -1,15 +1,14 @@
 #!/bin/sh
 # Build GV (Graphic Viewer) with LLVM-MinGW (clang), 64-bit, from a Git Bash
-# shell.  See build-llvm-mingw.sh (the 32-bit script) for the background; the
-# only difference is the toolchain target.  The C code is portable to both.
+# shell.
 #
-# Toolchain:
-#   https://github.com/mstorsjo/llvm-mingw/releases
-#   llvm-mingw-20261020-ucrt-x86_64.zip
+# The official build uses MSVC + nmake (see Makefile and appveyor.yml).  This
+# script reproduces it with a portable LLVM-MinGW x86_64 toolchain:
 #
 # The resource compiler in this toolchain is stricter than MSRC, so gv.rc is
-# copied to build64/gv.rc with three fixes applied by sed (MSRC tolerated all
-# of these; GNU/LLVM windres do not).
+# written in the canonical RC syntax (memory flags dropped, explicit commas
+# between control labels and ids, "EDITTEXT," typo fixed); both MSRC and
+# windres accept it.
 
 set -e
 cd "$(dirname "$0")"
@@ -30,14 +29,8 @@ LIBS="-ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -ldwmapi"
 rm -rf build64
 mkdir -p build64
 
-# Resource file (patched copy for windres syntax)
-sed -E 's/^(VersionGV VERSIONINFO).*/\1/;
-        s/ DIALOG (LOADONCALL |MOVEABLE |IMPURE |PURE |DISCARDABLE )+/ DIALOG /g;
-        s/^(.* DIALOG) +/\1 /;
-        s/(ICON [A-Za-z0-9_]+, IDC_STATIC) ([0-9])/\1, \2/;
-        s/("[^"]*") ([A-Za-z][A-Za-z0-9_]*)/\1, \2/g;
-        s/EDITTEXT, /EDITTEXT /' gv.rc > build64/gv.rc
-$WINDRES -I . build64/gv.rc -O coff -o build64/gv.res
+# Resource file
+$WINDRES -I . gv.rc -O coff -o build64/gv.res
 
 # Objects
 for f in gload gsave lzw gv gvlib mem process lib; do
