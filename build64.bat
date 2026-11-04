@@ -98,9 +98,17 @@ rem Import libraries
 "%AR%" rcs build64\gvlib.lib build64\lib.o || goto :fail
 "%AR%" rcs build64\mem.lib build64\mem.o || goto :fail
 
+rem Test tools (used by tests\interop.py and tests\asmconv_test.c).
+rem They use the gvlib API (LIBRARY-defined code), so link the gvlib.lib
+rem archive (built from lib.o) plus mem.o.
+"%CC%" -c %CFLAGS% tests\rawdump.c -o build64\rawdump.o || goto :fail
+"%CC%" -c %CFLAGS% tests\asmconv_test.c -o build64\asmconv_test.o || goto :fail
+"%CC%" build64\rawdump.o build64\gvlib.lib build64\mem.o -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\rawdump.exe || goto :fail
+"%CC%" build64\asmconv_test.o build64\gvlib.lib build64\mem.o -ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -o build64\asmconv_test.exe || goto :fail
+
 echo.
 echo Build succeeded:
-dir /b build64\gv.exe build64\gvlib.dll build64\gvlib.lib build64\mem.lib
+dir /b build64\gv.exe build64\gvlib.dll build64\gvlib.lib build64\mem.lib build64\rawdump.exe build64\asmconv_test.exe
 exit /b 0
 
 :dl_fail

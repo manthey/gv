@@ -3101,7 +3101,7 @@ STATIC void ungif(uchar *dest, uchar *source, long srclen)
         if (flags & 0x04)
           pinter |= 0x04;
         if (flags & 0x01)
-          pinter = (pinter & ~0xFFFFL) | 0x02L | (transindex << 8);
+          pinter = (pinter & 0xFFFF0000L) | 0x02L | (transindex << 8);
       }
       else if (label == 0xFF && end-p >= 19 && p[0] == 11 &&
                !memcmp(p+2, "NETSCAPE2.0", 11) && p[13] == 3 && p[14] == 1) {
@@ -3120,6 +3120,8 @@ STATIC void ungif(uchar *dest, uchar *source, long srclen)
     if (end-p < 10)
       break;
     flags = p[9];
+    if (flags & 0x40)             /* interlaced image (rows in GIF pass order) */
+      pinter |= 1;
     imagew = p[5]+256*p[6];       /* the image descriptor's size fields */
     imageh = p[7]+256*p[8];
     size = 10;
