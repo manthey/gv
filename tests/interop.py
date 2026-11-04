@@ -46,6 +46,12 @@ for name in sorted(os.listdir('out-new')):
     if img.size != (w, h):
         fails.append('%s: size %s vs %s' % (name, img.size, (w, h))); fail += 1
         continue
+    # JPEG is lossy: GV's integer DCT/IDCT and Pillow's differ by rounding,
+    # and chroma upsampling methods differ.  For smooth content these stay
+    # small; require a close match rather than an exact one.
+    jpeg = (img.format == 'JPEG')
+    def diffs_ok(diffs):
+        return max(diffs) <= 12 and sum(diffs) <= 3*len(diffs)
     if img.mode == 'P':
         p = img.getpalette() or []
         p = p + [0]*(768-len(p))
@@ -63,7 +69,8 @@ for name in sorted(os.listdir('out-new')):
         data = list(img.getdata())
         gv_idx = list(body[768:768+w*h])
         ramp = [i for i in range(256) for _ in range(3)]
-        if data != gv_idx:
+        if data != gv_idx and not (jpeg and
+                diffs_ok([abs(a-b) for a, b in zip(data, gv_idx)])):
             fails.append('%s: grey pixels differ' % name); fail += 1
         elif list(body[:768]) != ramp:
             fails.append('%s: grey palette is not the ramp' % name); fail += 1
@@ -71,10 +78,11 @@ for name in sorted(os.listdir('out-new')):
             ok += 1
     else:
         rgb = img.convert('RGB').tobytes()
-        if list(body[:w*h*3]) != list(rgb):
-            n = len(body[:w*h*3])
-            d = next((i for i in range(min(n, len(rgb)))
-                      if body[i] != rgb[i]), -1)
+        gv_rgb = body[:w*h*3]
+        if list(gv_rgb) != list(rgb) and not (jpeg and
+                diffs_ok([abs(a-b) for a, b in zip(gv_rgb, rgb)])):
+            d = next((i for i in range(min(len(gv_rgb), len(rgb)))
+                      if abs(gv_rgb[i]-rgb[i]) > (12 if jpeg else 0)), -1)
             fails.append('%s: rgb differs at %d' % (name, d)); fail += 1
         else:
             ok += 1

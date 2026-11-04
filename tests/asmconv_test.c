@@ -47,8 +47,10 @@ typedef struct {
 
 static void make_image(IMG *im, long w, long h, long pal,
                        unsigned long seedval, long pattern, long grey)
-/* pattern: 0 = noise, 1 = gradient, 2 = flat, 3 = vertical stripes
- * (stripes/flat are worst-case growth for LZW; noise is worst-case for RLE) */
+/* pattern: 0 = noise, 1 = gradient, 2 = flat, 3 = vertical stripes,
+ *          4 = smooth RGB ramps
+ * (stripes/flat are worst-case growth for LZW; noise is worst-case for RLE;
+ * smooth is needed for meaningful lossy cross-decoder comparison) */
 {
   long i, size = pal ? NPAL+w*h : w*h*3;
 
@@ -67,6 +69,13 @@ static void make_image(IMG *im, long w, long h, long pal,
       case 0:  im->data[i] = nextr(); break;
       case 1:  im->data[i] = (uchar)((p*7+p/w*13)&0xFF); break;
       case 2:  im->data[i] = (uchar)(0xA5); break;
+      case 4: {                /* smooth ramps: R across, G down, B their mix;
+                                * slow enough that chroma upsampling method
+                                * differences stay negligible */
+                  long k = p/3, c = p%3, x = k%im->w, y = k/im->w;
+                  long r = x*255/(im->w-1), g = y*255/(im->h-1);
+                  im->data[i] = (uchar)(c==0 ? r : c==1 ? g : (r+g)/2);
+                  break; }
       default: im->data[i] = (uchar)(((p/w)&1)*0xFF); break;
     }
   }
@@ -93,6 +102,20 @@ static void setup_gv(GV *gv, const char *name, long w, long h, long pal)
   gv->image = 0;  gv->dither = 0;  gv->offset = 0;
 }
 
+/* Custom quantization tables, in the same order the file's DQT segment and
+ * the quantizer use (zig-zag scan order): 64 luminance values followed by
+ * 64 chrominance values.  These are the standard (Annex K) tables. */
+static uchar jpgcust[128];
+static const uchar jpgcuststd[128] = {
+  16,11,10,16,24,40,51,61, 12,12,14,19,26,58,60,55,
+  14,13,16,24,40,57,69,56, 14,17,22,29,51,87,80,62,
+  18,22,37,56,68,109,103,77, 24,35,55,64,81,104,113,92,
+  49,64,78,87,103,121,120,101, 72,92,95,98,112,100,103,99,
+  17,18,24,47,99,99,99,99, 18,18,24,47,99,99,99,99,
+  24,24,47,99,99,99,99,99, 47,47,99,99,99,99,99,99,
+  99,99,99,99,99,99,99,99, 99,99,99,99,99,99,99,99,
+  99,99,99,99,99,99,99,99, 99,99,99,99,99,99,99,99 };
+
 typedef struct {
   const char *name;
   long format;
@@ -103,45 +126,51 @@ typedef struct {
                          jpg decimation/quality, gif giftype/interlace */
   long usetrans;      /* gif transparency */
   long pattern;       /* image pattern to use */
+  uchar *custom;      /* if non-zero, custom jpg quant tables (lum+chrom) */
 } SPEC;
 
 static SPEC specs[] = {
   /* name,          format,   color,         comp,     pal, a,b,   trans,pat */
-  {"t8_none",       GV_TIF,   TIF_8BIT,      TIF_NONE,     1, 0,0,     0, 0},
-  {"t8_none_g",     GV_TIF,   TIF_8BIT,      TIF_NONE,     1, 0,0,     0, 1},
-  {"t8_rle",        GV_TIF,   TIF_8BIT,      TIF_RLE,      1, 0,0,     0, 0},
-  {"t8_lzw",        GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,0,     0, 0},
-  {"t8_lzw_g",      GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,0,     0, 1},
-  {"t8_lzwflat",    GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,0,     0, 2},
-  {"t8_lzwpred",    GV_TIF,   TIF_8BIT,      TIF_LZWPRED,  1, 0,0,     0, 0},
-  {"t8_lzwpred_g",  GV_TIF,   TIF_8BIT,      TIF_LZWPRED,  1, 0,0,     0, 1},
-  {"t8_gv",         GV_TIF,   TIF_8BIT,      TIF_GV,       1, 0,0,     0, 0},
-  {"t8_gv_g",       GV_TIF,   TIF_8BIT,      TIF_GV,       1, 0,0,     0, 1},
-  {"t8_gvpred",     GV_TIF,   TIF_8BIT,      TIF_GVPRED,   1, 0,0,     0, 0},
-  {"t8_lzwrps",     GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,7,     0, 0},
-  {"t24_lzw",       GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 0,0,     0, 0},
-  {"t24_lzw_g",     GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 0,0,     0, 1},
-  {"t24_lzwflat",   GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 0,0,     0, 2},
-  {"t24_gv",        GV_TIF,   TIF_24BIT,     TIF_GV,       0, 0,0,     0, 0},
-  {"tg_lzw",        GV_TIF,   TIF_GREYSCALE, TIF_LZW,      1, 0,0,     0, 0},
-  {"tg_lzwpred",    GV_TIF,   TIF_GREYSCALE, TIF_LZWPRED,  1, 0,0,     0, 0},
-  {"tg_gv",         GV_TIF,   TIF_GREYSCALE, TIF_GV,       1, 0,0,     0, 0},
-  {"t24_lzwmot",    GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 1,0,     0, 0},
-  {"t24_rle",       GV_TIF,   TIF_24BIT,     TIF_RLE,      0, 0,0,     0, 0},
-  {"g87",           GV_GIF,   0,             0,            1, 0,0,     0, 0},
-  {"g89i",          GV_GIF,   0,             0,            1, 1,1,     0, 0},
-  {"g89t",          GV_GIF,   0,             0,            1, 1,0,     1, 0},
-  {"gflat",         GV_GIF,   0,             0,            1, 0,0,     0, 2},
-  {"pc8",           GV_PCX,   PCX_8BIT,      0,            1, 0,0,     0, 0},
-  {"pc24",          GV_PCX,   PCX_24BIT,     0,            0, 0,0,     0, 0},
-  {"b24",           GV_BMP,   BMP_24BIT,     0,            0, 0,0,     0, 0},
-  {"bp8",           GV_BMP,   BMP_PAL,       0,            1, 0,0,     0, 0},
-  {"p24b",          GV_PPM,   PPM_24BIT,     PPM_BINARY,   0, 0,0,     0, 0},
-  {"j11",           GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 0,75,    0, 0},
-  {"j21",           GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 1,75,    0, 0},
-  {"j22",           GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 2,75,    0, 0},
-  {"jg",            GV_JPG,   JPG_GREYSCALE, JPG_BASELINE, 0, 2,75,    0, 0},
-  {0,0,0,0,0,0,0,0,0}
+  {"t8_none",       GV_TIF,   TIF_8BIT,      TIF_NONE,     1, 0,0,     0, 0,0},
+  {"t8_none_g",     GV_TIF,   TIF_8BIT,      TIF_NONE,     1, 0,0,     0, 1,0},
+  {"t8_rle",        GV_TIF,   TIF_8BIT,      TIF_RLE,      1, 0,0,     0, 0,0},
+  {"t8_lzw",        GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,0,     0, 0,0},
+  {"t8_lzw_g",      GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,0,     0, 1,0},
+  {"t8_lzwflat",    GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,0,     0, 2,0},
+  {"t8_lzwpred",    GV_TIF,   TIF_8BIT,      TIF_LZWPRED,  1, 0,0,     0, 0,0},
+  {"t8_lzwpred_g",  GV_TIF,   TIF_8BIT,      TIF_LZWPRED,  1, 0,0,     0, 1,0},
+  {"t8_gv",         GV_TIF,   TIF_8BIT,      TIF_GV,       1, 0,0,     0, 0,0},
+  {"t8_gv_g",       GV_TIF,   TIF_8BIT,      TIF_GV,       1, 0,0,     0, 1,0},
+  {"t8_gvpred",     GV_TIF,   TIF_8BIT,      TIF_GVPRED,   1, 0,0,     0, 0,0},
+  {"t8_lzwrps",     GV_TIF,   TIF_8BIT,      TIF_LZW,      1, 0,7,     0, 0,0},
+  {"t24_lzw",       GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 0,0,     0, 0,0},
+  {"t24_lzw_g",     GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 0,0,     0, 1,0},
+  {"t24_lzwflat",   GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 0,0,     0, 2,0},
+  {"t24_gv",        GV_TIF,   TIF_24BIT,     TIF_GV,       0, 0,0,     0, 0,0},
+  {"tg_lzw",        GV_TIF,   TIF_GREYSCALE, TIF_LZW,      1, 0,0,     0, 0,0},
+  {"tg_lzwpred",    GV_TIF,   TIF_GREYSCALE, TIF_LZWPRED,  1, 0,0,     0, 0,0},
+  {"tg_gv",         GV_TIF,   TIF_GREYSCALE, TIF_GV,       1, 0,0,     0, 0,0},
+  {"t24_lzwmot",    GV_TIF,   TIF_24BIT,     TIF_LZW,      0, 1,0,     0, 0,0},
+  {"t24_rle",       GV_TIF,   TIF_24BIT,     TIF_RLE,      0, 0,0,     0, 0,0},
+  {"g87",           GV_GIF,   0,             0,            1, 0,0,     0, 0,0},
+  {"g89i",          GV_GIF,   0,             0,            1, 1,1,     0, 0,0},
+  {"g89t",          GV_GIF,   0,             0,            1, 1,0,     1, 0,0},
+  {"gflat",         GV_GIF,   0,             0,            1, 0,0,     0, 2,0},
+  {"pc8",           GV_PCX,   PCX_8BIT,      0,            1, 0,0,     0, 0,0},
+  {"pc24",          GV_PCX,   PCX_24BIT,     0,            0, 0,0,     0, 0,0},
+  {"b24",           GV_BMP,   BMP_24BIT,     0,            0, 0,0,     0, 0,0},
+  {"bp8",           GV_BMP,   BMP_PAL,       0,            1, 0,0,     0, 0,0},
+  {"p24b",          GV_PPM,   PPM_24BIT,     PPM_BINARY,   0, 0,0,     0, 0,0},
+  /* JPEG specs use the smooth pattern: comparing two decoders' output on
+   * lossy files is only meaningful for smooth content, where chroma
+   * upsampling method differences do not dominate. */
+  {"j11",           GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 0,75,    0, 4,0},
+  {"j21",           GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 1,75,    0, 4,0},
+  {"j22",           GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 2,75,    0, 4,0},
+  {"jg",            GV_JPG,   JPG_GREYSCALE, JPG_BASELINE, 0, 2,75,    0, 4,0},
+  {"jc",            GV_JPG,   JPG_24BIT,     JPG_BASELINE, 0, 0,100,   0, 4,
+                    (uchar *)jpgcust},
+  {0,0,0,0,0,0,0,0,0,0}
 };
 
 /* sizes used per format (TIF/JPG get all, GIF gets a subset) */
@@ -155,6 +184,7 @@ int main(int argc, char **argv)
   FILE *f;
   int failures = 0;
 
+  memcpy(jpgcust, jpgcuststd, sizeof(jpgcust));
   load_only = (argc > 2 && !strcmp(argv[2], "load"));
   if (argc > 3)  startspec = atoi(argv[3]);
   if (argc<2) { printf("usage: asmconv_test <outdir>\n");  return(2); }
@@ -206,7 +236,15 @@ int main(int argc, char **argv)
                       gv.fs.jpg.compression = s->comp;
                       gv.fs.jpg.dpi = 160;
                       gv.fs.jpg.decimation = s->a;
-                      gv.fs.jpg.quality = s->b*100;
+                      /* Quality scales the quantization tables (a percentage
+                       * of the base table values; 100 = tables unchanged, 0
+                       * = quantizer 1 = best quality).  It is NOT the IJG
+                       * "quality 0-100" scale; the save dialog allows 0 to
+                       * 2600 with a default of 50. */
+                      gv.fs.jpg.quality = s->b;
+                      gv.fs.jpg.usecustom = (s->custom != 0);
+                      if (s->custom)
+                        gv.fs.jpg.customquant = (char *)s->custom;
                       break; }
       hpic = image_handle(&im);
       snprintf(path, sizeof(path), "%s\\%s", dir, fname);
