@@ -134,6 +134,8 @@ long PreviewCoor[]={62,98,64,64, 134,98,64,64, 32,98,138,64};
 long LetterColor[6], PreCoor[MAXPREVIEW*2+4];
 SlideList *slide=0;
 
+BOOL get_window_rect(HWND Hwnd, RECT *rect);
+
 BOOL CALLBACK about(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the About dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
@@ -3752,7 +3754,7 @@ VOID CALLBACK preview_timer(HWND hwnd, ulong msg, ulong id, long time)
         if (!(pic2=malloc2(i+16+28672))) {
           free2(pic);  pic = 0; }
         else {
-          len = lzw(pic2+4, pic, pic2+i+8, size2(pic), i, 8);
+          len = lzw(pic2+4, pic, size2(pic), i, 8);
           ((long *)pic2)[0] = size2(pic);
           free2(pic);
           pic = pic2; } }
@@ -6384,7 +6386,7 @@ long slide_save(HWND hwnd, long saveas)
     low_memory(hwnd, serr, 0);  free2(work);  fclose(fptr);  Busy = 0;
     return(0); }
   slide->file[slide->numfile*FE-1] = 0;
-  head[2] = lzw(comp, slide->file, work, slide->numfile*FE, max, 8);
+  head[2] = lzw(comp, slide->file, slide->numfile*FE, max, 8);
   fwrite(comp, 1, head[2], fptr);
   free2(comp);
   head[3] = slide->numdir;
@@ -6393,7 +6395,7 @@ long slide_save(HWND hwnd, long saveas)
   if (!(comp=malloc2(max=(long)(slide->lendirname*1.391+16)))) {
     low_memory(hwnd, serr, 0);  free2(work);  fclose(fptr);  Busy = 0;
     return(0); }
-  head[6] = lzw(comp, slide->dirname, work, slide->lendirname, max, 8);
+  head[6] = lzw(comp, slide->dirname, slide->lendirname, max, 8);
   fwrite(slide->dir, 6, slide->numdir, fptr);
   fwrite(comp, 1, head[6], fptr);
   free2(comp);
@@ -6402,7 +6404,7 @@ long slide_save(HWND hwnd, long saveas)
   if (!(comp=malloc2(max=(long)(slide->lenfilename*1.391+16)))) {
     low_memory(hwnd, serr, 0);  free2(work);  fclose(fptr);
     Busy = 0;  return(0); }
-  head[9] = lzw(comp, slide->filename, work, slide->lenfilename, max, 8);
+  head[9] = lzw(comp, slide->filename, slide->lenfilename, max, 8);
   fwrite(comp, 1, head[9], fptr);
   free2(comp);
   head[10] = ftell(fptr);
@@ -6411,7 +6413,7 @@ long slide_save(HWND hwnd, long saveas)
     low_memory(hwnd, serr, 0);  free2(work);  fclose(fptr);
     Busy = 0;  return(0); }
   if (slide->lencatname)
-    head[12] = lzw(comp, slide->catname, work, slide->lencatname, max, 8);
+    head[12] = lzw(comp, slide->catname, slide->lencatname, max, 8);
   else
     head[12] = 0;
   fwrite(slide->cat, 8, 30, fptr);

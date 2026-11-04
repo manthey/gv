@@ -1,6 +1,5 @@
-*.obj
-*.res
-*.lib
-*.exe
-*.ini
-*.dll
+build/
+bin/
+out-*/
+lib_dump.c
+nul

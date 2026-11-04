@@ -12,6 +12,7 @@
 #include "process.h"
 
 #include "gload.c"
+#include "lzw.c"
 #include "gsave.c"
 #include "gvlib.c"
 #include "process.c"

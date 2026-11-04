@@ -125,22 +125,20 @@ uchar *load_pil         (FILE *fptr);
 uchar *load_ppm         (FILE *fptr);
 uchar *load_tga         (FILE *fptr);
 uchar *load_tif         (FILE *fptr);
-long   lzw              (void *dest, void *source, uchar *buf28k, long len,
-                         long maxlen, short numbits);
-long   lzwlen           (void *source, uchar *buf28k, long len,
+long   lzw              (uchar *dest, uchar *source, long len, long maxlen,
                          short numbits);
-long   lzwtif           (void *dest, void *source, uchar *buf28k, long len,
-                         long maxlen);
-long   lzwtiflen        (void *source, uchar *buf28k, long len);
+long   lzwlen           (uchar *source, long len, short numbits);
+long   lzwtif           (uchar *dest, uchar *source, long len, long maxlen);
+long   lzwtiflen        (uchar *source, long len);
 int    mclose           (FILE *fptr);
 FILE  *mopen            (char *name, char *mode);
 FILE  *mopen2           (char *name, char *mode);
 void   move             (long flags, long x, long y, long clear);
-size_t mread            (void *buffer, size_t size, size_t count,
+size_t mread            (char *buffer, size_t size, size_t count,
                          FILE *fptr);
 int    mseek            (FILE *fptr, long offset, int origin);
 long   mtell            (FILE *fptr);
-size_t mwrite           (void *buffer, size_t size, size_t count,
+size_t mwrite           (char *buffer, size_t size, size_t count,
                          FILE *fptr);
 long   palettize        (uchar *image, long w, long h, long scale);
 uchar *palettize_graphic(long w, long h, long pinter, uchar *pic,
@@ -192,12 +190,12 @@ long   unccitt_t6       (uchar *output, uchar *input, long ln, long srclen,
                          long bitorder, long w, long h);
 void   undct_1d         (long *src, long *dest);
 void   undct_1d_alt     (long *src, long *dest);
-void   ungif            (void *dest, void *source, long len);
+void   ungif            (uchar *dest, uchar *source, long len);
 void   uninterlace      (char *addr, long rev);
-void   unlzw            (void *dest, void *source, long maxlen, long srclen,
+void   unlzw            (uchar *dest, uchar *source, long maxlen, long srclen,
                          short numbits);
-void   unlzwtif         (void *dest, void *source, long maxlen, long srclen);
-long   unrle            (void *dest, void *source, long len, long srclen);
+void   unlzwtif         (uchar *dest, uchar *source, long maxlen, long srclen);
+long   unrle            (uchar *dest, uchar *source, long len, long srclen);
 long   use_palette      (uchar *pal);
 void   vertical_flip    (uchar *image, long w, long h);
 

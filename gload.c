@@ -264,15 +264,13 @@ STATIC void bgr_to_rgb(uchar *image, long siz)
  *        long size: number of values to convert.  Each value is 3 bytes.
  *                                                             2/26/96-DWM */
 {
-  __asm {
-          mov esi, image
-          mov ecx, siz
-bgrrgb1:  mov al, [esi]
-          xchg al, [esi+2]
-          mov [esi], al
-          add esi, 03
-          loop   bgrrgb1
-    }
+  long i;
+  uchar t;
+
+  for (i=0; i<siz; i++) {
+    t = image[i*3];
+    image[i*3] = image[i*3+2];
+    image[i*3+2] = t; }
 }
 
 STATIC short endian(short *x)
@@ -509,24 +507,13 @@ STATIC void jpeg_shift(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/5/96-DWM */
 {
-  __asm {
-          mov edi, dest
-          mov esi, source
-          mov ecx, 0x040
-jshift1:  mov eax, [esi]
-          sar eax, 0x13
-          cmp ax, 0x80
-          jl      jshift2
-          mov al, 0x7F
-          jmp     jshift3
-jshift2:  cmp ax, 0xFF80
-          jge     jshift3
-          mov al, 0x80
-jshift3:  mov [edi], al
-          inc edi
-          add esi, 0x04
-          loop    jshift1
-    }
+  long i, v;
+
+  for (i=0; i<0x40; i++) {
+    v = source[i] >> 19;             /* arithmetic shift, as in the asm */
+    if (v > 127)       dest[i] = 0x7F;
+    else if (v < -128) dest[i] = 0x80;
+    else               dest[i] = (uchar)v; }
 }
 
 STATIC void jpeg_shift_add(uchar *dest, long *source)
@@ -535,24 +522,13 @@ STATIC void jpeg_shift_add(uchar *dest, long *source)
  * Enter: uchar *dest: byte array to store results.
  *        long *source: source array of values to convert.      3/7/96-DWM */
 {
-  __asm {
-          mov edi, dest
-          mov esi, source
-          mov ecx, 0x40
-jshifta1: mov eax, [esi]
-          sar eax, 0x13
-          add ax, 0x80
-          cmp ax, 0x100
-          jb      jshifta3
-          jge     jshifta2
-          xor al, al
-          jmp     jshifta3
-jshifta2: mov al, 0xFF
-jshifta3: mov [edi], al
-          inc edi
-          add esi, 0x04
-          loop    jshifta1
-    }
+  long i, v;
+
+  for (i=0; i<0x40; i++) {
+    v = (source[i] >> 19) + 128;     /* arithmetic shift, as in the asm */
+    if (v > 255)      dest[i] = 0xFF;
+    else if (v < 0)   dest[i] = 0x00;
+    else              dest[i] = (uchar)v; }
 }
 
 STATIC void jpeg_undct(long *res, char *dest, long w, long rw, long rh, long add)
@@ -2166,335 +2142,6 @@ STATIC uchar *load_tif(FILE *fptr)
   return(Grey);
 }
 
-STATIC long lzw(uchar *dest, uchar *source, uchar *buf, long len, long maxlen,
-                short numbits)
-/* Compress a set of data using the LZW compression scheme.  Note that if the
- *  destination buffer is filled, there will not be an eof code written.  In
- *  the worst case, the LZW routine will produce output which is 1.391 times
- *  the size of the original input.
- * Enter: long dest: absolute memory location for compressed data.
- *        long source: memory location for data to compress.
- *        char *buf: 28k of work space.
- *        long len: length of data to compress.  Must be at least 2 bytes.
- *        long maxlen: length of output buffer.  Must be at least 8 bytes.
- *        int numbits: number of bits to begin.
- * Exit:  long len: length of compressed data, including eof. 12/11/94-DWM */
-{
-  uchar codesize, initcodesize;
-  ushort clearcode, eof, firstfree, freecode, maxcode, initmaxcode, incode,
-         nextlink;
-  long finlen;
-
-  __asm {
-          xor ebx, ebx
-          mov ecx, maxlen                    ;zero out the destination buffer
-          shr ecx, 0x02
-          dec ecx
-          mov edx, dest
-          xor eax, eax
-lzw1:     mov [edx], eax
-          add edx, 0x04
-          loop    lzw1
-          mov ecx, maxlen
-          and ecx, 0x03
-          add ecx, 0x04
-lzw2:     mov [edx], al
-          inc edx
-          loop    lzw2
-          mov eax, dest                   ;almost the same beginning as unlzw
-          sub eax, 0x04
-          add maxlen, eax
-          mov al, BYTE PTR numbits
-          mov cl, al
-          mov dx, 0x01
-          shl dx, cl
-          mov clearcode, dx
-          mov cx, dx
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          mov maxcode, cx
-          mov initmaxcode, cx
-          mov edx, dest
-          xor cx, cx
-          xor eax, eax
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov incode, ax
-          mov ax, clearcode
-lzw3:     mov edi, eax                                    ;add code to output
-          shl eax, cl
-          or  [edx], eax
-          add cl, codesize
-          xor eax, eax
-          mov al, cl
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          cmp edx, maxlen
-          jge     lzw14
-          cmp di, eof
-          je      lzw14
-          cmp di, clearcode
-          jne     lzw7
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          xor eax, eax
-          xor ebx, ebx
-lzw4:     mov [esi+ebx], eax
-          add bx, 0x04
-          cmp bx, 0x2000
-          jne     lzw4
-          mov nextlink, bx
-          jmp     lzw7
-lzw5:     mov ax, [esi+edi+1]                         ;continue building code
-          mov incode, ax
-          jmp     lzw7
-lzw6:     mov ax, [esi+ebx+1]
-          mov incode, ax
-lzw7:     xor eax, eax                                       ;build next code
-          cmp len, 0x00
-          je      lzw12
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov bx, incode
-          shl bx, 0x01
-          mov edi, ebx
-          sub edi, 0x03
-          mov bx, [esi+ebx]
-lzw8:     test bx, bx
-          je      lzw10
-          cmp [esi+ebx], al
-          je      lzw6
-          xor edi, edi
-          mov di, [esi+ebx+3]
-          test edi, edi
-          je      lzw9
-          cmp [esi+edi], al
-          je      lzw5
-          mov bx, [esi+edi+3]
-          jmp     lzw8
-lzw9:     mov edi, ebx
-lzw10:    mov bx, nextlink
-          mov [esi+edi+3], bx
-          add nextlink, 0x05
-          mov [esi+ebx], al
-          xor edi, edi
-          mov di, freecode
-          mov [esi+ebx+1], edi
-          mov di, incode
-          mov incode, ax
-          shl edi, cl
-          or  [edx], edi
-          add cl, codesize
-          mov ax, cx
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          cmp edx, maxlen
-          jge     lzw14
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw7
-          inc codesize
-          shl maxcode, 0x01
-          cmp codesize, 0x0C
-          jl      lzw7
-          jg      lzw11
-          sub maxcode, 0x01
-          jmp     lzw7
-lzw11:    dec codesize
-          mov ax, clearcode
-          jmp     lzw3
-lzw12:    mov ax, incode                                     ;write last code
-          shl eax, cl
-          or  [edx], eax
-          add cl, codesize
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw13
-          cmp codesize, 0x0C
-          jne     lzw13
-          inc codesize
-lzw13:    xor eax, eax
-          mov ax, eof
-          jmp     lzw3
-lzw14:    xor eax, eax                               ;return total lzw length
-          mov al, cl
-          add al, 0x07
-          shr al, 0x03
-          add eax, edx
-          sub eax, dest
-          mov finlen, eax
-    }
-  return(finlen);
-}
-
-STATIC long lzwlen(uchar *source, uchar *buf, long len, short numbits)
-/* Compute the length that data compressed with the lzw compression scheme
- *  will end up being.  No actual data is written.
- * Enter: long source: memory location for data to compress.
- *        char *buf: 28k of work space.
- *        long len: length of data to compress.  Must be at least 2 bytes.
- *        int numbits: number of bits to begin.
- * Exit:  long len: length of compressed data, including eof. 12/11/94-DWM */
-{
-  uchar codesize, initcodesize;
-  ushort clearcode, eof, firstfree, freecode, maxcode, initmaxcode, incode,
-         nextlink;
-  long finlen;
-
-  __asm {
-          xor ebx, ebx
-          mov al, BYTE PTR numbits
-          mov cl, al
-          mov dx, 0x01
-          shl dx, cl
-          mov clearcode, dx
-          mov cx, dx
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          mov maxcode, cx
-          mov initmaxcode, cx
-          xor edx, edx
-          xor cx, cx
-          xor eax, eax
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov incode, ax
-          mov ax, clearcode
-lzw3:     mov edi, eax                                    ;add code to output
-          shl eax, cl
-          add cl, codesize
-          xor eax, eax
-          mov al, cl
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          cmp di, eof
-          je      lzw14
-          cmp di, clearcode
-          jne     lzw7
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          xor eax, eax
-          xor ebx, ebx
-lzw4:     mov [esi+ebx], eax
-          add bx, 0x04
-          cmp bx, 0x2000
-          jne     lzw4
-          mov nextlink, bx
-          jmp     lzw7
-lzw5:     mov ax, [esi+edi+1]                         ;continue building code
-          mov incode, ax
-          jmp     lzw7
-lzw6:     mov ax, [esi+ebx+1]
-          mov incode, ax
-lzw7:     xor eax, eax                                       ;build next code
-          cmp len, 0x00
-          je      lzw12
-          mov esi, source
-          mov al, [esi]
-          inc source
-          mov esi, buf
-          dec len
-          mov bx, incode
-          shl bx, 0x01
-          mov edi, ebx
-          sub edi, 0x03
-          mov bx, [esi+ebx]
-lzw8:     test bx, bx
-          je      lzw10
-          cmp [esi+ebx], al
-          je      lzw6
-          xor edi, edi
-          mov di, [esi+ebx+3]
-          test edi, edi
-          je      lzw9
-          cmp [esi+edi], al
-          je      lzw5
-          mov bx, [esi+edi+3]
-          jmp     lzw8
-lzw9:     mov edi, ebx
-lzw10:    mov bx, nextlink
-          mov [esi+edi+3], bx
-          add nextlink, 0x05
-          mov [esi+ebx], al
-          xor edi, edi
-          mov di, freecode
-          mov [esi+ebx+1], edi
-          mov di, incode
-          mov incode, ax
-          add cl, codesize
-          mov ax, cx
-          shr ax, 0x03
-          add edx, eax
-          and cl, 0x07
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw7
-          inc codesize
-          shl maxcode, 0x01
-          cmp codesize, 0x0C
-          jl      lzw7
-          jg      lzw11
-          sub maxcode, 0x01
-          jmp     lzw7
-lzw11:    dec codesize
-          mov ax, clearcode
-          jmp     lzw3
-lzw12:    mov ax, incode                                     ;write last code
-          add cl, codesize
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jle     lzw13
-          cmp codesize, 0x0C
-          jne     lzw13
-          inc codesize
-lzw13:    mov ax, eof
-          jmp     lzw3
-lzw14:    xor eax, eax                               ;return total lzw length
-          mov al, cl
-          add al, 0x07
-          shr al, 0x03
-          add eax, edx
-          mov finlen, eax
-    }
-  return(finlen);
-}
-
 STATIC void plane_to_rgb(uchar *image, long w, long h)
 /* Convert a file in the format of the red,green,and blue planes (organized
  *  on a line by line basis) to RGB triplets.
@@ -3636,309 +3283,6 @@ STATIC void uninterlace(char *addr, long rev)
   free2(buf);
 }
 
-STATIC void unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
-             short numbits)
-/* LZW decode data until the specified number of bytes have been created or
- *  an eof code is encountered.  This routine only works on LZW data which
- *  was created from 8 bit samples and has a maximum code length of 12 bits.
- *  Even through the data must have been created from 8 bit samples, it may
- *  have had fewer significant bits, hence the numbits parameter.
- * Enter: long dest: pointer to absolute memory location for unlzwed data.
- *        long source: pointer to source informtaion.
- *        long maxlen: maximum size of destination.
- *        long srclen: number of bytes in source.
- *        int numbits: bit size of data to decompact.         12/10/94-DWM */
-{
-  uchar codesize, initcodesize, pos;
-  ushort clearcode, eof, firstfree, freecode, maxcode, bitmask, codemask,
-         initcodemask, initmaxcode, oldcode, incode, finchar;
-
-  __asm {
-          xor ebx, ebx
-          mov eax, dest
-          add maxlen, eax
-          mov al, BYTE PTR numbits
-          mov cl, al
-          mov dx, 0x01
-          shl dx, cl
-          mov clearcode, dx
-          mov cx, dx
-          mov bitmask, dx
-          dec bitmask
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          mov freecode, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          mov maxcode, cx
-          mov initmaxcode, cx
-          mov edx, dest                                     ;begin LZW decode
-          mov esi, source
-          add srclen, esi
-          mov pos, 0x00
-          mov ax, bitmask
-          shl ax, 0x01
-          inc ax
-          mov codemask, ax
-          mov initcodemask, ax
-          xor edi, edi
-unlzw1:   mov eax, [esi]                                      ;read next code
-          mov cl, pos
-          shr eax, cl
-          add cl, codesize
-          cmp cl, 0x08
-          jl      unlzw2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzw7
-          cmp cl, 0x08
-          jl      unlzw2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzw7
-unlzw2:   mov pos, cl
-          and ax, codemask
-          cmp ax, eof
-          je      unlzw7
-          cmp ax, clearcode
-          jne     unlzw3
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initcodemask
-          mov codemask, ax
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          mov eax, [esi]
-          mov cl, pos
-          shr eax, cl
-          add cl, codesize
-          mov pos, cl
-          and ax, codemask
-          mov oldcode, ax
-          and ax, bitmask
-          mov finchar, ax
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          jb      unlzw1
-          jmp     unlzw7
-unlzw3:   mov incode, ax                                        ;process code
-          cmp ax, freecode
-          jl      unlzw4
-          mov ax, oldcode
-          mov bx, finchar
-          mov [outcode+edi], bl
-          inc edi
-unlzw4:   cmp ax, bitmask
-          jle     unlzw5
-          mov bx, ax
-          mov cl, [suffix+ebx]
-          mov [outcode+edi], cl
-          inc edi
-          shl bx, 0x01
-          mov ax, [prefix+ebx]
-          jmp     unlzw4
-unlzw5:   mov finchar, ax
-          mov [outcode+edi], al
-          inc edi
-unlzw6:   mov al, [outcode+edi-1]
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          je      unlzw7
-          dec edi
-          jne     unlzw6
-          mov bx, freecode
-          mov ax, finchar
-          mov [suffix+ebx], al
-          shl bx, 0x01
-          mov cx, oldcode
-          mov [prefix+ebx], cx
-          mov bx, incode
-          mov oldcode, bx
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jl      unlzw1
-          cmp codesize, 0x0C
-          jge     unlzw1
-          inc codesize
-          shl codemask, 0x01
-          inc codemask
-          shl maxcode, 0x01
-          jmp     unlzw1
-unlzw7:
-    }
-}
-
-STATIC void unlzwtif(uchar *dest, uchar *source, long maxlen, long srclen)
-/* TIFF LZW decode data until the specified number of bytes have been created
- *  or an eof code is encountered.  This routine only works on LZW data which
- *  was created from 8 bit samples and has a maximum code length of 12 bits.
- *  This routine only works on TIFF style LZW data.
- * Enter: long dest: pointer to absolute memory location for unlzwed data.
- *        long source: pointer to source informtaion.
- *        long maxlen: maximum size of destination.
- *        long srclen: length of input data.                  12/10/94-DWM */
-{
-  uchar codesize, initcodesize, pos;
-  ushort clearcode, eof, firstfree, freecode, maxcode, bitmask, codemask,
-         initcodemask, initmaxcode, oldcode, incode, finchar;
-
-  __asm {
-          xor ebx, ebx
-          mov eax, dest
-          add maxlen, eax
-          mov al, 0x8
-          mov dx, 0x0100
-          mov clearcode, dx
-          mov cx, dx
-          mov bitmask, dx
-          dec bitmask
-          inc dx
-          mov eof, dx
-          inc dx
-          mov firstfree, dx
-          mov freecode, dx
-          inc al
-          mov codesize, al
-          mov initcodesize, al
-          shl cx, 0x01
-          dec cx                               ;Remove line for GIF style LZW
-          mov maxcode, cx
-          mov initmaxcode, cx
-          mov edx, dest                                     ;begin LZW decode
-          mov esi, source
-          add srclen, esi
-          mov pos, 0x00
-          mov ax, bitmask
-          shl ax, 0x01
-          inc ax
-          mov codemask, ax
-          mov initcodemask, ax
-          xor edi, edi
-unlzwt1:  mov eax, [esi]                                      ;read next code
-          mov ch, al                 ;These 7 lines are the same as bswap eax
-          mov cl, ah
-          shl ecx, 0x10
-          shr eax, 0x10
-          mov ch, al
-          mov cl, ah
-          mov eax, ecx
-          mov cl, 0x20
-          sub cl, pos
-          sub cl, codesize
-          shr eax, cl            ;Remove from bswap to here for GIF style LZW
-          mov cl, pos      ;Add shr eax, cl after this line for GIF style LZW
-          add cl, codesize
-          cmp cl, 0x08
-          jl      unlzwt2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzwt7
-          cmp cl, 0x08
-          jl      unlzwt2
-          sub cl, 0x08
-          inc esi
-          cmp esi, srclen
-          jge     unlzwt7
-unlzwt2:  mov pos, cl
-          and ax, codemask
-          cmp ax, eof
-          je      unlzwt7
-          cmp ax, clearcode
-          jne     unlzwt3
-          mov al, initcodesize                                   ;clear codes
-          mov codesize, al
-          mov ax, initcodemask
-          mov codemask, ax
-          mov ax, initmaxcode
-          mov maxcode, ax
-          mov ax, firstfree
-          mov freecode, ax
-          mov eax, [esi]
-          mov ch, al                 ;These 7 lines are the same as bswap eax
-          mov cl, ah
-          shl ecx, 0x10
-          shr eax, 0x10
-          mov ch, al
-          mov cl, ah
-          mov eax, ecx
-          mov cl, 0x20
-          sub cl, pos
-          sub cl, codesize
-          shr eax, cl            ;Remove from bswap to here for GIF style LZW
-          mov cl, pos      ;Add shr eax, cl after this line for GIF style LZW
-          add cl, codesize
-          mov pos, cl
-          and ax, codemask
-          mov oldcode, ax
-          and ax, bitmask
-          mov finchar, ax
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          jl      unlzwt1
-          jmp     unlzwt7
-unlzwt3:  mov incode, ax                                        ;process code
-          cmp ax, freecode
-          jl      unlzwt4
-          mov ax, oldcode
-          mov bx, finchar
-          mov [outcode+edi], bl
-          inc edi
-unlzwt4:  cmp ax, bitmask
-          jle     unlzwt5
-          mov bx, ax
-          mov cl, [suffix+ebx]
-          mov [outcode+edi], cl
-          inc edi
-          shl bx, 0x01
-          mov ax, [prefix+ebx]
-          jmp     unlzwt4
-unlzwt5:  mov finchar, ax
-          mov [outcode+edi], al
-          inc edi
-unlzwt6:  mov al, [outcode+edi-1]
-          mov [edx], al
-          inc edx
-          cmp edx, maxlen
-          je      unlzwt7
-          dec edi
-          jne     unlzwt6
-          mov bx, freecode
-          mov ax, finchar
-          mov [suffix+ebx], al
-          shl bx, 0x01
-          mov cx, oldcode
-          mov [prefix+ebx], cx
-          mov bx, incode
-          mov oldcode, bx
-          inc freecode
-          mov bx, freecode
-          cmp bx, maxcode
-          jl      unlzwt1
-          cmp codesize, 0x0C
-          jge     unlzwt1
-          inc codesize
-          shl codemask, 0x01
-          inc codemask
-          shl maxcode, 0x01
-          inc maxcode                          ;Remove line for GIF style LZW
-          jmp     unlzwt1
-unlzwt7:
-    }
-}
-
 STATIC long unrle(uchar *output, uchar *input, long ln, long srclen)
 /* Uncompress data using a run-length encoding scheme.  The size of the
  *  output is unpredicatable.  Decompression ends when len characters have
@@ -3949,53 +3293,40 @@ STATIC long unrle(uchar *output, uchar *input, long ln, long srclen)
  *        long srclen: maximum length of input.
  * Exit:  long len: length of rle code used.                  11/30/92-DWM */
 {
-  long finlen;
+  uchar *ip = input, *op = output, n, v;
+  uchar *opend;
+  long count;
 
-  __asm {
-          mov edi, input
-          mov esi, output
-          mov ecx, esi
-          add ecx, ln
-          cmp ecx, esi
-          jne     unrle1
-          mov ecx, 0xFFFFFFFF
-unrle1:   mov al, [edi]
-          inc edi
-          dec srclen
-          jl      unrle6
-          cmp al, 0x80
-          ja      unrle3
-          je      unrle6
-          inc al
-unrle2:   mov ah, [edi]
-          inc edi
-          dec srclen
-          jl      unrle6
-          mov [esi], ah
-          inc esi
-          cmp esi, ecx
-          jae     unrle6
-          dec al
-          jne     unrle2
-          jmp     unrle5
-unrle3:   mov ah, [edi]
-          inc edi
-          dec srclen
-          jl      unrle6
-          dec al
-unrle4:   mov [esi], ah
-          inc esi
-          cmp esi, ecx
-          jae     unrle6
-          inc al
-          jne     unrle4
-unrle5:   cmp esi, ecx
-          jb      unrle1
-unrle6:   mov eax, edi
-          sub eax, input
-          mov finlen, eax
+  /* The end pointer is one past the last output byte; 0 for ln means the
+   *  output size is unlimited (as in the asm, which used 0xFFFFFFFF). */
+  opend = ln ? output+ln : (uchar *)-1L;
+  for (;;) {
+    n = *ip++;                       /* read, then check, as the asm does */
+    if (--srclen < 0)  break;
+    if (n > 0x80) {                  /* run of the next byte, 257-n times */
+      v = *ip++;
+      if (--srclen < 0)  break;
+      count = 257-n;
+      do {
+        *op++ = v;
+        if (op >= opend)  goto done;
+      } while (--count);
     }
-  return(finlen);
+    else if (n == 0x80)              /* end of RLE code */
+      break;
+    else {                           /* n+1 literal bytes */
+      count = n+1;
+      do {
+        v = *ip++;
+        if (--srclen < 0)  goto done;
+        *op++ = v;
+        if (op >= opend)  goto done;
+      } while (--count);
+    }
+    if (op >= opend)  break;
+  }
+done:
+  return((long)(ip-input));
 }
 
 STATIC void vertical_flip(uchar *image, long w, long h)

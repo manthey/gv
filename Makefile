@@ -10,8 +10,8 @@ RC_OPTS=/n /nologo
 all: gv.exe gvlib.lib mem.lib gvlib.dll
 
 
-gv.exe: gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res
-	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib dwmapi.lib
+gv.exe: gload.obj gsave.obj lzw.obj gv.obj gvlib.obj mem.obj process.obj gv.res
+	link $(LINK_OPTS) /OUT:gv.exe gload.obj gsave.obj lzw.obj gv.obj gvlib.obj mem.obj process.obj gv.res advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib dwmapi.lib
 
 gv.res: gv.rc gvrc.h
 	rc $(RC_OPTS) gv.rc
@@ -28,6 +28,8 @@ mem.obj: mem.c mem.h
 	cl /c $(CL_OPTS) mem.c
 process.obj: process.c process.h mem.h
 	cl /c $(CL_OPTS) process.c
+lzw.obj: lzw.c gload.h
+	cl /c $(CL_OPTS) lzw.c
 
 
 gvlib.lib: lib.obj
