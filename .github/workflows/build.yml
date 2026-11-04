@@ -57,9 +57,11 @@ jobs:
         run: nmake
 
       - name: List build results
+        shell: cmd
         run: dir gv.exe gvlib.dll gvlib.lib mem.lib
 
       - name: Collect artifacts
+        shell: cmd
         run: |
           mkdir dist
           copy gv.exe dist\
