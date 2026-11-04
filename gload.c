@@ -814,8 +814,6 @@ STATIC uchar *load_gif(FILE *fptr)
     perr = 0x805;  free2(new);  return(0); }
   if (pinter)
     uninterlace(new+768, 0);
-  for (i=0; i<768; i++)
-    new[i] = new[i]*4.048;
   pinter = 1;
   return(new);
 }
@@ -3040,221 +3038,153 @@ STATIC void undct_1d_alt(long *src, long *dest)
 STATIC void ungif(uchar *dest, uchar *source, long srclen)
 /* Decode any GIF file.  The file must be completely stored in memory, and
  *  there must be sufficient space to store the uncompressed image, including
- *  space for a color map (768 bytes).  The original data is modified.  Note
- *  that interlaced images will still be interlaced.  Three global values are
- *  set: pwidth, pheight, and pinter.  Bit 0 of pinter is 0 if the image is
- *  not interlaced, and 1 if it is.  Bit 1 of pinter is 1 if a transparent
- *  color is specified.  Bit 2 of pinter is 0 if the image is reset between
- *  frames, 1 if it persists.  Bits 8-15 contain the transparent color.  Bits
- *  16-31 contain the delay time in 1/100ths of a second.
- * Enter: long dest: pointer to absolute memory location for final image.
- *        long source: pointer to source informtaion.
- *        long srclen: length of source data.                   5/1/94-DWM */
+ *  space for a color map (768 bytes).  Note that interlaced images will
+ *  still be interlaced.  Global values are set:  pwidth and pheight hold
+ *  the image size (pwidth is -1 if the file could not be decoded), and
+ *  pinter holds:  bit 0: image is interlaced;  bit 1: a transparent color
+ *  is specified;  bit 2: the image persists between frames;  bits 8-15:
+ *  the transparent color;  bits 16-31: the delay time in 1/100ths second.
+ *  The color table of the selected image is written to dest as RGB bytes
+ *  (0-255), and the pixels to dest+768.  If ppart selects an image other
+ *  than the first, earlier images are skipped.  If more images follow the
+ *  decoded one, bit 0x80 is set in pspec[1].  The Netscape loop count is
+ *  stored in pspec+0x10.  Image offsets within the file are ignored; the
+ *  image is decoded linearly, as in the original version.
+ * Enter: uchar *dest: pointer to memory for the palette and the image.
+ *        uchar *source: pointer to the GIF file data.
+ *        long srclen: length of source data.                   2026-DWM */
 {
-  uchar bitspixel, background;
-  ushort totalx, totaly, xstart, ystart, xlength, ylength, xxend, yend,
-         bitmask, part;
-  long palsub;
+  uchar *p = source, *end = source+srclen, *pal = dest, *pix = dest+768;
+  uchar *comp, *q, label, flags, minbits, b;
+  long part = ppart, entries, size, i, found = 0, imagew, imageh;
 
-  __asm {
-          mov eax, ppart
-          mov part, ax
-          xor eax, eax                                     ;read first header
-          xor ecx, ecx
-          mov pinter, eax
-          mov pwidth, 0x0A
-          mov pheight, 0x0A
-          mov palsub, eax
-          mov esi, source
-          add srclen, esi
-          mov eax, [esi]
-          cmp eax, 0x38464947
-          jne     ungif18
-          mov ax, [esi+6]
-          mov totalx, ax
-          mov ax, [esi+8]
-          mov totaly, ax
-          mov al, [esi+0x0A]
-          and al, 0x07
-          inc al
-          mov bitspixel, al
-          mov al, [esi+0x0B]
-          mov background,al
-          cmp BYTE PTR [esi+0x0C], 00      ;pixel aspect ratio
-//          jne     ungif18
-          mov cl, bitspixel                                    ;read colormap
-          mov ax, 0x01
-          shl ax, cl
-          mov cx, ax
-          dec ax
-          mov bitmask, ax
-          mov bl, [esi+0x0A]
-          add esi, 0x0D
-          mov edi, dest
-          add dest, 0x0300
-          test bl, 0x80
-          je      ungif2
-          mov WORD PTR palsub, 0x0300
-ungif1:   mov eax, [esi]
-          shr eax, 0x02
-          and eax, 0x3F3F3F
-          mov [edi], eax
-          add edi, 0x03
-          add esi, 0x03
-          loop    ungif1
-ungif2:   cmp BYTE PTR [esi], 0x2C                      ;check for extensions
-          je      ungif6
-          cmp BYTE PTR [esi], 0x21                       ;record transparency
-          jne     ungif5
-          cmp part, 0x00
-          jg      ungif3
-          cmp BYTE PTR [esi+1], 0xF9
-          jne     ungifb
-          mov ax, [esi+4]
-          shl eax, 0x10
-          mov pinter, eax
-          xor eax, eax
-          mov al, [esi+3]
-          and al, 0x04
-          or  pinter, eax
-          xor eax, eax
-          test BYTE PTR [esi+3], 0x01
-          je      ungif3
-          mov ah,  [esi+6]
-          mov al, 0x02
-          mov WORD PTR pinter, ax
-          jmp     ungif3
-ungifb:   cmp BYTE PTR [esi+1], 0xFF
-          jne     ungif3
-          cmp DWORD PTR [esi+2], 0x54454E0B
-          jne     ungif3
-          mov ax, [esi+0x10]
-          mov WORD PTR [pspec+0x10], ax
-ungif3:   add esi, 0x02
-          cmp esi, srclen
-          jae     ungif18
-ungif4:   xor ebx, ebx
-          mov bl, BYTE PTR [esi]
-          inc bx
-          add esi, ebx
-          cmp esi, srclen
-          jae     ungif18
-          cmp bl, 0x01
-          jne     ungif4
-          jmp     ungif2
-ungif5:   inc esi
-          cmp esi, srclen
-          jae     ungif18
-          jmp     ungif2
-ungif6:   cmp part, 0x00                                     ;ignore an image
-          jle     ungif7
-          dec part
-          test BYTE PTR [esi+9], 0x80
-          je      ungifa
-          mov cl, [esi+9]
-          and cl, 0x07
-          inc cl
-          mov eax, 0x01
-          shl eax, cl
-          add esi, eax
-          add esi, eax
-          add esi, eax
-ungifa:   add esi, 0x0B
-          cmp esi, srclen
-          jae     ungif18
-          jmp     ungif4
-ungif7:   mov ax, [esi+1]                                       ;read header2
-          mov xstart, ax
-          mov bx, [esi+3]
-          mov ystart, bx
-          mov cx, [esi+5]
-          mov xlength, cx
-          mov WORD PTR pwidth, cx
-          mov dx, [esi+7]
-          mov ylength, dx
-          mov WORD PTR pheight, dx
-          add ax, cx
-          dec ax
-          mov xxend, ax
-          add bx, dx
-          dec bx
-          mov yend, bx
-          test BYTE PTR [esi+9], 0x40
-          je      ungif8
-          inc pinter
-ungif8:   test BYTE PTR [esi+9], 0x80                    ;read image colormap
-          je      ungif10
-          mov cl, BYTE PTR [esi+9]
-          and cl, 0x07
-          inc cl
-          mov ax, 0x01
-          shl ax, cl
-          mov cx, ax
-          mov edi, dest
-          sub edi, 0x0300
-ungif9:   mov eax, [esi+0x0A]
-          shr eax, 0x02
-          and eax, 0x3F3F3F
-          mov [edi], eax
-          add edi, 0x03
-          add esi, 0x03
-          cmp esi, srclen
-          jae     ungif18
-          loop    ungif9
-ungif10:  mov al, [esi+0x0A]       ;determine starting number of bits / pixel
-          mov bitspixel, al
-          add esi, 0x0B                          ;elminate block length bytes
-          cmp esi, srclen
-          jae     ungif17
-          mov source, esi
-          mov edi, esi
-          xor ch, ch
-ungif11:  mov cl, [esi]
-          cmp cl, 0x00
-          je      ungif13
-          inc esi
-          cmp esi, srclen
-          jae     ungif17
-ungif12:  mov al, [esi]
-          mov [edi], al
-          inc esi
-          cmp esi, srclen
-          jae     ungif17
-          inc edi
-          loop    ungif12
-          jmp     ungif11
-ungif13:  inc esi                                ;check for additional images
-          cmp esi, srclen
-          jae     ungif17
-ungif14:  cmp BYTE PTR [esi], 0x2C
-          je      ungif16
-          cmp BYTE PTR [esi], 0x21                       ;record transparency
-          jne     ungif17
-          add esi, 0x02
-          cmp esi, srclen
-          jae     ungif17
-ungif15:  xor ebx, ebx
-          mov bl, BYTE PTR [esi]
-          inc bx
-          add esi, ebx
-          cmp esi, srclen
-          jae     ungif17
-          cmp bl, 0x01
-          jne     ungif15
-          jmp     ungif14
-ungif16:  or  [pspec+1], 0x80
-ungif17:  xor eax, eax                                      ;decompress image
-          mov al, bitspixel
-          push eax
-          sub edi, source
-          push edi
-          push MAXGSIZE
-          push source
-          push dest
-          call    unlzw
-          add esp, 0x14
-ungif18:
+  pinter = 0;
+  pwidth = pheight = -1;
+  memset(pal, 0, 768);            /* the palette is fully owned here */
+  if (srclen < 13 || memcmp(p, "GIF8", 4))
+    return;
+  /* logical screen descriptor */
+  flags = p[10];
+  p += 13;
+  if (flags & 0x80) {             /* global color table */
+    entries = 3L << ((flags & 0x07)+1);
+    if (p+entries > end)
+      return;
+    for (i=0; i<entries && i<768; i++)
+      pal[i] = p[i];
+    p += entries;
+  }
+  for (;;) {                      /* scan the blocks of the GIF file */
+    if (p >= end)
+      break;
+    b = *p;
+    if (b == 0x3B)                /* trailer */
+      break;
+    if (b != 0x2C && b != 0x21) { /* unknown block: resync, as before */
+      p++;
+      continue;
     }
+    if (b == 0x21) {              /* extension */
+      long delay, transindex;
+      label = (p+1 < end ? p[1] : 0);
+      p += 2;
+      if (part > 0 || p >= end)
+        continue;                 /* extensions of skipped images are skipped */
+      if (label == 0xF9 && end-p >= 6 && p[0] >= 4) {
+        /* graphic control: transparency, persistence, and delay time */
+        flags = p[1];
+        delay = (ushort)(((long)p[2])+256*p[3]);
+        transindex = p[4];
+        pinter |= delay << 16;
+        if (flags & 0x04)
+          pinter |= 0x04;
+        if (flags & 0x01)
+          pinter = (pinter & ~0xFFFFL) | 0x02L | (transindex << 8);
+      }
+      else if (label == 0xFF && end-p >= 19 && p[0] == 11 &&
+               !memcmp(p+2, "NETSCAPE2.0", 11) && p[13] == 3 && p[14] == 1) {
+        /* netscape looping extension: the number of times to play */
+        ((short *)(pspec+0x10))[0] = (short)(((long)p[15])+256*p[16]);
+      }
+      while (p < end) {           /* skip the sub-blocks of the extension */
+        size = *p++;
+        if (!size)
+          break;
+        p += size;
+      }
+      continue;
+    }
+    /* image descriptor */
+    if (end-p < 10)
+      break;
+    flags = p[9];
+    imagew = p[5]+256*p[6];       /* the image descriptor's size fields */
+    imageh = p[7]+256*p[8];
+    size = 10;
+    if (flags & 0x80) {           /* local color table: replaces the palette */
+      entries = 3L << ((flags & 0x07)+1);
+      if (p+10+entries > end)
+        break;
+      for (i=0; i<entries && i<768; i++)
+        pal[i] = p[10+i];
+      size += entries;
+    }
+    if (end-p < size+1)
+      break;
+    if (part > 0) {               /* skip this image */
+      part--;
+      p += size;
+      while (p < end) {           /* skip the LZW data sub-blocks */
+        size = *p++;
+        if (!size)
+          break;
+        p += size;
+      }
+      continue;
+    }
+    minbits = p[size];
+    p += size+1;
+    /* collect the LZW data, stripping the sub-block headers in place */
+    comp = q = p;
+    while (p < end) {
+      size = *p++;
+      if (!size)
+        break;
+      if (p+size > end)
+        break;
+      memmove(q, p, size);
+      q += size;
+      p += size;
+    }
+    /* the width and height come from the image descriptor */
+    pwidth = imagew;
+    pheight = imageh;
+    /* decode the image (LZW decompression handles the rest) */
+    unlzw(pix, comp, MAXGSIZE, (long)(q-comp), (short)minbits);
+    found = 1;
+    /* check for a subsequent image (pspec records "more images") */
+    while (p < end) {
+      b = *p;
+      if (b == 0x2C) {
+        pspec[1] |= 0x80;
+        break;
+      }
+      if (b == 0x21) {            /* skip an extension */
+        p += 2;
+        while (p < end) {
+          size = *p++;
+          if (!size)
+            break;
+          p += size;
+        }
+        continue;
+      }
+      p++;
+    }
+    break;                        /* only one image is decoded */
+  }
+  if (!found)
+    pwidth = pheight = -1;
 }
 
 STATIC void uninterlace(char *addr, long rev)

@@ -3,3 +3,9 @@ bin/
 out-*/
 lib_dump.c
 nul
+*.obj
+*.exe
+*.dll
+*.lib
+*.res
+pyload.py

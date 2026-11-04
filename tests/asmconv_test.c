@@ -28,6 +28,8 @@
 
 #define NPAL 768
 
+static long load_only;
+
 /* deterministic pseudo-random byte generator (xorshift32) */
 static unsigned long rstate;
 static void seed(unsigned long s) { rstate = s ? s : 1; }
@@ -152,9 +154,10 @@ int main(int argc, char **argv)
   FILE *f;
   int failures = 0;
 
+  load_only = (argc > 2 && !strcmp(argv[2], "load"));
   if (argc<2) { printf("usage: asmconv_test <outdir>\n");  return(2); }
   strcpy(dir, argv[1]);
-  CreateDirectoryA(dir, NULL);
+  if (!load_only)  CreateDirectoryA(dir, NULL);
 
   for (s=specs; s->name; s++) {
     long nsizes = 4;
@@ -206,9 +209,13 @@ int main(int argc, char **argv)
       hpic = image_handle(&im);
       sprintf(path, "%s\\%s", dir, fname);
       gv.name = path;
-      if (!SaveGraphic(&gv, hpic)) {
+      if (!load_only && !SaveGraphic(&gv, hpic)) {
         printf("SAVE-ERR %s error=%lx\n", fname, gv.error);  failures++; }
       GlobalFree(hpic);
+      if (load_only && (f = fopen(path, "rb")) == NULL) {
+        printf("MISSING %s\n", fname);  failures++;  free_image(&im);
+        continue; }
+      if (load_only)  fclose(f);
 
       /* load back and compare (exact for lossless formats) */
       setup_gv(&gv, path, 0, 0, 0);
