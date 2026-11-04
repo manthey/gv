@@ -1,4 +1,3 @@
-#ifndef LIBRARY
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +5,6 @@
 #include <time.h>
 #include "gload.h"
 #define STATIC
-#endif
 
 #define NUMFORMATS 10
 
@@ -152,9 +150,9 @@ STATIC long append_tif(FILE *fptr, char *spec)
   long end, size;
 
   (*fread2)(total, 8, 1, fptr);
-  if (memcmp(total, "MM\0\x2A", 4) && (end=memcmp(total, "II\x2A", 4))) {
+  end = (memcmp(total, "II\x2A\x00", 4) != 0);  /* 0 little endian, 1 big */
+  if (memcmp(total, "MM\0\x2A", 4) && end) {
     (*fclose2)(fptr);  return(perr=5); }
-  end = (end!=0);
   if (end!=1-spec[6]) { (*fclose2)(fptr);  return(perr=7); }
   (*fseek2)(fptr, 0, SEEK_END);
   size = (*ftell2)(fptr);
@@ -254,14 +252,16 @@ STATIC long best_color(long allowed, long trans, long inver)
       if (inver!=-1) {
         new[762] = (trans>>16)&0xFF;  new[763] = (trans>>8)&0xFF;
         new[764] = trans&0xFF; }
-      for (i=j=0; i<(long)pwidth*pheight; i++, j+=3)
+      for (i=j=0; i<(long)pwidth*pheight; i++, j+=3) {
         if ((ppic[j]<<16)+(ppic[j+1]<<8)+ppic[j+2]==trans)
           new[i+768] = 255;
         else if ((ppic[j]<<16)+(ppic[j+1]<<8)+ppic[j+2]==inver)
           new[i+768] = 254;
         else
           new[i+768] = ColorTable[((ppic[j]&0xF8)<<8)+((ppic[j+1]&0xFC)<<3)+
-                                  (ppic[j+2]>>3)];  break;
+                                  (ppic[j+2]>>3)];
+      }
+      break;
     case 2: if (!(new=malloc2((long)pwidth*pheight))) {
         perr = 3;  return(-1); }
       for (i=j=0; i<(long)pwidth*pheight; i++, j+=3)
@@ -278,7 +278,7 @@ STATIC long best_color(long allowed, long trans, long inver)
               abs(val[i&3]-winpal[j*3+2]);
           if (t<s) {  s = t;  pal[i] = j; } }
       if (!(new=malloc2((long)pwidth*pheight))) { perr = 3; return(-1); }
-      for (i=j=0; i<(long)pwidth*pheight; i++, j+=3)
+      for (i=j=0; i<(long)pwidth*pheight; i++, j+=3) {
         if ((s=(ppic[j]<<16)+(ppic[j+1]<<8)+ppic[j+2])==trans)
           new[i] = 255;
         else if (s==inver)
@@ -287,7 +287,7 @@ STATIC long best_color(long allowed, long trans, long inver)
           for (k=0, s=1024; k<16; k++) {
             t = abs(ppic[j]-winpal[k*3])+abs(ppic[j+1]-winpal[k*3+1])+
                 abs(ppic[j+2]-winpal[k*3+2]);
-            if (t<s) { s = t;  new[i] = k; } } break;
+            if (t<s) { s = t;  new[i] = k; } } } break;
     case 4: w = pwidth;  h = pheight;
       if (padded) { w = ((pwidth+31)/32)*32;  h = ((pheight+15)/16)*16; }
       if (!(new=malloc2(w*h))) {
@@ -339,8 +339,8 @@ STATIC long best_color(long allowed, long trans, long inver)
       pwidth = w;  pheight = h; break;
     case 100: if (!(new=malloc2((long)pwidth*pheight*3))) {
         perr = 3; return(-1); }
-      for (i=s=0; i<(long)pwidth*pheight; i++, s+=3)
-        memcpy(new+s, ppic+ppic[i+768]*3, 3); break;
+      for (i=s=0; i<(long)pwidth*pheight; i++, s+=3) {
+        memcpy(new+s, ppic+ppic[i+768]*3, 3); } break;
     case 101: if (trans<0 || trans>254) break;
       if (!(new=malloc2((long)pwidth*pheight+768))) break;
       memmove(new, ppic, (long)pwidth*pheight+768);
@@ -357,11 +357,11 @@ STATIC long best_color(long allowed, long trans, long inver)
           pal[i+768] = 255;
         else if (i==inver)
           pal[i+768] = 254;
-        else
+        else {
           pal[i+768] = (pal[ppic[s]]+pal[ppic[s+1]+256]+pal[ppic[s+2]+512]>
-                        127);
-      for (i=0; i<(long)pwidth*pheight; i++)
-        new[i] = pal[ppic[i+768]+768]; break;
+                        127); }
+      for (i=0; i<(long)pwidth*pheight; i++) {
+        new[i] = pal[ppic[i+768]+768]; } break;
     case 103: case 106: for (i=0; i<64; i++)
         for (j=0, s=1024; j<16; j++) {
           t = abs(val[i>>4]-winpal[j*3])+abs(val[(i&0xC)>>2]-winpal[j*3+1])+
@@ -378,8 +378,8 @@ STATIC long best_color(long allowed, long trans, long inver)
             t = abs(ppic[j]-winpal[k*3])+abs(ppic[j+1]-winpal[k*3+1])+
                 abs(ppic[j+2]-winpal[k*3+2]);
             if (t<s) {  s = t;  pal[i+768] = k; } }
-      for (i=0; i<(long)pwidth*pheight; i++)
-        new[i] = pal[ppic[i+768]+768]; break;
+      for (i=0; i<(long)pwidth*pheight; i++) {
+        new[i] = pal[ppic[i+768]+768]; } break;
     case 104: w = pwidth;  h = pheight;
       if (padded) { w = ((pwidth+31)/32)*32;  h = ((pheight+15)/16)*16; }
       if (!(new=malloc2(w*h))) {
@@ -403,8 +403,8 @@ STATIC long best_color(long allowed, long trans, long inver)
         pal[i]   = 255-ppic[s]  -pal[i+3];
         pal[i+1] = 255-ppic[s+1]-pal[i+3];
         pal[i+2] = 255-ppic[s+2]-pal[i+3]; }
-      for (i=s=0; i<(long)pwidth*pheight; i++, s+=4)
-        memcpy(new+s, pal+ppic[i+768]*4, 4); break;
+      for (i=s=0; i<(long)pwidth*pheight; i++, s+=4) {
+        memcpy(new+s, pal+ppic[i+768]*4, 4); } break;
     case 107: w = ((pwidth+31)/32)*32;  h = ((pheight+15)/16)*16;
       if (!(new=malloc2(w*h*3))) { perr = 3; return(-1); }
       new2 = new+w*h;  new3 = new2+w*h;
@@ -457,8 +457,8 @@ STATIC void bmp4rle(uchar *src, long w, FILE *fptr, uchar *buf)
   while (s<w) {
     cur = src[s];  if (s+1<w)  cur2 = src[s+1];  run = 2-(s+1==w);
     while (1) {
-      if (src[s+run]!=cur || s+run>=w || run==255) break;  run++;
-      if (src[s+run]!=cur2 || s+run>=w || run==255) break;  run++; }
+      if (src[s+run]!=cur || s+run>=w || run==255) { break; }  run++;
+      if (src[s+run]!=cur2 || s+run>=w || run==255) { break; }  run++; }
     if (run>=3 || count || s+run>=w) {
       buf[d] = run;  buf[d+1] = (cur<<4)+cur2;  d+=2;  s+=run; }
     run = min(4, w-s);
@@ -494,7 +494,7 @@ STATIC void bmp8rle(uchar *src, long w, FILE *fptr, uchar *buf)
   while (s<w) {
     cur = src[s];  run = 1;
     while (1) {
-      if (src[s+run]!=cur || s+run>=w || run==255) break;  run++; }
+      if (src[s+run]!=cur || s+run>=w || run==255) { break; }  run++; }
     if (run>=3 || count || s+run>=w) {
       buf[d] = run;  buf[d+1] = cur;  d+=2;  s+=run; }
     run = 2-(s+1==w);
@@ -579,6 +579,60 @@ STATIC void fill_zone24(uchar *dest, long bclr, long count)
     dest[i*3+2] = (uchar)(bclr >> 16); }
 }
 
+/* State for the JPEG entropy encoder, shared by jpeg_dct_start,
+ *  jpeg_dct, and jpeg_dct_end.                              2026-DWM */
+static long jlastdc[3], jfp, jfb;
+static FILE *jpeg_file;
+static uchar *jpeg_buf, *jpeg_fbuf;
+
+STATIC void jpeg_dct_start(FILE *file, uchar *scratch)
+/* Initialize the JPEG entropy encoder: reset the DC predictors, remember
+ *  the output file, and prepare the 4 KB scratch buffer (2 KB of zero-run
+ *  table followed by 2 KB of pending bits).
+ * Enter: FILE *file: file to write the entropy-coded data to.
+ *        uchar *scratch: 4 KB buffer for the encoder's use.  2026-DWM */
+{
+  long i, j, k;
+
+  jlastdc[0] = jlastdc[1] = jlastdc[2] = 0;
+  jpeg_file = file;
+  jpeg_buf = scratch;
+  for (i=0, j=1, k=0; i<2048; i++) {
+    jpeg_buf[i] = (uchar)k;
+    if (i+1==j) {  j *= 2;  k++; } }
+  jpeg_fbuf = jpeg_buf+2048;  jfp = jfb = 0;
+  memset(jpeg_fbuf, 0, 2048);
+}
+
+STATIC void jpeg_dct_end(void)
+/* Flush the JPEG entropy encoder: write any pending bits, byte-stuff the
+ *  0xFF bytes, output the buffer, and slide the last kilobyte of unflushed
+ *  data down for the next call (the caller keeps writing until done).
+ * Enter: none.  Exit: none.                               2026-DWM */
+{
+  long i, j, k, l;
+  long v[1];
+  uchar *vc=(uchar *)v, *temp;
+
+  if (jfb) {                                        /* Write last of data */
+    v[0] = 0xFF;  v[0] <<= (24-jfb-8);
+    jpeg_fbuf[jfp] |= vc[2];  jfp++;  jfb = 0; }
+  i = k = 0;  j = jfp;                                    /* Stuff bytes */
+  temp = (j ? memchr(jpeg_fbuf+i, 0xFF, j) : 0);
+  while (temp) {
+    l = temp-jpeg_fbuf+1-i;
+    memcpy(jpeg_fbuf+2048+k, jpeg_fbuf+i, l);
+    jpeg_fbuf[2048+l+k] = 0;
+    k += l+1;  i += l;  j -= l;
+    temp = (j ? memchr(jpeg_fbuf+i, 0xFF, j) : 0); }
+  if (j)  memcpy(jpeg_fbuf+2048+k, jpeg_fbuf+i, j);
+  k += j;
+  if (k)  (*fwrite2)(jpeg_fbuf+2048, 1, k, jpeg_file);
+  jfp -= 1024;
+  memmove(jpeg_fbuf, jpeg_fbuf+1024, 1024);
+  memset(jpeg_fbuf+1024, 0, 1024);
+}
+
 STATIC void jpeg_dct(char *src, long w, long *div, long channel, long *huff)
 /* Encode an 8x8 block of an image.  This process first applies a discrete
  *  cosine transform, quantizes the results, differences the dc value,
@@ -610,51 +664,21 @@ STATIC void jpeg_dct(char *src, long w, long *div, long channel, long *huff)
 {
   long i, j, k, l, v[1], dct[64], *dest, en=0, *div2=div+64, dc, dcv;
   long ent[64], ents[64], entv[64];
-  static long lastdc[3], fp, fb;
-  static FILE *fptr;
-  static uchar *buf, *fbuf;
   static short nvaltbl[]={0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,
                           16383,32767};
   uchar *vc=(uchar *)v, *temp;
-
-  if (!src) {
-    if (w) {                                               /* Setup tables */
-      lastdc[0] = lastdc[1] = lastdc[2] = 0;
-      fptr = ((FILE *)w);
-      buf = (char *)div;
-      for (i=0, j=1, k=0; i<2048; i++) {
-        buf[i] = k;
-        if (i+1==j) {  j *= 2;  k++; } }
-      fbuf = buf+2048;  fp = fb = 0;
-      memset(fbuf, 0, 2048); }
-    else {
-      if (fb) {                                      /* Write last of data */
-        v[0] = 0xFF;  v[0] <<= (24-fb-8);
-        fbuf[fp] |= vc[2];  fp++;  fb = 0; }
-      i = k = 0;  j = fp;                                   /* Stuff bytes */
-      if (j) temp = memchr(fbuf+i, 0xFF, j);  else temp = 0;
-      while (temp) {
-        l = temp-fbuf+1-i;
-        memcpy(fbuf+2048+k, fbuf+i, l);
-        fbuf[2048+l+k] = 0;
-        k += l+1;  i += l;  j -= l;
-        if (j)  temp = memchr(fbuf+i, 0xFF, j);  else  temp = 0; }
-      if (j)  memcpy(fbuf+2048+k, fbuf+i, j);
-      k += j;
-      if (k)  (*fwrite2)(fbuf+2048, 1, k, fptr); }
-    return; }
   for (i=0, dest=dct; i<8; i++, src+=w, dest+=8)                    /* DCT */
     dct_1d(src, dest);
   for (i=0; i<8; i++)
     dct_1d_alt(dct+i, dct+i);
   if (dct[0]<0) { dcv = 1;  dct[0] = - dct[0]; }  else  dcv = 0;
   if (dct[0]<div2[0])  dc = 0;  else dc = (dct[0]+div2[0])/div[0];
-  if (dcv)  dc = -dc;  j = dc;
-  dc -= lastdc[channel];  lastdc[channel] = j;
+  if (dcv) { dc = -dc; }  j = dc;
+  dc -= jlastdc[channel];  jlastdc[channel] = j;
   if (dc<0) { dcv = 1;  dc = -dc; } else  dcv = 0;
   ents[0] = l = k = 0;
   for (i=1; i<64; i++) {
-    j = dct[zagtbl[i]];
+    j = dct[(uchar)zagtbl[(uchar)i]];
     if (j<0) { entv[en] = 1;  j = -j; }  else entv[en] = 0;
     if (j<div2[i]) {
       if (ents[en]<240)  ents[en]+=16;
@@ -665,41 +689,41 @@ STATIC void jpeg_dct(char *src, long w, long *div, long channel, long *huff)
   if (k!=63) {
     ent[l] = ents[l] = 0;                                /* No more values */
     en = l+1; }
-  i = buf[dc];  v[0] = huff[i];  l = huff[i+544];        /* Huffman encode */
-  v[0] <<= (24-l-fb);
-  fbuf[fp] |= vc[2];  fbuf[fp+1] |= vc[1];  fbuf[fp+2] |= vc[0];
-  fb += l;  while (fb>=8) { fp++;  fb -= 8; }
+  i = jpeg_buf[dc];  v[0] = huff[i];  l = huff[i+544];        /* Huffman encode */
+  v[0] <<= (24-l-jfb);
+  jpeg_fbuf[jfp] |= vc[2];  jpeg_fbuf[jfp+1] |= vc[1];  jpeg_fbuf[jfp+2] |= vc[0];
+  jfb += l;  while (jfb>=8) { jfp++;  jfb -= 8; }
   if (i) {
     if (dcv)  v[0] = nvaltbl[i]-dc;  else v[0] = dc;
-    v[0] <<= (24-i-fb);
-    fbuf[fp] |= vc[2];  fbuf[fp+1] |= vc[1];  fbuf[fp+2] |= vc[0];
-    fb += i;  while (fb>=8) { fp++;  fb -= 8; } }
+    v[0] <<= (24-i-jfb);
+    jpeg_fbuf[jfp] |= vc[2];  jpeg_fbuf[jfp+1] |= vc[1];  jpeg_fbuf[jfp+2] |= vc[0];
+    jfb += i;  while (jfb>=8) { jfp++;  jfb -= 8; } }
   for (j=0; j<en; j++) {
-    i = buf[ent[j]];  k = i+ents[j];
+    i = jpeg_buf[ent[j]];  k = i+ents[j];
     v[0] = huff[k+16];  l = huff[k+560];
-    v[0] <<= (24-l-fb);
-    fbuf[fp] |= vc[2];  fbuf[fp+1] |= vc[1];  fbuf[fp+2] |= vc[0];
-    fb += l;  while (fb>=8) { fp++;  fb -= 8; }
+    v[0] <<= (24-l-jfb);
+    jpeg_fbuf[jfp] |= vc[2];  jpeg_fbuf[jfp+1] |= vc[1];  jpeg_fbuf[jfp+2] |= vc[0];
+    jfb += l;  while (jfb>=8) { jfp++;  jfb -= 8; }
     if (i) {
       if (entv[j])  v[0] = nvaltbl[i]-ent[j];  else v[0] = ent[j];
-      v[0] <<= (24-i-fb);
-      fbuf[fp] |= vc[2];  fbuf[fp+1] |= vc[1];  fbuf[fp+2] |= vc[0];
-      fb += i;  while (fb>=8) { fp++;  fb -= 8; } } }
-  if (fp>=1024) {
+      v[0] <<= (24-i-jfb);
+      jpeg_fbuf[jfp] |= vc[2];  jpeg_fbuf[jfp+1] |= vc[1];  jpeg_fbuf[jfp+2] |= vc[0];
+      jfb += i;  while (jfb>=8) { jfp++;  jfb -= 8; } } }
+  if (jfp>=1024) {
     i = k = 0;  j = 1024;                                   /* Stuff bytes */
-    temp = memchr(fbuf+i, 0xFF, j);
+    temp = memchr(jpeg_fbuf+i, 0xFF, j);
     while (temp) {
-      l = temp-fbuf+1-i;
-      memcpy(fbuf+2048+k, fbuf+i, l);
-      fbuf[2048+k+l] = 0;
+      l = temp-jpeg_fbuf+1-i;
+      memcpy(jpeg_fbuf+2048+k, jpeg_fbuf+i, l);
+      jpeg_fbuf[2048+k+l] = 0;
       k += l+1;  i += l;  j -= l;
-      if (j)  temp = memchr(fbuf+i, 0xFF, j);  else  temp = 0; }
-    if (j)  memcpy(fbuf+2048+k, fbuf+i, j);
+      if (j)  temp = memchr(jpeg_fbuf+i, 0xFF, j);  else  temp = 0; }
+    if (j)  memcpy(jpeg_fbuf+2048+k, jpeg_fbuf+i, j);
     k += j;
-    (*fwrite2)(fbuf+2048, 1, k, fptr);
-    fp -= 1024;
-    memmove(fbuf, fbuf+1024, 1024);
-    memset(fbuf+1024, 0, 1024); }
+    (*fwrite2)(jpeg_fbuf+2048, 1, k, jpeg_file);
+    jfp -= 1024;
+    memmove(jpeg_fbuf, jpeg_fbuf+1024, 1024);
+    memset(jpeg_fbuf+1024, 0, 1024); }
 }
 
 STATIC long palettize(uchar *image, long w, long h, long scale)
@@ -789,7 +813,7 @@ STATIC long save_bmp(FILE *fptr, char *spec)
   uchar header[54], bits[]={24,8,1,4,0,0,0}, pal[1024];
   uchar *buf, *src, zero[4]={0,0,0,0};
 
-  if (best_color(clrtbl[spec[2]], -1, -1)<0) {
+  if (best_color(clrtbl[(uchar)spec[2]], -1, -1)<0) {
     (*fclose2)(fptr);  return(perr); }
   memcpy(header, "BM", 2);
   ((long *)(header+2))[1] = 0;
@@ -891,7 +915,7 @@ STATIC long save_curico(FILE *fptr, char *spec)
  * Exit:  long error: 0 for good, otherwise error number.      8/24/96-DWM */
 {
   long mx, my, trans=((long *)(spec+8))[0], inv=((long *)(spec+12))[0];
-  long clrtbl[]={0xF, 4, 8, 2, 1}, rw, rw1, i, j, k, loc, hx, hy, append=0;
+  long clrtbl[]={0xF, 4, 8, 2, 1}, rw, rw1, i, j, k, loc, append=0;
   long aphead, aptail, trans2, inv2;
   uchar *new, header[62], pal[1024], *buf, *src, bits[]={24,8,1,4,0,0,0};
   uchar zero[4]={0,0,0,0};
@@ -910,9 +934,7 @@ STATIC long save_curico(FILE *fptr, char *spec)
     case 1: mx = my = 16; break;
     case 2: mx = my = 32; }
   scale = pwidth/mx;  if (pheight/my>scale)  scale = pheight/my;
-  hx = ((short *)(spec+16))[0]/scale+(mx-pwidth/scale)/2;
-  hy = ((short *)(spec+16))[1]/scale+(my-pheight/scale)/2;
-  if (mx!=pwidth || my!=pheight) {                        /* Scale picture */
+    if (mx!=pwidth || my!=pheight) {                        /* Scale picture */
     if (pinter) {
       if (!(new=malloc2(mx*my+768))) {
         perr = 3; (*fclose2)(fptr); return(3); }
@@ -930,7 +952,7 @@ STATIC long save_curico(FILE *fptr, char *spec)
     inv2   = (ppic[inv  *3]<<16)+(ppic[inv  *3+1]<<8)+ppic[inv  *3+2]; }
   else {
     trans2 = trans;  inv2 = inv; }
-  if (best_color(clrtbl[spec[2]], trans, inv)<0) {
+  if (best_color(clrtbl[(uchar)spec[2]], trans, inv)<0) {
     (*fclose2)(fptr);  return(perr); }
   if (!pfree) {
     i = pwidth*pheight*(3-2*pinter)+768*pinter;
@@ -1166,12 +1188,12 @@ STATIC long save_graphic(char *name, uchar *image, char *spec, long free)
   ppic = image;  pfree = free;
   form = spec[0];
   if (form<0 || form>=NUMFORMATS) {
-    if (free && ppic)  free2(ppic);  return(1); }
+    if (free && ppic) { free2(ppic); }  return(1); }
   if (!(fptr=(*fopen2)(name, style[spec[1]!=0])))
     if (spec[1]!=0) {
       fptr = (*fopen2)(name, style[0]);  spec[1] = 0; }
   if (!fptr) {
-    if (free && ppic)  free2(ppic);  return(2+2*(spec[1]!=0)); }
+    if (free && ppic) { free2(ppic); }  return(2+2*(spec[1]!=0)); }
   switch (form+100*(spec[1]!=0)) {
     case 0: err = save_bmp(fptr, spec); break;
 #ifndef DOSLIB
@@ -1261,7 +1283,7 @@ STATIC long save_grob(FILE *fptr, char *spec)
       for (i=0; i<w; i++)
         if (!new[i+j*w])
           pic[j*x+i/8] |= tbl[i&7];
-    fprintf(fptr, "%%%%HP:T(1);\r\nGROB %d %d ", w, h*(colors-1));
+    fprintf(fptr, "%%%%HP:T(1);\r\nGROB %ld %ld ", w, h*(colors-1));
     for (i=0; i<x*h*(colors-1); i++)
       fprintf(fptr, "%02X", pic[i]); }
   else {
@@ -1299,7 +1321,7 @@ STATIC long save_jpg(FILE *fptr, char *spec)
  * Exit:  long error: 0 for good, otherwise error number.      8/24/96-DWM */
 {
   long clrtbl[]={0x180, 0x100, 0x80}, pw=pwidth, ph=pheight, pw2, pw4, jp;
-  long mcu[10], nmcu, mw=1, mh=1, nw, nh, i, j, k, l, m, s, size, size2;
+  long mcu[10], mw=1, mh=1, nw, nh, i, j, k, l, m, s, size, size2;
   long *divtbl, *divtbl2, *huff, *huff2, only=((uchar *)spec)[3]&0xC0;
   uchar *head, *buf;
   long hstart[]={0xB6,0xD7,0x18E,0x1AF,0,16,272,288};
@@ -1310,16 +1332,16 @@ STATIC long save_jpg(FILE *fptr, char *spec)
   head = buf+6144;  divtbl = (long *)(head+0x27B);  divtbl2 = divtbl+128;
   huff = divtbl+256;
   degrade = spec[6];
-  if (best_color(clrtbl[spec[2]], -1, -1)<0) {
+  if (best_color(clrtbl[(uchar)spec[2]], -1, -1)<0) {
     free2(buf);  (*fclose2)(fptr);  return(perr); }
   degrade = 0;
   memset(mcu, 0, 10*sizeof(long));
   switch ((spec[6]+1)*(pinter==7)) {
-    case 0: nmcu = 1;  break;
-    case 1: nmcu = 3;  mcu[1] = 1;  mcu[2] = 2; break;
-    case 2: nmcu = 4;  mcu[2] = 1;  mcu[3] = 2; mw = 2; break;
-    case 3: nmcu = 6;  mcu[4] = 1;  mcu[5] = 2; mw = 2; mh = 2; break;
-    case 4: nmcu = 10; mcu[8] = 1;  mcu[9] = 2; mw = 4; mh = 2; }
+    case 0: break;
+    case 1: mcu[1] = 1;  mcu[2] = 2; break;
+    case 2: mcu[2] = 1;  mcu[3] = 2; mw = 2; break;
+    case 3:  mcu[4] = 1;  mcu[5] = 2; mw = 2; mh = 2; break;
+    case 4: mcu[8] = 1;  mcu[9] = 2; mw = 4; mh = 2; }
   nw = ((pw+8*mw-1)/(8*mw));
   nh = ((ph+8*mh-1)/(8*mh));
   memcpy(head, jpghead, 0x27B);
@@ -1328,17 +1350,17 @@ STATIC long save_jpg(FILE *fptr, char *spec)
   i = spec[3]&0x3F;
   head[0x9F] = 0xC0+i*(i<2)+2*(i>=2);
   for (i=0; i<64; i++) {
-    if (spec[7])  j = ((uchar *)(((long *)(spec+0xC))[0]))[i];
+    if (spec[7])  j = ((uchar *)jpgcustomquant)[i];
     else          j = (long)(head[0x19+i]);
     j *= 0.01*((long *)(spec+8))[0];
-    if (j<=0) j = 1;  if (j>255) j = 255;
+    if (j<=0) { j = 1; }  if (j>255) { j = 255; }
     head[0x19+i] = j;  divtbl[i] = j<<19;  divtbl[i+64] = j<<18;
     if (j==255)  divtbl[i] = divtbl[i+64] = 0x7FFFFFFF;
-    if (spec[7])  j = ((uchar *)(((long *)(spec+0xC))[0]))[i+64];
-    else          j = (long)head[0x5E+i];
+    if (spec[7])  j = ((uchar *)jpgcustomquant)[i+64];
+    else          j = (long)head[0x5E + i];
     j *= 0.01*((long *)(spec+8))[0];
-    if (j<=0) j = 1;  if (j>255) j = 255;
-    head[0x5E+i] = j;  divtbl[i+128] = j<<19;  divtbl[i+192] = j<<18;
+    if (j<=0) { j = 1; }  if (j>255) { j = 255; }
+    head[0x5E + i] = j;  divtbl[i+128] = j<<19;  divtbl[i+192] = j<<18;
     if (j==255)  divtbl[i+128] = divtbl[i+192] = 0x7FFFFFFF; }
   ((short *)(head+0xA3))[0] = ph;  endian((short *)(head+0xA3));
   ((short *)(head+0xA5))[0] = pw;  endian((short *)(head+0xA5));
@@ -1376,7 +1398,7 @@ STATIC long save_jpg(FILE *fptr, char *spec)
           huff2[head[j]+544] = l;
           huff2[head[j]] = s>>(16-l);
           s += ln[l-1]; } }
-    jpeg_dct(0, (long)fptr, (long *)buf, 0, 0);                     /* DCT */
+    jpeg_dct_start(fptr, buf);
     for (j=0; j<nh*mh*8; j+=mh*8) {
       jp = j*pwidth;
       for (i=0; i<nw*mw*8; i+=mw*8) {
@@ -1405,7 +1427,7 @@ STATIC long save_jpg(FILE *fptr, char *spec)
             jpeg_dct(ppic+jp+i+24+pwidth*8,pwidth,divtbl, 0, huff);
             jpeg_dct(ppic+(j>>1)*pw4+(i>>2)+size, pw4,divtbl2,1,huff+272);
             jpeg_dct(ppic+(j>>1)*pw4+(i>>2)+size2,pw4,divtbl2,2,huff+272); } } }
-    jpeg_dct(0, 0, 0, 0, 0); }
+    jpeg_dct_end(); }
   (*fwrite2)(head+0x279, 1, 2, fptr);
   (*fclose2)(fptr);
   free2(buf);
@@ -1419,19 +1441,20 @@ STATIC long save_pcx(FILE *fptr, char *spec)
  *        char *spec: byte 2-color mode: 0-best, 1-1-bit, 2-8-bit palette.
  * Exit:  long error: 0 for good, otherwise error number.      8/24/96-DWM */
 {
-  long clrtbl[]={6,4,2}, x, i, j, cur, d, s, run;
+  long clrtbl[]={6,4,2,1}, x, i, j, p, d, s, run;  /* color 3 = 24-bit */
   uchar header[128], *src, *dest, *new;
 
-  if (best_color(clrtbl[spec[2]], -1, -1)<0) {
+  if (best_color(clrtbl[(uchar)spec[2]], -1, -1)<0) {
     (*fclose2)(fptr);  return(perr); }
   x = pwidth;  if (pinter==2) x = (pwidth+7)/8;
-  if (!(new=malloc2(x*pheight*2))) { perr = 3; (*fclose2)(fptr); return(0); }
+  if (!(new=malloc2(x*pheight*6+16))) { perr = 3; (*fclose2)(fptr); return(0); }
   memset(header, 0, 128);
   header[0] = 0xA;  header[1] = 5;  header[2] = 1;
-  header[3] = 1+7*(pinter==1);
+  header[3] = (pinter==0 ? 8 : 1+7*(pinter==1));   /* bits per plane */
   ((short *)(header+8))[0] = pwidth-1;  ((short *)(header+8))[1] = pheight-1;
   ((short *)(header+8))[2] = ((short *)(header+8))[3] = 160;
-  header[0x41] = 1;  ((short *)(header+0x42))[0] = x;
+  header[0x41] = (pinter==0 ? 3 : 1);  /* color planes */
+  ((short *)(header+0x42))[0] = x;
   ((short *)(header+0x44))[0] = pinter;
   header[0x13] = header[0x14] = header[0x15] = 255;
   (*fwrite2)(header, 1, 128, fptr);
@@ -1441,19 +1464,31 @@ STATIC long save_pcx(FILE *fptr, char *spec)
       for (i=0; i<pwidth; i++)
         if (!(i&7))       dest[i>>3] = 0x80*(src[i]!=0);
         else if (src[i])  dest[i>>3] |= imask[i&7]; } }
+  src = ppic;
   d = 0;
   for (j=0; j<pheight; j++) {
-    src = ppic+j*x;  s = 0;  if (pinter==1)  src += 768;
-    while (s<x) {
-      cur = src[s];  run = 1;
-      while (s+run<x && run<63)
-        if (src[s+run+1]==src[s]) run++;
-        else break;
-      if (run>1 || src[s]>63) {
-        new[d] = run | 0xC0;  new[d+1] = src[s];  d+=2; }
-      else {
-        new[d] = src[s];  d++; }
-      s += run; } }
+    if (pinter==0) {            /* 24-bit: encode the R, G, and B planes */
+      for (p=0; p<3; p++) {
+        s = j*x*3+p;  i = 0;
+        while (i<x) {
+          run = 1;
+          while (i+run<x && run<63 && src[s+(i+run)*3]==src[s+i*3]) run++;
+          if (run>1 || src[s+i*3]>63) {
+            new[d] = run | 0xC0;  new[d+1] = src[s+i*3];  d+=2; }
+          else {
+            new[d] = src[s+i*3];  d++; }
+          i += run; } } }
+    else {                      /* palette or grey: one plane per row */
+      src = ppic+j*x;  s = 0;  if (pinter==1)  src += 768;
+      i = 0;
+      while (i<x) {
+        run = 1;
+        while (i+run<x && run<63 && src[s+i+run]==src[s+i]) run++;
+        if (run>1 || src[s+i]>63) {
+          new[d] = run | 0xC0;  new[d+1] = src[s+i];  d+=2; }
+        else {
+          new[d] = src[s+i];  d++; }
+        i += run; } } }
   (*fwrite2)(new, 1, d, fptr);
   free2(new);
   if (pinter==1) {
@@ -1476,16 +1511,18 @@ STATIC long save_ppm(FILE *fptr, char *spec)
   char buf[80];
   uchar mask[]={0x80,0x40,0x20,0x10,8,4,2,1};
 
-  if (best_color(clrtbl[spec[2]], -1, -1)<0) {
+  if (best_color(clrtbl[(uchar)spec[2]], -1, -1)<0) {
     (*fclose2)(fptr);  return(perr); }
   switch (spec[6]*10+pinter) {
-    case 0: fprintf(fptr, "P3 %d %d 255\r\n", pwidth, pheight);
+    case 0: fprintf(fptr, "P3 %ld %ld 255\r\n", pwidth, pheight);
       l = (long)pwidth*pheight*3;
+      /* fall through */
     case 2: if (!l) {
-        fprintf(fptr, "P1 %d %d\r\n", pwidth, pheight);
+        fprintf(fptr, "P1 %ld %ld\r\n", pwidth, pheight);
         l = (long)pwidth*pheight; }
+      /* fall through */
     case 4: if (!l) {
-        fprintf(fptr, "P2 %d %d 255\r\n", pwidth, pheight);
+        fprintf(fptr, "P2 %ld %ld 255\r\n", pwidth, pheight);
         l = (long)pwidth*pheight; }
       buf[0] = 0;
       for (i=0; i<l; i++) {
@@ -1494,16 +1531,16 @@ STATIC long save_ppm(FILE *fptr, char *spec)
           buf[0] = 0; }
         sprintf(buf+strlen(buf), " %d", ppic[i]); }
       fprintf(fptr, "%s\r\n", buf+1); break;
-    case 10: fprintf(fptr, "P6 %d %d 255 ", pwidth, pheight);
+    case 10: fprintf(fptr, "P6 %ld %ld 255 ", pwidth, pheight);
       (*fwrite2)(ppic, 3, (long)pwidth*pheight, fptr); break;
     case 12: for (i=b=d=0; i<(long)pwidth*pheight; i++, b=(b+1)%8) {
         if (!b)           ppic[d] = mask[0]*ppic[i];
         else if (ppic[i]) ppic[d] |= mask[b];
         if (b==7) d++; }
       if (b)  d++;
-      fprintf(fptr, "P4 %d %d ", pwidth, pheight);
+      fprintf(fptr, "P4 %ld %ld ", pwidth, pheight);
       (*fwrite2)(ppic, 1, d, fptr); break;
-    case 14: fprintf(fptr, "P5 %d %d 255 ", pwidth, pheight);
+    case 14: fprintf(fptr, "P5 %ld %ld 255 ", pwidth, pheight);
       (*fwrite2)(ppic, 1, (long)pwidth*pheight, fptr); }
   (*fclose2)(fptr);
   return(0);
@@ -1559,7 +1596,7 @@ STATIC long save_tif(FILE *fptr, char *spec)
   long *lhead, zero=0;
 
   if (spec[1])  zero = (*ftell2)(fptr)-8;
-  if (best_color(clrtbl[spec[2]], -1, -1)<0) {
+  if (best_color(clrtbl[(uchar)spec[2]], -1, -1)<0) {
     (*fclose2)(fptr);  return(perr); }
   if (rps<1 || rps>pheight)  rps = pheight;
   ns = (pheight+rps-1)/rps;                      /* Maximum of 3000 strips */
@@ -1593,7 +1630,7 @@ STATIC long save_tif(FILE *fptr, char *spec)
           for (j=0; j<numtag; j++,d2+=2) {
             ((short *)(head+d2))[0] = 8;  if (end)  endian((short *)(head+d2)); } }
         break;
-      case 0x103: val = comp[spec[3]]; break;
+      case 0x103: val = comp[(uchar)spec[3]]; break;
       case 0x106: val = photoint[pinter]; break;
       case 0x111: tagsize = 4;  numtag = ns;  so = d1+8;
         if (ns>1) { val = d2+zero;  so = d2;  d2 += ns*4; } break;
@@ -1649,25 +1686,28 @@ STATIC long save_tif(FILE *fptr, char *spec)
           i = rle(dest, ppic+d1+j*w*bpp, w*bpp);
           (*fwrite2)(dest, 1, i, fptr); }
         free2(dest); break;
-      case 3: for (l=0; l<bpp; l++)
-        for (j=0; j<h; j++)
-          for (i=w-1; i>0; i--)
-            ppic[d1+(i+j*w)*bpp+l] -= ppic[d1+(i-1+j*w)*bpp+l];
+      case 3: for (l=0; l<bpp; l++) {
+        for (j=0; j<h; j++) {
+          for (i=w-1; i>0; i--) {
+            ppic[d1+(i+j*w)*bpp+l] -= ppic[d1+(i-1+j*w)*bpp+l]; } } }
+      /* fall through */
       case 2: if (!(dest=malloc2(j=(long)(d2*1.391+16))))
           if (!(dest=malloc2(j=lzwtiflen(ppic+d1, d2)))) {
             perr = 3; (*fclose2)(fptr); free2(head); return(3); }
         i = lzwtif(dest, ppic+d1, d2, j);
         (*fwrite2)(dest, 1, i, fptr);
         free2(dest);
-        if (spec[3]==3 && !pfree)
-          for (l=0; l<bpp; l++)
-            for (j=0; j<h; j++)
-              for (i=1; i<w; i++)
-                ppic[d1+(i+j*w)*bpp+l] += ppic[d1+(i-1+j*w)*bpp+l]; break;
-      case 5: for (l=0; l<bpp; l++)
-        for (j=0; j<h; j++)
-          for (i=w-1; i>0; i--)
-            ppic[d1+(i+j*w)*bpp+l] -= ppic[d1+(i-1+j*w)*bpp+l];
+        if (spec[3]==3 && !pfree) {
+          for (l=0; l<bpp; l++) {
+            for (j=0; j<h; j++) {
+              for (i=1; i<w; i++) {
+                ppic[d1+(i+j*w)*bpp+l] += ppic[d1+(i-1+j*w)*bpp+l]; } } } }
+          break;
+      case 5: for (l=0; l<bpp; l++) {
+        for (j=0; j<h; j++) {
+          for (i=w-1; i>0; i--) {
+            ppic[d1+(i+j*w)*bpp+l] -= ppic[d1+(i-1+j*w)*bpp+l]; } } }
+      /* fall through */
       case 4: if (!(dest=malloc2(j=(long)(d2*1.391+16))))
           if (!(dest=malloc2(j=lzwlen(ppic+d1, d2, 8)))) {
             perr = 3; (*fclose2)(fptr); free2(head); return(3); }
@@ -1684,7 +1724,7 @@ STATIC long save_tif(FILE *fptr, char *spec)
       endianl((long *)(head+so));  endianl((long *)(head+sc)); }
     so += 4;  sc += 4; }
   if (sifd)
-    sprintf(head+sifd, "%04X", (*ftell2)(fptr));
+    sprintf(head+sifd, "%04lX", (*ftell2)(fptr));
   if (!spec[1])
     (*fseek2)(fptr, 0, SEEK_SET);
   else
@@ -1722,10 +1762,10 @@ STATIC void scale_pic(uchar *dest, uchar *source, long srcw, long destw,
     h = dimgh;  w = simgw*h/simgh;  if (w>dimgw) w = dimgw; }
   if (bclr==-1) { w = dimgw;  h = dimgh; }
   horz = malloc2((w+h)*sizeof(long));
-  if (w!=dimgw || h!=dimgh || !horz)
-    for (j=0; j<dimgh; j++)
+  if (w!=dimgw || h!=dimgh || !horz) {
+    for (j=0; j<dimgh; j++) {
       if (trans==-1)  memset(dest+destw*j, bclr, dimgw);
-      else            memset(dest+destw*j, 0, dimgw);
+      else            memset(dest+destw*j, 0, dimgw); } }
   if (!horz)  return;
   vert = horz+w;
   stepx = stepy = min((float)simgw/w, (float)simgh/h);
@@ -1858,7 +1898,8 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
   short transgb;
   uchar transr, *s, *pic=0;
 
-  if (Interpolate&0x1C00) if (pic=malloc2(simgw*simgh*3)) {   /* Autospiff */
+  if (Interpolate&0x1C00)  pic = malloc2(simgw*simgh*3);
+  if (pic) {   /* Autospiff */
     for (j=0, s=source; j<simgh; j++, s+=srcw*3)
       memcpy(pic+simgw*3*j, s, simgw*3);
     srcw = simgw;
@@ -1887,7 +1928,7 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
         break;
       default: gamma = 1; }
     else             gamma = 1;
-    if (gamma>10)  gamma = 10;  if (gamma<0.1)  gamma = 0.1;
+    if (gamma>10) { gamma = 10; }  if (gamma<0.1) { gamma = 0.1; }
     for (i=0; i<256; i++) {
       if (i<=a)       hist[i] = 0;
       else if (i>=b)  hist[i] = 255;
@@ -1902,10 +1943,10 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
   if (bclr==-1) { w = dimgw;  h = dimgh; }
   if (w==simgw && h==simgh)  inter = 0;
   horz = malloc2((w+h)*sizeof(long)*(inter+1)*2+2304*sizeof(long));
-  if (w!=dimgw || h!=dimgh || !horz)
-    for (j=0; j<dimgh; j++)
+  if (w!=dimgw || h!=dimgh || !horz) {
+    for (j=0; j<dimgh; j++) {
       if (trans==-1)  fill_zone24(dest+destw*j*3, bclr, dimgw);
-      else            memset(dest+destw*j*3, 0, dimgw*3);
+      else            memset(dest+destw*j*3, 0, dimgw*3); } }
   if (!horz) {
     free2(pic);  return; }
   hfac = horz+w*(inter+1);
@@ -1924,8 +1965,8 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
   for (i=0; i<(h*(inter+1)); i++)  vert[i] *= 3*srcw;
   dest += ((dimgw-w)/2+(dimgh-h)/2*destw)*3;
   if (trans!=-1) {
-    transgb = ((short *)&trans)[0];
-    transr = ((uchar *)&trans)[2];
+    transgb = (short)(trans & 0xFFFF);        /* the same bytes, without */
+    transr = (uchar)((trans >> 16) & 0xFF);   /* a type-punned access */
     for (j=d=0; j<h; j++, d+=(destw-w)*3)
       for (i=0; i<w; i++, d+=3) {
         if (((short *)(source+vert[j]+horz[i]))[0]==transgb &&
@@ -1941,35 +1982,40 @@ STATIC void scale_pic24(uchar *dest, uchar *source, long srcw, long destw,
   else for (c=0; c<3; c++)
     for (j=0,d=c,s=source+c; j<h; j++, d+=(destw-w)*3)
       switch (inter) {
-        case 1: for (i=0; i<w; i++, d+=3)
+        case 1: for (i=0; i<w; i++, d+=3) {
           dest[d] = ((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w])*vfac[j+h])>>18;
+          }
           break;
-        case 2: for (i=0; i<w; i++, d+=3)
+        case 2: for (i=0; i<w; i++, d+=3) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2])*vfac[j+h2])>>18];
+          }
           break;
-        case 3: for (i=0; i<w; i++, d+=3)
+        case 3: for (i=0; i<w; i++, d+=3) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2]+s[vert[j]+horz[i+w3]]*hfac[i+w3])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h]+horz[i+w3]]*hfac[i+w3])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h2]+horz[i+w3]]*hfac[i+w3])*vfac[j+h2]+
                     (s[vert[j+h3]+horz[i]]*hfac[i]+s[vert[j+h3]+horz[i+w]]*hfac[i+w]+s[vert[j+h3]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h3]+horz[i+w3]]*hfac[i+w3])*vfac[j+h3])>>18];
+          }
           break;
-        case 4: for (i=0; i<w; i++, d+=3)
+        case 4: for (i=0; i<w; i++, d+=3) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2]+s[vert[j]+horz[i+w3]]*hfac[i+w3]+s[vert[j]+horz[i+w4]]*hfac[i+w4])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h]+horz[i+w4]]*hfac[i+w4])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h2]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h2]+horz[i+w4]]*hfac[i+w4])*vfac[j+h2]+
                     (s[vert[j+h3]+horz[i]]*hfac[i]+s[vert[j+h3]+horz[i+w]]*hfac[i+w]+s[vert[j+h3]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h3]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h3]+horz[i+w4]]*hfac[i+w4])*vfac[j+h3]+
                     (s[vert[j+h4]+horz[i]]*hfac[i]+s[vert[j+h4]+horz[i+w]]*hfac[i+w]+s[vert[j+h4]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h4]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h4]+horz[i+w4]]*hfac[i+w4])*vfac[j+h4])>>18];
+          }
           break;
-        case 5: for (i=0; i<w; i++, d+=3)
+        case 5: for (i=0; i<w; i++, d+=3) {
           dest[d] = crop[((s[vert[j]+horz[i]]*hfac[i]+s[vert[j]+horz[i+w]]*hfac[i+w]+s[vert[j]+horz[i+w2]]*hfac[i+w2]+s[vert[j]+horz[i+w3]]*hfac[i+w3]+s[vert[j]+horz[i+w4]]*hfac[i+w4]+s[vert[j]+horz[i+w5]]*hfac[i+w5])*vfac[j]+
                     (s[vert[j+h]+horz[i]]*hfac[i]+s[vert[j+h]+horz[i+w]]*hfac[i+w]+s[vert[j+h]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h]+horz[i+w5]]*hfac[i+w5])*vfac[j+h]+
                     (s[vert[j+h2]+horz[i]]*hfac[i]+s[vert[j+h2]+horz[i+w]]*hfac[i+w]+s[vert[j+h2]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h2]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h2]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h2]+horz[i+w5]]*hfac[i+w5])*vfac[j+h2]+
                     (s[vert[j+h3]+horz[i]]*hfac[i]+s[vert[j+h3]+horz[i+w]]*hfac[i+w]+s[vert[j+h3]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h3]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h3]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h3]+horz[i+w5]]*hfac[i+w5])*vfac[j+h3]+
                     (s[vert[j+h4]+horz[i]]*hfac[i]+s[vert[j+h4]+horz[i+w]]*hfac[i+w]+s[vert[j+h4]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h4]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h4]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h4]+horz[i+w5]]*hfac[i+w5])*vfac[j+h4]+
                     (s[vert[j+h5]+horz[i]]*hfac[i]+s[vert[j+h5]+horz[i+w]]*hfac[i+w]+s[vert[j+h5]+horz[i+w2]]*hfac[i+w2]+s[vert[j+h5]+horz[i+w3]]*hfac[i+w3]+s[vert[j+h5]+horz[i+w4]]*hfac[i+w4]+s[vert[j+h5]+horz[i+w5]]*hfac[i+w5])*vfac[j+h5])>>18];
+          }
         break; }
   free2(pic);
   free2(horz);

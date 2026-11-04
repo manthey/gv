@@ -11,7 +11,7 @@ void  *lock2    (HANDLE hmem);
 void  *malloc2  (size_t size);
 void  *pointer2 (HANDLE hmem);
 void  *realloc2 (void *current, size_t size);
-long   size2    (void *mem);
+long   size2    (const void *mem);
 HANDLE unlock2  (void *mem);
 
 #endif                                  /* End of prevent double inclusion */

@@ -10,7 +10,7 @@ from PIL import Image
 
 def gvraw(path):
     out = path + '.gvraw'
-    subprocess.run(['bin/rawdump.exe', path, out], check=True,
+    subprocess.run([os.environ.get('RAWDUMP', 'bin/rawdump.exe'), path, out], check=True,
                    capture_output=True)
     d = open(out, 'rb').read()
     os.remove(out)

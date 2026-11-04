@@ -1,4 +1,3 @@
-#ifndef LIBRARY
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +6,6 @@
 #include "process.h"
 #include "gload.h"
 #define STATIC
-#endif
 
 #define itag  ((short *)tag)
 #define ltag  ((long *)tag)
@@ -25,11 +23,12 @@ STATIC char zagtbl[]={ 0, 1, 8,16, 9, 2, 3,10, 17,24,32,25,18,11, 4, 5,
                       12,19,26,33,40,48,41,34, 27,20,13, 6, 7,14,21,28,
                       35,42,49,56,57,50,43,36, 29,22,15,23,30,37,44,51,
                       58,59,52,45,38,31,39,46, 53,60,61,54,47,55,62,63};
-STATIC FILE *(*fopen2)(char *name, char *mode)=fopen;
+STATIC FILE *(*fopen2)(const char *name, const char *mode)=fopen;
 STATIC size_t (*fread2)(void *buffer, size_t size, size_t count, FILE *fptr)=fread;
-STATIC size_t (*fwrite2)(void *buffer, size_t size, size_t count,FILE *fptr)=fwrite;
+STATIC size_t (*fwrite2)(const void *buffer, size_t size, size_t count,FILE *fptr)=fwrite;
 STATIC int (*fclose2)(FILE *fptr)=fclose;
 STATIC int (*fseek2)(FILE *fptr, long offset, int origin)=fseek;
+STATIC char *jpgcustomquant = 0;
 STATIC long (*ftell2)(FILE *fptr)=ftell;
 STATIC char software[TIF_MAXSOFTWARELEN], serial[TIF_MAXSERIALLEN],
        tifmodel[TIF_MAXMODELLEN];
@@ -363,8 +362,8 @@ STATIC long jpeg_decode(uchar *src, long offset, long len, uchar *dchuff,
       val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
       neg = !(val&0x8000);
       val = (val&0x7FFF)>>(16-val2);
-      if (neg)  dest[zagtbl[d]] = (val-nvaltbl[val2])*quant[d];
-      else      dest[zagtbl[d]] = (pvaltbl[val2]+val)*quant[d];
+      if (neg)  dest[(uchar)zagtbl[(uchar)d]] = (val-nvaltbl[val2])*quant[d];
+      else      dest[(uchar)zagtbl[(uchar)d]] = (pvaltbl[val2]+val)*quant[d];
       bit += val2;
       while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
     d++; }
@@ -403,7 +402,7 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
   static short nvaltbl[]={0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,
                           16383,32767};
   static short pvaltbl[]={0,1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,
-                          16384,32768};
+                          16384,(short)-32768};  /* 32768 wraps, as always here */
   static long run;
 
   p = offset>>3;  bit = offset&7;
@@ -434,11 +433,11 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
   if (!first && run) {
     if (succ && spec0)
       for (d=spec0; d<=spec1; d++)
-        if (dest[zagtbl[d]]) {
+        if (dest[(uchar)zagtbl[(uchar)d]]) {
           val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
           if (val&0x8000) {
-            if (dest[zagtbl[d]]>0)  dest[zagtbl[d]] += quant[d];
-            else                    dest[zagtbl[d]] -= quant[d]; }
+            if (dest[(uchar)zagtbl[(uchar)d]]>0)  dest[(uchar)zagtbl[(uchar)d]] += quant[d];
+            else                    dest[(uchar)zagtbl[(uchar)d]] -= quant[d]; }
           bit++;
           while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
     run--;  return((p<<3)+bit); }
@@ -458,11 +457,11 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
       run = val-1;
       if (succ)
         for (; d<=spec1; d++)
-          if (dest[zagtbl[d]]) {
+          if (dest[(uchar)zagtbl[(uchar)d]]) {
             val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
             if (val&0x8000) {
-              if (dest[zagtbl[d]]>0)  dest[zagtbl[d]] += quant[d];
-              else                    dest[zagtbl[d]] -= quant[d]; }
+              if (dest[(uchar)zagtbl[(uchar)d]]>0)  dest[(uchar)zagtbl[(uchar)d]] += quant[d];
+              else                    dest[(uchar)zagtbl[(uchar)d]] -= quant[d]; }
             bit++;
             while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
       return((p<<3)+bit); }
@@ -472,28 +471,28 @@ STATIC long jpeg_decode_spectral(uchar *src, long offset, long len,
         val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
         neg = !(val&0x8000);
         val = (val&0x7FFF)>>(16-val2);
-        if (neg)  dest[zagtbl[d]] = (val-nvaltbl[val2])*quant[d];
-        else      dest[zagtbl[d]] = (pvaltbl[val2]+val)*quant[d]; }
+        if (neg)  dest[(uchar)zagtbl[(uchar)d]] = (val-nvaltbl[val2])*quant[d];
+        else      dest[(uchar)zagtbl[(uchar)d]] = (pvaltbl[val2]+val)*quant[d]; }
       bit += val2;
       while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
     else {
       i = (val2>>4)+1;  j = d;
       for (k=0; i && d<=spec1+1; )
-        if (dest[zagtbl[d]]) { d++;  k++; }
+        if (dest[(uchar)zagtbl[(uchar)d]]) { d++;  k++; }
         else                 { d++;  i--; }
       d--;
       if (val2&0xF) {
         val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
-        if (val&0x8000)  dest[zagtbl[d]] = quant[d];
-        else             dest[zagtbl[d]] = -quant[d];
+        if (val&0x8000)  dest[(uchar)zagtbl[(uchar)d]] = quant[d];
+        else             dest[(uchar)zagtbl[(uchar)d]] = -quant[d];
         bit++;
         while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); } }
       for (i=0; i<k; i++) {
-        while (!dest[zagtbl[j]]) j++;
+        while (!dest[(uchar)zagtbl[(uchar)j]]) j++;
         val = ((src[p]<<16)+(src[p+1]<<8)+src[p+2])>>(8-bit);
         if (val&0x8000) {
-          if (dest[zagtbl[j]]>0)  dest[zagtbl[j]] += quant[j];
-          else                    dest[zagtbl[j]] -= quant[j]; }
+          if (dest[(uchar)zagtbl[(uchar)j]]>0)  dest[(uchar)zagtbl[(uchar)j]] += quant[j];
+          else                    dest[(uchar)zagtbl[(uchar)j]] -= quant[j]; }
         bit++;
         while (bit>=8) { bit -= 8; p++; if (p>=len) return(len<<3); }
         j++; } }
@@ -573,8 +572,8 @@ STATIC void jpeg_undct(long *res, char *dest, long w, long rw, long rh, long add
     oldd = d;
     switch (rw) {
       case 1: memcpy(dest+d, out+s, 8);  s+=8;  d+=8; break;
-      case 2: for (i=0; i<8; i++,s++,d+=rw)
-          dest[d] = dest[d+1] = out[s]; break;
+      case 2: for (i=0; i<8; i++,s++,d+=rw) {
+          dest[d] = dest[d+1] = out[s]; } break;
       case 4: for (i=0; i<8; i++,s++,d+=rw) {
           dest[d] = dest[d+1] = out[s];
           ((short *)(dest+d))[1] = ((short *)(dest+d))[0]; } break;
@@ -785,7 +784,7 @@ STATIC uchar *load_gif(FILE *fptr)
  *                    of image this is.                        2/25/96-DWM */
 {
   uchar *new, *gif;
-  long size, i;
+  long size;
 
   (*fseek2)(fptr, 0, SEEK_END);
   size = (*ftell2)(fptr);
@@ -883,9 +882,9 @@ STATIC uchar *load_graphic(char *name)
  *                    the image.  pwidth, pheight, and pinter tell what sort
  *                    of image this is.                        2/25/96-DWM */
 {
-  static long i, j, scale, type;
+  static long type;
   static uchar *new, total[18];
-  static FILE *fptr, *fptr2;
+  static FILE *fptr;
 
   if (LoadPart<0 || name) {
     perr = 0;
@@ -911,7 +910,7 @@ STATIC uchar *load_graphic(char *name)
     (*fseek2)(fptr, 0, SEEK_SET);
     memset(pspec, 0, LENPSPEC);
     if (type<1 || (strlen(name) > 4 && !stricmp(name + strlen(name) - 4, ".nef"))) {
-      if (new=load_pil(fptr)) {
+      if ((new=load_pil(fptr))) {
         type = 13;
         (*fclose2)(fptr);
       }
@@ -940,7 +939,7 @@ STATIC uchar *load_graphic(char *name)
     default: perr = 0;  return(0); }
   if (!new && type >= 2 && type !=12 && type !=13) {
     if ((fptr=(*fopen2)(name, "rb"))) {
-      if (new=load_pil(fptr)) {
+      if ((new=load_pil(fptr))) {
         type = 13;
         perr = 0;
       }
@@ -968,11 +967,11 @@ STATIC uchar *load_groa(FILE *fptr)
   char header[50], *h;
 
   (*fread2)(header, 1, 50, fptr);
-  if (h=strstr(header, "GROB"))
+  if ((h=strstr(header, "GROB")))
     size = h-header+4;
   (*fseek2)(fptr, size, SEEK_SET);
   pwidth = pheight = 0;
-  fscanf(fptr, "%d%*c%d", &pwidth, &pheight);
+  fscanf(fptr, "%ld%*c%ld", &pwidth, &pheight);
   if (pwidth<=0 || pheight<=0) {
     perr = 0x805;  (*fclose2)(fptr);  return(0); }
   pinter = 1;
@@ -987,7 +986,7 @@ STATIC uchar *load_groa(FILE *fptr)
   d = 768;
   for (j=0; j<pheight; j++)
     for (i=0; i<pwidth; i+=8) {
-      fscanf(fptr, "%2x", &t);
+      fscanf(fptr, "%2lx", &t);
       for (k=0; k<8 && i+k<pwidth; k++, d++)
         if (!(t&mask[k]))
           new[d] = 1; }
@@ -1173,7 +1172,7 @@ STATIC uchar *load_jpg(FILE *fptr)
   static uchar *new, *jpg, *temp, *temp2, *huff, *hufflen, *quant, *dres;
   static uchar *crop, *dres2, *dres3;
   static long res[64], dy, fsize, s, d, val, restart, h, i, j, k, l, r, w;
-  static long mw, mh, start, size, com[28], rr[8], ncom, hl[16], dcbase[4];
+  static long mw, mh, start=0, size, com[28], rr[8], ncom=0, hl[16], dcbase[4];
   static long x, y, Y, Cb, Cr, mw8, mh8, *ytbl, C, M, K, ycck;
   static long *ytbl2, *ytbl3, *ytbl4, lastr, rnum, orient;
   static long ln[16]={32768,16384,8192,4096,2048,1024,512,256,128,64,32,16,8,4,2,1};
@@ -1205,6 +1204,7 @@ STATIC uchar *load_jpg(FILE *fptr)
       val = jpg[s]*256+jpg[s+1];
       switch (val) {
         case 0xFFC1: pspec[3] = 1;                /* Extended frame header */
+          /* fall through */
         case 0xFFC0: if (jpg[s+4]!=8) {           /* Baseline frame header */
             perr = 0xB04;  free2(jpg);  free2(huff);  return(0); }
           if (part<0) break;
@@ -1242,7 +1242,6 @@ STATIC uchar *load_jpg(FILE *fptr)
             pspec[1] |= 0x80; break; }
           part--;
           if (part!=-1) break;
-          start = s+2+jpg[s+2]*256+jpg[s+3];
           for (i=0; i<jpg[s+4]; i++) {
             com[i*7+4] = jpg[s+5+i*2];
             com[i*7+5] = jpg[s+6+i*2]>>4;
@@ -1294,7 +1293,7 @@ STATIC uchar *load_jpg(FILE *fptr)
         default: if (jpg[s]==0xFF && jpg[s+1]!=0 && jpg[s+1]!=0xDA) break;
           temp = memchr(jpg+s+1, 0xFF, fsize-s-1);
           if (!temp)  s = fsize;
-          else        s = temp-jpg; continue; }
+          else    { s = temp-jpg; }  continue; }
       if (val==0xFFD9 && part<=-1) break;               // had been just <1
       if ((val>=0xFFC0 && val<=0xFFCF) || val==0xFFDA || val==0xFFDB ||
           val==0xFFDA || (val>=0xFFE0 && val<=0xFFEF) || val==0xFFFE)
@@ -1315,7 +1314,7 @@ STATIC uchar *load_jpg(FILE *fptr)
     ((short *)(pspec+4))[0] = jpg[0xE]*256+jpg[0xF];
     pspec[6] = (mw==2)+(mh==2)+2*(mw==4);
     pspec[8] = quant[58];
-    ((long *)(pspec+0xC))[0] = (long)(pquant);
+    jpgcustomquant = (char *)pquant;
     mw8 = mw*8;  mh8 = mh*8;
     for (i=0; i<ncom; i++) {
       rr[i]   = mw/com[i*7+1];
@@ -1418,7 +1417,7 @@ STATIC uchar *load_jpg(FILE *fptr)
       for (i=1; i<pheight; i++)
         memmove(new+i*pwidth*3, new+i*w*3, pwidth*3);
       size = pwidth*pheight*3; }
-    if (jpg=realloc2(new, size))
+    if ((jpg=realloc2(new, size)))
       new = jpg; }
   new = reorient(new, orient);
   return(new);
@@ -1438,7 +1437,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
 {
   uchar *new, *temp, *temp2, *hufflen, *quant, *dres, *crop, *dres2, *dres3;
   long dy, s, d, val, restart, h, i, j, k, l, r, w, firstspec;
-  long mw, mh, start, size, com[28], rr[8], ncom, hl[16], dcbase[4];
+  long mw, mh, size, com[28], rr[8], ncom, hl[16], dcbase[4];
   long x, y, Y, Cb, Cr, mw8, mh8, *ytbl, succ, C, M, K, ycck;
   long *ytbl2, *ytbl3, *ytbl4, lastr, rnum;
   static long ln[16]={32768,16384,8192,4096,2048,1024,512,256,128,64,32,16,8,4,2,1};
@@ -1496,7 +1495,6 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
               memset(temp, jpg[h], ln[l-1]);
               temp += ln[l-1]; } } break;
       case 0xFFDA: if (!part) {                             /* Scan header */
-          start = s+2+jpg[s+2]*256+jpg[s+3];
           for (i=0; i<jpg[s+4]; i++) {
             com[i*7+4] = jpg[s+5+i*2];
             com[i*7+5] = jpg[s+6+i*2]>>4;
@@ -1534,7 +1532,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
       default: if (jpg[s]==0xFF && jpg[s+1]!=0 && jpg[s+1]!=0xDA) break;
         temp = memchr(jpg+s+1, 0xFF, fsize-s-1);
         if (!temp)  s = fsize;
-        else        s = temp-jpg; continue; }
+        else    { s = temp-jpg; }  continue; }
     if (val==0xFFD9 && part<=-1) break;        // had been just <-1
     if (val<0xFFD0 || val>0xFFD9)  s += 2 + jpg[s+2]*256 + jpg[s+3];
     else if (val!=0xFFFF)          s += 2;
@@ -1553,7 +1551,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
   ((short *)(pspec+4))[0] = jpg[0xE]*256+jpg[0xF];
   pspec[6] = (mw==2)+(mh==2)+2*(mw==4);
   pspec[8] = quant[58];
-  ((long *)(pspec+0xC))[0] = (long)(pquant);
+  jpgcustomquant = (char *)pquant;
   mw8 = mw*8;  mh8 = mh*8;
   for (i=0; i<ncom; i++) {
     rr[i]   = mw/com[i*7+1];
@@ -1687,7 +1685,7 @@ STATIC uchar *load_jpg_progress(uchar *jpg, long fsize, uchar *huff)
       for (i=1; i<pheight; i++)
         memmove(new+i*pwidth*3, new+i*w*3, pwidth*3);
       size = pwidth*pheight*3; }
-    if (jpg=realloc2(new, size))
+    if ((jpg=realloc2(new, size)))
       new = jpg; }
   return(new);
 }
@@ -1704,7 +1702,7 @@ STATIC uchar *load_pcx(FILE *fptr)
  *                    of image this is.                        2/26/96-DWM */
 {
   uchar head[128], *new, *pcx;
-  long scan, bits, size, i, j, d, s, k, fsize, w;
+  long scan, bits, size, i, j, d, s, k, fsize, w=0;
 
   pspec[0] = 7;
   (*fseek2)(fptr, 0, SEEK_END);
@@ -1821,7 +1819,7 @@ STATIC uchar *load_pil(FILE *fptr)
     perr = ProcessError;
     return 0;
   }
-  sscanf(dest, "P6%ld%ld%*d%*c%n", &pwidth, &pheight, &offset);
+  sscanf(dest, "P6%ld%ld%*d%*c%ln", &pwidth, &pheight, &offset);
   if (destlen-offset < pwidth * pheight * 3) {
     free2(dest);
     return 0;
@@ -1966,7 +1964,7 @@ STATIC uchar *load_tif(FILE *fptr)
 {
   short ifd=0, ifd2=0, orient=0;
   long end, temp, temp2, i, j, pic[8]={1,1,1,1,0,0,-1,1}, part=ppart;
-  long trydcs=1, *offset=0, *count, onum;
+  long trydcs=1, *offset=0, *count=0, onum;
   char *Grey, *tag;
 
   (*fseek2)(fptr, 0, SEEK_SET);
@@ -2016,7 +2014,7 @@ STATIC uchar *load_tif(FILE *fptr)
         if (pic[2]<0 || pic[2]>=6) {
           perr = 0x1204; free2(tag); free2(offset);
           (*fclose2)(fptr);  return(0); }
-        if (pic[2]==2 || pic[2]>=5)  pinter = 0; break;
+        if (pic[2]==2 || pic[2]>=5) { pinter = 0; } break;
       case 0x10A: if (ltag[i*7+3]==2)  pic[4] = 1; break;
       case 0x110: if (ltag[i*7+1]<=4)  break;
         (*fseek2)(fptr, ltag[i*7+2], SEEK_SET);
@@ -2029,7 +2027,7 @@ STATIC uchar *load_tif(FILE *fptr)
         break;
       case 0x115: pic[7] = ltag[i*7+3]; break;
       case 0x116: pic[6] = ltag[i*7+3]; break;
-      case 0x117: temp = 0;
+      case 0x117: temp = 0;  /* fall through */
       case 0x111: if (itag[i*14]==0x111)  temp = ltag[i*7+1];
         if (!offset) {
           onum = ltag[i*7+1];
@@ -2046,15 +2044,18 @@ STATIC uchar *load_tif(FILE *fptr)
           (*fread2)(offset+temp, itag[i*14+1]-(itag[i*14+1]==3), ltag[i*7+1],
                 fptr);
           switch (itag[i*14+1]) {
-            case 1: for (j=ltag[i*7+1]-1; j>=0; j--)
-              offset[temp+j] = ((unsigned char *)(offset+temp))[j]; break;
+            case 1: for (j=ltag[i*7+1]-1; j>=0; j--) {
+              offset[temp+j] = ((unsigned char *)(offset+temp))[j]; } break;
             case 3: for (j=ltag[i*7+1]-1; j>=0; j--) {
               if (end)  endian(((unsigned short *)(offset+temp))+j);
               offset[temp+j] = ((unsigned short *)(offset+temp))[j]; } break;
-            case 4: if (end)  for (j=0; j<ltag[i*7+1]; j++)
-              endianl(offset+temp+j); } } break;
-      case 0x11A: case 0x11B: if (ltag[i*7+4])
-        ((short *)(pspec+6))[0] = ltag[i*7+3]/ltag[i*7+4]; break;
+            case 4: if (end) {
+              for (j=0; j<ltag[i*7+1]; j++)
+                endianl(offset+temp+j); } } } break;
+      case 0x11A: case 0x11B:
+        if (ltag[i*7+4]) {
+          ((short *)(pspec+6))[0] = ltag[i*7+3]/ltag[i*7+4]; }
+        break;
       case 0x11C: if (ltag[i*7+3]!=1) {
           perr = 0x1304;  free2(tag);  free2(offset);
           (*fclose2)(fptr);  return(0); }
@@ -2191,7 +2192,7 @@ STATIC long ppm_number(FILE *fptr, long scale)
 {
   long num, val;
 
-  while (!(val=fscanf(fptr, "%d", &num)))
+  while (!(val=fscanf(fptr, "%ld", &num)))
     fscanf(fptr, "%*[^\n\r]%*c");
   if (val<0)  return(-1);
   if (!scale)  return(num);
@@ -2244,11 +2245,11 @@ STATIC long read_tif(uchar *grey, long *count, long *offset, long *pic,
     udata = 0;  ul = 0;
     if (pic[1]!=1) {
       if (!(udata=(char *)malloc2(sl+3))) {
-        if (cl) free2(cdata);  return(1); }
+        if (cl) { free2(cdata); }  return(1); }
       ul = 1; }
     count[s] = (*fread2)(cdata, 1, count[s], fptr);
     if (count[s]<=0) {
-      if (cl) free2(cdata);  if (ul) free2(udata);  return(1); }
+      if (cl) { free2(cdata); }  if (ul) { free2(udata); }  return(1); }
     switch (pic[1]) {
       case 1: udata = cdata;  cdata = 0; ul = cl; break;   /* Uncompressed */
       case 2: unccitt_mode2(udata, cdata, sl, count[s], pic[4], x); break;
@@ -2261,7 +2262,7 @@ STATIC long read_tif(uchar *grey, long *count, long *offset, long *pic,
     if (cdata) { if (cl) free2(cdata);  cdata = 0; }
     if (pic[3]==2) {                             /* Differencing predictor */
       if (pic[0]!=8) {
-        if (ul) free2(udata);  return(1); }
+        if (ul) { free2(udata); }  return(1); }
       for (l=0; l<pic[7]; l++)
         for (k=0; k<pic[6] && k<y-j; k++)
           for (i=1; i<x; i++)
@@ -2390,7 +2391,7 @@ STATIC void reorder_tif(uchar *dest, uchar *tag, long num, long end, FILE *fptr)
         if (end) { for (j=0; j<4; j++)  endian(itemp+j); }
         ldest[i*7+3] = itemp[0];  ldest[i*7+4] = itemp[1];
         ldest[i*7+5] = itemp[2];  ldest[i*7+6] = itemp[3]; break;
-      case 5: ldest[i*7+1] *= 2;
+      case 5: ldest[i*7+1] *= 2;  /* fall through */
       case 4: if (ldest[i*7+1]<=1) {
           ldest[i*7+3] = ldest[i*7+2];
           ldest[i*7+2]=ldest[i*7+4]=ldest[i*7+5]=ldest[i*7+6] = 0; break; }
@@ -2803,7 +2804,7 @@ STATIC long unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
     x = rx = 0;  rl = 0;  ox = oldrun[0];  orx = 1;
     while (x<w) {
       unccitt_prep_bits(input, &s, &sb, &cur, srclen, bitorder);
-      for (i=0; i<ccittcode[i+2]!=-2; i+=3)
+      for (i=0; ccittcode[i+2]!=-2; i+=3)
         if (ccittcode[i]==(cur&mask[ccittcode[i+1]]))
           break;
       if (ccittcode[i+2]==-2) { sb++;  continue; }
@@ -2857,10 +2858,10 @@ STATIC long unccitt_t6(uchar *output, uchar *input, long ln, long srclen,
               rl += ccittwhite[i+2];  x += ccittwhite[i+2];
               if (ccittwhite[i+2]<64) break; }
             run[rx] = rl;  rx++;  rl = 0; }
-          if (rx)  while (ox<=x && ox<w) {
-            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; } break;
-        case 2: if (rx)  while (ox<=x && ox<w) {  /* Repeat a previous run */
-            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; }
+          if (rx) { while (ox<=x && ox<w) {
+            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; } } break;
+        case 2: if (rx) { while (ox<=x && ox<w) {  /* Repeat a previous run */
+            ox += oldrun[orx]+oldrun[orx+1];  orx += 2; } }
           run[rx] = ox-x+rl;  rx++;  rl = 0;  x = ox;
           ox += oldrun[orx];  orx++;
           break;

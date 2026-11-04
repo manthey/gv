@@ -162,7 +162,7 @@ void *realloc2(void *current, size_t size)
   if (!current)  return(malloc2(size));
   /* Reallocate to even size blocks to help avoid memory fragmentation. */
   if (size>2*1024*1024)  size = (((size-1)/(1024*1024))+1)*1024*1024;
-  else { for (i=1; i<size; i*=2);  size = i; }
+  else { for (i=1; i<(long)size; i*=2) { }  size = i; }
   for (i=0; i<MallocNum; i++)
 	if (current==MallocTbl[i].mem) {
 	  hmem = (HANDLE)MallocTbl[i].hmem;
@@ -177,7 +177,7 @@ void *realloc2(void *current, size_t size)
   return(0);
 }
 
-long size2(void *mem)
+long size2(const void *mem)
 /* Return the size of the specified memory block.  If the pointer does not
  *  point to the base address of a memory block, a value of zero is returned.
  * Enter: void *mem: pointer to a locked memory block.

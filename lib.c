@@ -1,5 +1,4 @@
 #define LIBRARY
-#define STATIC static
 
 #include <math.h>
 #include <stdio.h>

@@ -29,7 +29,11 @@ CC=i686-w64-mingw32-clang
 WINDRES=i686-w64-mingw32-windres
 AR=i686-w64-mingw32-ar
 
-CFLAGS="-O2 -Wno-error=incompatible-pointer-types -fms-extensions -fasm-blocks -I."
+# All warnings are failures.  The two exceptions are codebase idioms:
+# - pointer-sign: char * and uchar * are used interchangeably throughout
+# - unused-parameter: Windows callback signatures require unused parameters
+WARN="-Wall -Wextra -Wno-pointer-sign -Wno-unused-parameter -Werror"
+CFLAGS="-O2 -fms-extensions $WARN -I."
 LIBS="-ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -ldwmapi"
 
 rm -rf build

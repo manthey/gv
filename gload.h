@@ -131,14 +131,14 @@ long   lzwlen           (uchar *source, long len, short numbits);
 long   lzwtif           (uchar *dest, uchar *source, long len, long maxlen);
 long   lzwtiflen        (uchar *source, long len);
 int    mclose           (FILE *fptr);
-FILE  *mopen            (char *name, char *mode);
-FILE  *mopen2           (char *name, char *mode);
+FILE  *mopen            (const char *name, const char *mode);
+FILE  *mopen2           (const char *name, const char *mode);
 void   move             (long flags, long x, long y, long clear);
-size_t mread            (char *buffer, size_t size, size_t count,
+size_t mread            (void *buffer, size_t size, size_t count,
                          FILE *fptr);
 int    mseek            (FILE *fptr, long offset, int origin);
 long   mtell            (FILE *fptr);
-size_t mwrite           (char *buffer, size_t size, size_t count,
+size_t mwrite           (const void *buffer, size_t size, size_t count,
                          FILE *fptr);
 long   palettize        (uchar *image, long w, long h, long scale);
 uchar *palettize_graphic(long w, long h, long pinter, uchar *pic,
@@ -207,10 +207,13 @@ extern long Dither, Interpolate, LoadPart, MAXGSIZE, Minpheight, Minpwidth,
 extern short prefix[];
 extern uchar *ColorTable, imask[], jpghead[], MasterPal[], *ppic, pquant[],
        winpal[];
-extern FILE *(*fopen2)(char *name, char *mode);
+extern FILE *(*fopen2)(const char *name, const char *mode);
 extern size_t (*fread2)(void *buffer, size_t size, size_t count, FILE *fptr);
-extern size_t (*fwrite2)(void *buffer, size_t size, size_t count,FILE *fptr);
+extern size_t (*fwrite2)(const void *buffer, size_t size, size_t count,FILE *fptr);
 extern int (*fclose2)(FILE *fptr);
 extern int (*fseek2)(FILE *fptr, long offset, int origin);
 extern long (*ftell2)(FILE *fptr);
+extern char *jpgcustomquant;          /* pointer to a custom JPEG quantization
+                                         table (128 bytes), not part of the
+                                         on-disk specification block */
 #endif

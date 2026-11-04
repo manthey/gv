@@ -29,6 +29,7 @@
 #define NPAL 768
 
 static long load_only;
+static long startspec;
 
 /* deterministic pseudo-random byte generator (xorshift32) */
 static unsigned long rstate;
@@ -155,11 +156,12 @@ int main(int argc, char **argv)
   int failures = 0;
 
   load_only = (argc > 2 && !strcmp(argv[2], "load"));
+  if (argc > 3)  startspec = atoi(argv[3]);
   if (argc<2) { printf("usage: asmconv_test <outdir>\n");  return(2); }
   strcpy(dir, argv[1]);
   if (!load_only)  CreateDirectoryA(dir, NULL);
 
-  for (s=specs; s->name; s++) {
+  for (s=specs+startspec; s->name; s++) {
     long nsizes = 4;
     if (s->format==GV_GIF)  nsizes = 3;      /* skip 256x38 for gif */
     if (s->format==GV_JPG)  nsizes = 2;      /* keep jpg runs fast */
@@ -168,14 +170,14 @@ int main(int argc, char **argv)
       IMG im;
       HANDLE hpic, hload;
       uchar *p, *q;
-      char fname[600];
+      char fname[80];
       long ok;
 
       make_image(&im, sizes[si][0], sizes[si][1], s->pal,
                  (unsigned long)(0x1234+si*7+(s-specs)*11), s->pattern,
                  s->format==GV_TIF && s->color==TIF_GREYSCALE);
-      sprintf(fname, "%s_%dx%d", s->name, (int)sizes[si][0],
-              (int)sizes[si][1]);
+      snprintf(fname, sizeof(fname), "%s_%dx%d", s->name,
+              (int)sizes[si][0], (int)sizes[si][1]);
 
       /* save */
       setup_gv(&gv, fname, sizes[si][0], sizes[si][1], s->pal);
@@ -207,7 +209,7 @@ int main(int argc, char **argv)
                       gv.fs.jpg.quality = s->b*100;
                       break; }
       hpic = image_handle(&im);
-      sprintf(path, "%s\\%s", dir, fname);
+      snprintf(path, sizeof(path), "%s\\%s", dir, fname);
       gv.name = path;
       if (!load_only && !SaveGraphic(&gv, hpic)) {
         printf("SAVE-ERR %s error=%lx\n", fname, gv.error);  failures++; }
@@ -225,7 +227,7 @@ int main(int argc, char **argv)
       else {
         p = GlobalLock(hload);
         /* dump decoded data for cross-build comparison */
-        sprintf(path, "%s\\%s.raw", dir, fname);
+        snprintf(path, sizeof(path), "%s\\%s.raw", dir, fname);
         f = fopen(path, "wb");
         fwrite(&gv.width, 4, 1, f);
         fwrite(&gv.height, 4, 1, f);
@@ -235,8 +237,8 @@ int main(int argc, char **argv)
         else
           fwrite(p, 1, (long)gv.width*gv.height*3, f);
         fclose(f);
-        if (s->format==GV_TIF && (s->color==TIF_8BIT ||
-                                  s->color==TIF_24BIT) ||
+        if ((s->format==GV_TIF && (s->color==TIF_8BIT ||
+                                  s->color==TIF_24BIT)) ||
             s->format==GV_BMP || s->format==GV_PPM) {
           q = im.data;
           ok = (gv.width==sizes[si][0] && gv.height==sizes[si][1] &&

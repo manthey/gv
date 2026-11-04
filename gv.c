@@ -136,7 +136,7 @@ SlideList *slide=0;
 
 BOOL get_window_rect(HWND Hwnd, RECT *rect);
 
-BOOL CALLBACK about(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK about(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the About dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -207,7 +207,7 @@ void add_extensions(HWND hwnd)
   MsgBox(hwnd, "Extensions Linked", "Link Exentsions", MB_OK);
 }
 
-BOOL CALLBACK aspect_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK aspect_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the Lock Aspect Ratio dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -216,7 +216,8 @@ BOOL CALLBACK aspect_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   char text[80];
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpAspect); break;
       case IDOK: GetDlgItemText(hdlg, AspectXXX, text, 79);
         sscanf(text, "%f", &AspectXY[2]);
@@ -228,9 +229,10 @@ BOOL CALLBACK aspect_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                              "must be positive numbers.", "Error", MB_OK);
           return(0); }
         AspectX = AspectXY[0] = AspectXY[2];
-        AspectY = AspectXY[1] = AspectXY[3];
+        AspectY = AspectXY[1] = AspectXY[3];  /* fall through */
       case IDCANCEL: EndDialog(hdlg, 1);  recheck(Hwnd, 0);  return(1);
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG: AspectXY[2]=AspectXY[0];  AspectXY[3]=AspectXY[1];
       sprintf(text, "%g", AspectXY[2]);
       SetDlgItemText(hdlg, AspectXXX, text);
@@ -262,7 +264,7 @@ void batch(void)
   Busy = 0;
 }
 
-BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK batch_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the Batch cancel dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -293,7 +295,7 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       return(1);
     case WM_TIMER: if (!TimerOn) break;
       if (!new && opfile[0]) {
-        sprintf(iname, "Reading file %d of %d.", cur+1, num);
+        sprintf(iname, "Reading file %ld of %ld.", cur+1, num);
         SetDlgItemText(hdlg, BatchStat1, iname);
         strcpy(iname, opfile);
         remove_quotes(iname);
@@ -308,7 +310,7 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           if (part) {
             file[0] = 0;
             name = oname+strlen(opfilter);
-            sprintf(pnum, "%d", part);
+            sprintf(pnum, "%ld", part);
             if (strlen(pnum)+strlen(name)>8)
               file = name+8-strlen(pnum);
             strcpy(file, pnum);
@@ -327,14 +329,14 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         multi = pspec[1];
         strcpy(workfile, iname);
         if (!new && (Msg&1)) {
-          if (TimerOn) KillTimer(hdlg, 0); TimerOn = 0;
+          if (TimerOn) { KillTimer(hdlg, 0); }  TimerOn = 0;
           MsgBox(Hwnd, ErrorMsg[perr>>8], "Error", MB_OK);
           free2(iname);
           EndDialog(hdlg, 1); break; }
-        if (!new)
-          next = 1; break; }
+        if (!new) {
+          next = 1; } break; }
       if (new) {
-        sprintf(iname, "%sing file %d of %d.", val[NewCopy-2], cur+1, num);
+        sprintf(iname, "%sing file %ld of %ld.", val[NewCopy-2], cur+1, num);
         SetDlgItemText(hdlg, BatchStat1, iname);
         gspec[0] = SaveFilt-1;
         gspec[1] = (NewCopy==3);
@@ -342,7 +344,7 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         pwidth = pw;  pheight = ph;  pinter = pi;
         cursor(1);
         if (gspec[0]==5)
-          ((long *)(gspec+0xC))[0] = (long)(gquant);
+          jpgcustomquant = (char *)gquant;
         half = 0;
         if (HalfSizeBatch)
           half = scale_graphic(pwidth, pheight, pi, new, pwidth/2, pheight/2, 0);
@@ -360,7 +362,7 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           i = save_graphic(oname, new, gspec, 0);
         cursor(0);
         if (i && (Msg&1)) {
-          if (TimerOn) KillTimer(hdlg, 0); TimerOn = 0;
+          if (TimerOn) { KillTimer(hdlg, 0); }  TimerOn = 0;
           MsgBox(Hwnd, ErrorMsg2[i-1], "Error", MB_OK);
           free2(new);  new = 0;  free2(iname);
           EndDialog(hdlg, 1); break; }
@@ -383,8 +385,9 @@ BOOL CALLBACK batch_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
             strcpy(opfile, iname); } }
         new = 0;
         if (cur<num) break; }
+      /* fall through */
     case WM_COMMAND: if (msg==WM_COMMAND && (wp&0xFFFF)!=IDCANCEL) break;
-      if (TimerOn) KillTimer(hdlg, 0); TimerOn = 0;
+      if (TimerOn) { KillTimer(hdlg, 0); }  TimerOn = 0;
       if (new)  free2(new);
       free2(iname);
       EndDialog(hdlg, 1); }
@@ -493,13 +496,13 @@ void copy(HWND hwnd, long full)
   cursor(0);
 }
 
-BOOL CALLBACK copy_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK copy_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Actually copy or move files.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
  *        WPARAM wp, LPARAM lp: parameters for message.        3/22/97-DWM */
 {
-  static uchar *new, *iname, *oname;
+  static uchar *iname, *oname;
   static long num, cur, left, newdir;
   char *s;
   long res, okay;
@@ -520,7 +523,7 @@ BOOL CALLBACK copy_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
             break;
       return(1);
     case WM_TIMER: if (!TimerOn)  break;
-      sprintf(iname, "Processing file %d of %d.", left, num);
+      sprintf(iname, "Processing file %ld of %ld.", left, num);
       SetDlgItemText(hdlg, BatchStat1, iname);
       while (cur<slide->numfile && !(slide->file[cur*FE+0x2F]&2))
         cur++;
@@ -567,6 +570,7 @@ BOOL CALLBACK copy_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           if (newdir<slide->numdir)
             ((short *)s)[0] = newdir; }
         cur++;  left++;  if (cur<slide->numfile) break; }
+      /* fall through */
     case WM_COMMAND: if (msg==WM_COMMAND && (wp&0xFFFF)!=IDCANCEL) break;
       KillTimer(hdlg, 0);  TimerOn = 0;
       free2(iname);
@@ -591,7 +595,7 @@ void copy_file(long copy)
   openfile.nMaxFile = NAMELEN;
   openfile.lpstrFileTitle = openfile.lpstrCustomFilter = 0;
   openfile.lpstrInitialDir = opendir+1024;
-  openfile.lpfnHook = (DLGPROC)open_slide_dialog;
+  openfile.lpfnHook = (LPOFNHOOKPROC)(void *)open_slide_dialog;
   openfile.lpTemplateName = MAKEINTRESOURCE(OpDLG);
   PMode = copy+3;
   openfile.Flags = OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_HIDEREADONLY |
@@ -716,7 +720,7 @@ void create_savepic_cross(HWND hdlg, HBITMAP wpic)
   create_savepic_rect(0, &rect, hdlg);
   ix = PreviewXY[0];  iy = PreviewXY[1];
   w = rect.right-rect.left;  h = rect.bottom-rect.top;
-  if (!w) w = 1;  if (!h) h = 1;
+  if (!w) { w = 1; }  if (!h) { h = 1; }
   iw = PreviewArea[2+fit*4]-PreviewArea[0+fit*4];
   ih = PreviewArea[3+fit*4]-PreviewArea[1+fit*4];
   if (iw<=w && ih<=h) {
@@ -831,7 +835,11 @@ void cursor(long wait)
     default: if (WholeScreen) {
         SetCursor(cur=LoadCursor(hinst, MAKEINTRESOURCE(CursorNull))); break; }
       SetCursor(cur=LoadCursor(0, IDC_ARROW)); }
+  #ifdef _WIN64
+  SetClassLongPtr(Hwnd, GCLP_HCURSOR, (LONG_PTR)cur);
+#else
   SetClassLong(Hwnd, GCL_HCURSOR, (long)cur);
+#endif
 }
 
 void draw_bmp(HDC hdc, long x, long y, long w, long h, long pal, HANDLE bmp)
@@ -892,7 +900,7 @@ void drop_file(HANDLE drop)
   for (i=1; i<n && len<NAMELEN-1; i++) {
     name[len] = 0;
     DragQueryFile(drop, i, name2, NAMELEN-len-2);
-    if (name2[0]!='"')  sprintf(name+strlen(name), "\"%s\"", name2);
+    if (name2[0]!='"')  snprintf(name+strlen(name), (size_t)(NAMELEN-strlen(name)), "\"%.250s\"", name2);
     else                strcat(name, name2);
     len = strlen(name);
     if (i!=n-1 && len<NAMELEN-1) {
@@ -912,10 +920,10 @@ void end_ctl3d(void)
 
   if (!hctl3d)  return;
   reg = GetProcAddress(hctl3d, "Ctl3dUnregister");
-  (*reg)(hinst);
+  ((BOOL (WINAPI *)(HINSTANCE))(void *)reg)(hinst);
 }
 
-BOOL CALLBACK find_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK find_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the find dialog box.  Is done is selected, actually
  *  find the requested files.
  * Enter: HWND hdlg: handle of current dialog window.
@@ -923,7 +931,9 @@ BOOL CALLBACK find_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
  *        WPARAM wp, LPARAM lp: parameters for message.        6/11/96-DWM */
 {
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT, HelpFind);  break;
       case IDOK: if (!Findtext)
           if (!(Findtext=malloc2(NAMELEN))) {
@@ -937,6 +947,7 @@ BOOL CALLBACK find_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         return(Busy=0);
       case IDCANCEL: EndDialog(hdlg, 0); return(Busy=0);
       default: return(0); }
+    /* fall through */
     case WM_INITDIALOG: Busy = 1;
       SendDlgItemMessage(hdlg, FindExact, BM_SETCHECK, FindType==0, 0);
       SendDlgItemMessage(hdlg, FindBegin, BM_SETCHECK, FindType==1, 0);
@@ -981,7 +992,7 @@ long find_file(char *name, long type, long recurse, WIN32_FIND_DATA *find,
  * Exit:  long none: 0 for file found, 1 for no more files.      6/7/95-DWM */
 {
   #define maxrecursedepth 20
-  static WIN32_FIND_DATA f[maxrecursedepth], *last=0;
+  static WIN32_FIND_DATA f[maxrecursedepth];
   static HANDLE h[maxrecursedepth];
   static long depth, new, multi;
   static char root[256], spec[256], xtype, atype, rec;
@@ -1125,8 +1136,8 @@ void find_next(void)
     switch (FindType) {
       case 0: okay = !stricmp(Findtext, name); break;
       case 1: okay = !strnicmp(Findtext, name, strlen(Findtext)); break;
-      case 2: for (k=0; (size_t)k<strlen(name); k++)
-          if (okay=!strnicmp(Findtext, name+k, strlen(Findtext))) break; }
+      case 2: for (k=0; (size_t)k<strlen(name); k++) {
+          if ((okay=!strnicmp(Findtext, name+k, strlen(Findtext)))) break; } }
     if (((long *)(slide->file+j*FE+0x40))[0]<0)
       okay = 0;
     if (okay) {
@@ -1175,7 +1186,7 @@ BOOL get_window_rect(HWND Hwnd, RECT *rect) {
   return GetWindowRect(Hwnd, rect);
 }
 
-BOOL CALLBACK grey_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK grey_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the greyscale conversion dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -1184,11 +1195,13 @@ BOOL CALLBACK grey_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   char text[80];
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT, HelpGreyscale);
         break;
       case IDOK: GetDlgItemText(hdlg, GreyShade, text, 79);
-        sscanf(text, "%d", &Shade);
+        sscanf(text, "%ld", &Shade);
         if (Shade<2) {
           if (Msg&1)
             MsgBox(hdlg, "The number of shades must\n"
@@ -1197,9 +1210,10 @@ BOOL CALLBACK grey_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         EndDialog(hdlg, 1); return(0);
       case IDCANCEL: Shade = 0;  EndDialog(hdlg, 1); return(1);
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG: Shade = oldh/64+1;  if (oldh%64)  Shade = 3;
       if (Shade<2)  Shade = 2;
-      sprintf(text, "%d", Shade);
+      sprintf(text, "%ld", Shade);
       SetDlgItemText(hdlg, GreyShade, text);
       SetFocus(hdlg);
       return(1); }
@@ -1223,7 +1237,7 @@ void image_switch(long dir)
   if (dir==1)   num = (oldspec[1]&0x7F)+1;
   strcpy(name, curfile);
   if (strchr(name, '?'))  strchr(name, '?')[0] = 0;
-  sprintf(name+strlen(name), "?%d", num+1);
+  sprintf(name+strlen(name), "?%ld", num+1);
   open_pic_mid(Hwnd, name, 0);
 }
 
@@ -1255,20 +1269,20 @@ void info(HWND hwnd, long prev)
     sprintf(text+strlen(text), "Image %d of multi-image file\n\n",
             (((uchar *)infspec)[1]&0x7F)+1);
   if (!prev) {
-    sprintf(text+strlen(text), "Picture size: %d x %d\nSelected area: ",
+    sprintf(text+strlen(text), "Picture size: %ld x %ld\nSelected area: ",
             oldw, oldh);
     if (!View[4] && !View[5] && View[6]==oldw && View[7]==oldh)
       strcat(text, "all");
     else
-      sprintf(text+strlen(text), "%d,%d,%d,%d", View[4], View[5], View[6],
+      sprintf(text+strlen(text), "%ld,%ld,%ld,%ld", View[4], View[5], View[6],
               View[7]);
     strcat(text, "\nViewable area: ");
     if (!View[0] && !View[1] && View[2]==oldw && View[3]==oldh)
       strcat(text, "all selected");
     else
-      sprintf(text+strlen(text), "%d,%d,%d,%d", View[0], View[1], View[2],
+      sprintf(text+strlen(text), "%ld,%ld,%ld,%ld", View[0], View[1], View[2],
               View[3]);
-    sprintf(text+strlen(text), "\n\nBit depth: %d\n\nFile format: ",
+    sprintf(text+strlen(text), "\n\nBit depth: %ld\n\nFile format: ",
             24-16*oldi); }
   else if (((short *)(s+6))[0]) {
     sprintf(text+strlen(text), "Picture size: %d x %d\nSelected area: ",
@@ -1293,40 +1307,42 @@ void info(HWND hwnd, long prev)
     strcat(text, filt);
     strchr(text, '|')[0] = 0;
     if (!infspec[0] || infspec[0]==9)
-      sprintf(text+strlen(text), "\nCompression: %s", SaveComp[infspec[3]]);
+      sprintf(text+strlen(text), "\nCompression: %s", SaveComp[(uchar)infspec[3]]);
     if (((short *)(infspec+4))[0])
       sprintf(text+strlen(text), "\nDPI: %d", ((short *)(infspec+4))[0]);
     switch (infspec[0]) {
       case 0: sprintf(text+strlen(text), "\nFormat: %d", 40-28*infspec[6]);
         break;
-      case 1: case 4: sprintf(text+strlen(text), "\nTransparent color: %d",
+      case 1: case 4: sprintf(text+strlen(text), "\nTransparent color: %ld",
                               ((long *)(infspec+8))[0]);
-        sprintf(text+strlen(text), "\nInverse color: %d",
+        sprintf(text+strlen(text), "\nInverse color: %ld",
                               ((long *)(infspec+12))[0]);  break;
       case 2: sprintf(text+strlen(text), "\nFormat: GIF%da\nInterlacing: %s\nTransparent color: ",
-                      87+2*infspec[6], lace[infspec[7]]);
+                      87+2*(uchar)infspec[6], lace[(uchar)infspec[7]]);
         if (infspec[2])
-          sprintf(text+strlen(text), "%d", ((long *)(infspec+8))[0]);
+          sprintf(text+strlen(text), "%ld", ((long *)(infspec+8))[0]);
         else
           sprintf(text+strlen(text), "Not used");
         if (((short *)(infspec+16))[0]>1)
           sprintf(text+strlen(text), "\nRepeat image sequence: %d times",
                   ((short *)(infspec+16))[0]);
-        if (((short *)(infspec+12))[0])
+        if (((short *)(infspec+12))[0]) {
           sprintf(text+strlen(text), "\nInter-image delay: %4.2f sec",
-                  ((short *)(infspec+12))[0]*0.01); break;
-      case 3: sprintf(text+strlen(text), "\nCalculated number of shades: %d",
-                              ((long *)(infspec+12))[0]);
-      case 6: sprintf(text+strlen(text), "\nFormat: %s", asc[infspec[6]]);
+                  ((short *)(infspec+12))[0]*0.01); } break;
+      case 3:
+        sprintf(text+strlen(text), "\nCalculated number of shades: %ld",
+                ((long *)(infspec+12))[0]);
+        /* fall through */
+      case 6: sprintf(text+strlen(text), "\nFormat: %s", asc[(uchar)infspec[6]]);
         break;
       case 5: sprintf(text+strlen(text), "\nCompression: %s",
-                      base[infspec[3]]);
+                      base[(uchar)infspec[3]]);
         sprintf(text+strlen(text), "\nChroma decimation: %s",
-                chroma[infspec[6]]);
-        sprintf(text+strlen(text), "\nQuality: %d",
+                chroma[(uchar)infspec[6]]);
+        sprintf(text+strlen(text), "\nQuality: %ld",
                               ((long *)(infspec+8))[0]);  break;
-      case 9: sprintf(text+strlen(text), "\nEndian: %s", end[infspec[6]]);
-        sprintf(text+strlen(text), "\nRows per strip: %d",
+      case 9: sprintf(text+strlen(text), "\nEndian: %s", end[(uchar)infspec[6]]);
+        sprintf(text+strlen(text), "\nRows per strip: %ld",
                               ((long *)(infspec+8))[0]); }
     if (infspec[0]==1)
       sprintf(text+strlen(text), "\nHot spot: %d, %d",
@@ -1343,7 +1359,7 @@ void info(HWND hwnd, long prev)
           sprintf(text+strlen(text), "%s", slide->catname+
                   ((long *)(slide->cat+i*8))[0]); }
     s = slide->file+l*FE;
-    sprintf(text+strlen(text), "\n\nFile size: %d bytes\n\nFile date: %d/%d/%d %d:%02d:%02d",
+    sprintf(text+strlen(text), "\n\nFile size: %ld bytes\n\nFile date: %d/%d/%d %d:%02d:%02d",
             ((long *)(s+0x38))[0], (((short *)(s+0x3E))[0]>>5)&0xF,
             s[0x3E]&0x1F, (((ushort *)(s+0x3E))[0]>>9)+1980,
             ((ushort *)(s+0x3C))[0]>>11, (((ushort *)(s+0x3C))[0]>>5)&0x3F,
@@ -1360,7 +1376,7 @@ void join_names(char *text)
 {
   char *loc, *loc2;
 
-  if (loc=find_space(text)) {
+  if ((loc=find_space(text))) {
     if (text[0]=='"' && loc[1]=='"') {
       loc[-1] = '\\';  memmove(loc, loc+1, strlen(loc+1)); }
     else if (text[0]=='"') {
@@ -1450,14 +1466,26 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
       case MenuInter:
         Interpolate = (!(Interpolate&~0x1C00))|(Interpolate&0x1C00);
         recheck(hwnd, !oldi);  break;
-      case MenuInter2: if ((Interpolate&!0x1C00)!=0x2003)
+      case MenuInter2: if ((Interpolate&~0x1C00)==0x2003)
           Interpolate = 0x2003|(Interpolate&0x1C00);
         else  Interpolate &= 0x1C00;
         recheck(hwnd, !oldi); break;
       case MenuLastView: case MenuLastView+1: case MenuLastView+2:
       case MenuLastView+3: if (TimerOn) break;
-        sprintf(lastview+1024, "\"%s\"", lastview+256*((wp&0xFFFF)-
-                MenuLastView));
+        {
+          char *srcview = lastview+256*((wp&0xFFFF)-MenuLastView);
+          /* the source block (entries 0-3) ends where the destination
+           *  (entry 4) begins, so the copy never overlaps; GCC cannot
+           *  prove it and warns, so the check is disabled locally */
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wrestrict"
+#endif
+          snprintf(lastview+1024, 256, "\"%.250s\"", srcview);
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+        }
         open_pic_mid(hwnd, lastview+1024, 0); break;
       case MenuLetBlack: Letter = Letter&0xC; recheck(hwnd, 1); break;
       case MenuLetCon:  Letter = (Letter&0xC)+3; recheck(hwnd, 1); break;
@@ -1525,7 +1553,7 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         View[0] = View[1] = View[4] = View[5] = 0;
         View[2] = View[6] = oldw;  View[3] = View[7] = oldh;
         no_letter(hwnd);
-        if (Lock&4)  zoom(1, 0); recheck(hwnd, 1); break;
+        if (Lock&4) { zoom(1, 0); }  recheck(hwnd, 1); break;
       case MenuZ025: zoom(0.25, 1); break;
       case MenuZ050: zoom(0.5, 1); break;
       case MenuZ100: zoom(1, 1); break;
@@ -1642,6 +1670,7 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         KillTimer(hwnd, 0);
         TimerOn = 0;
         open_pic_end(hwnd); }
+      /* fall through */
     default: return(DefWindowProc(hwnd, msg, wp, lp)); }
   return(0);
 }
@@ -1673,7 +1702,7 @@ HANDLE metafile_to_bmp(HANDLE gmem)
   long size, i;
 
   if (!(temp=lock2(gmem)))  return(0);
-  mf = (HANDLE)((long *)(temp+12))[0];
+  mf = ((METAFILEPICT *)temp)->hMF;
   unlock2(temp);
   size = GetMetaFileBitsEx(mf, 0, 0);
   if (size<40)  return(0);
@@ -1699,7 +1728,7 @@ void move(long flags, long x, long y, long clear)
   long x1, x2, y1, y2, dx, dy, push;
   float sx, sy, ox, oy, w, h;
 
-  if (x>32768)  x -= 65536;  if (y>32768)  y -= 65536;
+  if (x>32768) { x -= 65536; }  if (y>32768) { y -= 65536; }
   hdc = GetDC(Hwnd);
   if (Down==1 || Down==3) {
     if (ODown[0]) {
@@ -1740,7 +1769,7 @@ void move(long flags, long x, long y, long clear)
       if (push) {
         sx = (float)WindowW/(View[2]-View[0]);
         sy = (float)WindowH/(View[3]-View[1]);
-        if (sy<sx)  sx = sy;  if (!sx)  sx = 1;
+        if (sy<sx) { sx = sy; }  if (!sx) { sx = 1; }
         Focus[0] = (float)x/sx-(float)WindowW/(2*sx)+0.5*(View[2]+View[0]);
         Focus[1] = (float)y/sx-(float)WindowH/(2*sx)+0.5*(View[3]+View[1]); }
       if (push==1 && (View[2]-View[0]>2 || View[3]-View[1]>2))
@@ -1752,7 +1781,7 @@ void move(long flags, long x, long y, long clear)
       if (Down==3) { w = ODown[3]-ODown[1];  h = ODown[4]-ODown[2]; }
       sx = w/(View[2]-View[0]);
       sy = h/(View[3]-View[1]);
-      if (sy<sx)  sx = sy;  if (!sx)  sx = 1;
+      if (sy<sx) { sx = sy; }  if (!sx) { sx = 1; }
       if (sx>1 && (Lock&6))  sx = 1;
       ox = w/(2*sx)-0.5*(View[2]-View[0]);
       oy = h/(2*sx)-0.5*(View[3]-View[1]);
@@ -1762,8 +1791,8 @@ void move(long flags, long x, long y, long clear)
       else {
         x1 = View[0]-ox-ODown[1]/sx; y1 = View[1]-oy-ODown[2]/sx;
         x2 = x1+WindowW/sx;   y2 = y1+WindowH/sx; }
-      if (x1<0) x1 = 0;  if (x2>oldw) x2 = oldw;
-      if (y1<0) y1 = 0;  if (y2>oldh) y2 = oldh;
+      if (x1<0) { x1 = 0; }  if (x2>oldw) { x2 = oldw; }
+      if (y1<0) { y1 = 0; }  if (y2>oldh) { y2 = oldh; }
       if (x1!=x2 && y1!=y2) {
         View[0] = View[4] = x1;  View[1] = View[5] = y1;
         View[2] = View[6] = x2;  View[3] = View[7] = y2;
@@ -1773,7 +1802,7 @@ void move(long flags, long x, long y, long clear)
   if (Down==2) {
     cursor(2*(!clear));
     sx = WindowW/(View[2]-View[0]);  sy = WindowH/(View[3]-View[1]);
-    if (sy<sx)  sx = sy;  if (!sx)  sx = 1;
+    if (sy<sx) { sx = sy; }  if (!sx) { sx = 1; }
     dx = (float)(x-DownX)/sx;  if (!dx && x!=DownX)  dx = x-DownX;
     dy = (float)(y-DownY)/sx;  if (!dy && y!=DownY)  dy = y-DownY;
     DownX = x;  DownY = y;
@@ -1844,7 +1873,7 @@ void no_letter(HWND hwnd)
 
   if (!(Letter&8) || IsIconic(hwnd) || IsZoomed(hwnd))  return;
   w2 = View[2]-View[0];  h2 = View[3]-View[1];
-  if (!w2)  w2 = 1;  if (!h2)  h2 = 1;
+  if (!w2) { w2 = 1; }  if (!h2) { h2 = 1; }
   GetClientRect(hwnd, &r);
   get_window_rect(hwnd, &r2);
   w = r.right;  h = r.bottom;
@@ -1861,7 +1890,7 @@ void no_letter(HWND hwnd)
   WindowW = w;  WindowH = h;
 }
 
-BOOL CALLBACK null_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK null_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle a zero-input dialog.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -1870,7 +1899,7 @@ BOOL CALLBACK null_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   return(0);
 }
 
-BOOL CALLBACK open_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK open_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Set the title in the open dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -1879,9 +1908,12 @@ BOOL CALLBACK open_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   HWND ctrl;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpOpen+NewCopy);
         break; } break;
+    /* fall through */
     case WM_INITDIALOG: SetWindowText(hdlg, OpenTitle[NewCopy]);
       ctrl = GetDlgItem(hdlg, OpenRec);   DestroyWindow(ctrl);
       ctrl = GetDlgItem(hdlg, OpenRec2);  DestroyWindow(ctrl);
@@ -1917,7 +1949,7 @@ long open_pic(HWND hwnd)
   openfile.nMaxFile = NAMELEN;
   openfile.lpstrFileTitle = openfile.lpstrCustomFilter = 0;
   openfile.lpstrInitialDir = opendir+256*(NewCopy-1)*(NewCopy>=2);
-  openfile.lpfnHook = (DLGPROC)open_dialog;
+  openfile.lpfnHook = (LPOFNHOOKPROC)(void *)open_dialog;
   openfile.lpTemplateName = MAKEINTRESOURCE(OpDLG);
   openfile.Flags = OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_FILEMUSTEXIST |
                    OFN_HIDEREADONLY | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST |
@@ -2027,7 +2059,7 @@ void open_pic_mid(HWND hwnd, char *name, long preremove)
     if (temp[i]<' ')  temp[i] = 0;
   remove_quotes(temp);
   if (strchr(temp, '?')) {
-    sscanf(strchr(temp, '?')+1, "%d", &part);
+    sscanf(strchr(temp, '?')+1, "%ld", &part);
     part--;
     strchr(temp, '?')[0] = 0; }
   strcpy(opfile, temp);
@@ -2070,7 +2102,7 @@ void open_pic_new(HWND hwnd, char *name)
                 &proc);
 }
 
-BOOL CALLBACK open_slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK open_slide_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Set up the slide open dialog.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -2080,7 +2112,9 @@ BOOL CALLBACK open_slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   long num;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case IDOK: SlideOpt &= 0xFFFFFFF9;
         SlideOpt |= 2*SendDlgItemMessage(hdlg,OpenRec,BM_GETCHECK,0,0);
         SlideOpt |= 4*SendDlgItemMessage(hdlg,OpenMul,BM_GETCHECK,0,0);
@@ -2088,6 +2122,7 @@ BOOL CALLBACK open_slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       case HelpHelp: num = PMode;  if (SlideOpt&0x200) num = 2;
           WinHelp(Hwnd, HelpFile, HELP_CONTEXT, HelpOpenSlide+num);
         break; } break;
+    /* fall through */
     case WM_INITDIALOG:
       if ((SlideOpt&0x200) || PMode>1) {
         ctrl = GetDlgItem(hdlg, edt1);  EnableWindow(ctrl, 0);
@@ -2159,7 +2194,7 @@ void paste(void)
       if (i==CF_DIB || i==CF_BITMAP || i==CF_METAFILEPICT)
         strcpy(text, "The clipboard's owner does not permit access");
       else
-        sprintf(text, "Can't read clipboard in format %d.", i);
+        sprintf(text, "Can't read clipboard in format %ld.", i);
       if (Msg&1)
         MsgBox(Hwnd, text, "Error", MB_OK); }
     CloseClipboard(); }
@@ -2205,7 +2240,7 @@ void prep_pic(HWND hwnd)
 
   if (!rescale)  return;
   x = oldw;  y = oldh;  pal = oldi;  apic = pic;
-  if (x<2) x=2;  if (y<2) y=2;
+  if (x<2) { x=2; }  if (y<2) { y=2; }
   if (!Scale) {
     if (View[0]<0 || View[0]>=oldw)  View[0] = 0;
     if (View[1]<0 || View[1]>=oldh)  View[1] = 0;
@@ -2219,7 +2254,7 @@ void prep_pic(HWND hwnd)
           slide_delete(LastNum, 1);
         pv[0]=View[4];  pv[1]=View[5];  pv[2]=View[6];  pv[3]=View[7]; }
     rw = View[2]-View[0];  rh = View[3]-View[1];
-    if (!rw)  rw = 1;  if (!rh)  rh = 1;
+    if (!rw) { rw = 1; }  if (!rh) { rh = 1; }
     border = LetterColor[Letter&3];
     if (LetterColor[4]>=0 && (Letter&4)) border = LetterColor[4];
     if (LetterColor[5]) {
@@ -2228,7 +2263,7 @@ void prep_pic(HWND hwnd)
                pic[border8*3+2]; }
     if (PrepTrans!=-1 || PreviewPic)  border = border8 = 0;
     x = WindowW;  y = WindowH;
-    if (x<2) x=2;  if (y<2) y=2;
+    if (x<2) { x=2; }  if (y<2) { y=2; }
     if (CopyMode) {
       if (x*rh>y*rw)       x = y*rw/rh;
       else if (x*rh<y*rw)  y = x*rh/rw;
@@ -2238,7 +2273,7 @@ void prep_pic(HWND hwnd)
         View[2]!=oldw || View[3]!=oldh || (Lock&6) || CopyMode ||
         (Interpolate&0x1C00)) {
       if (BitsPixel>8 && oldi && Interpolate) {
-        if (bpic=malloc2(oldw*oldh*3)) {
+        if ((bpic=malloc2(oldw*oldh*3))) {
           for (i=0; i<oldw*oldh; i++)  memcpy(bpic+i*3, pic+pic[768+i]*3, 3);
           depal = 1;  depalpic = pic;  pic = bpic;  oldi = 0; } }
       apic = malloc2(x*y*(3-2*oldi)+768*oldi);  a = 1;
@@ -2279,7 +2314,7 @@ void prep_pic(HWND hwnd)
     wpic = GlobalAlloc(GMEM_MOVEABLE, w*y+1024*pal+40);
     if (!wpic) {
       low_memory(hwnd, "Creating Bitmap", 1);
-      if (a) free2(apic); return; }
+      if (a) { free2(apic); }  return; }
     pic2 = GlobalLock(wpic);  lpic = (long *)pic2;
     lpic[0] = 40;  lpic[1] = x;  lpic[2] = y;
     ((short *)pic2)[6] = 1;  ((short *)pic2)[7] = 24-16*pal;
@@ -2304,7 +2339,7 @@ void prep_pic(HWND hwnd)
       lpal = LocalAlloc(LPTR, sizeof(LOGPALETTE) + 256*sizeof(PALETTEENTRY));
       if (!lpal) {
         low_memory(hwnd, "Allocating Palette", 1);
-        if (a) free2(apic); return; }
+        if (a) { free2(apic); }  return; }
       lpal->palVersion = 0x300;  lpal->palNumEntries = 256;
       for (i=0; i<256 && pal; i++) {
         lpal->palPalEntry[i].peRed   = pic2[42+i*4];
@@ -2480,7 +2515,7 @@ void preview_char(long key)
   if (i==PreCoor[0] || i==PreCoor[2]*PreCoor[3])  shift = 0;
   else if (key==VK_SPACE)  shift = 1;
   new += ((long *)(slide->file+cur*FE+0x40))[0];
-  if (new<0)  new = 0;  if (new>=PreCoorMax)  new = PreCoorMax-1;
+  if (new<0) { new = 0; }  if (new>=PreCoorMax) { new = PreCoorMax-1; }
   for (i=0; i<slide->numfile; i++)
     if (((long *)(slide->file+i*FE+0x40))[0]==new)
       sel = i;
@@ -2621,7 +2656,7 @@ void preview_delete(void)
   if (Msg&4) {
     i = preview_deselect(3);
     if (i>1)
-      sprintf(name, "Delete %d files?", i);
+      sprintf(name, "Delete %ld files?", i);
     else
       strcpy(name, "Delete selected file?");
     if (MsgBox(HwndP, name, "Warning", MB_OKCANCEL)==IDCANCEL)
@@ -2681,7 +2716,7 @@ long preview_deselect(long hold)
   return(num);
 }
 
-BOOL CALLBACK preview_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK preview_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the Preview Options dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -2691,7 +2726,9 @@ BOOL CALLBACK preview_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   char text[270];
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpPreview); break;
       case IDOK: SlideOpt &= 0x017FFFFF;
         for (i=25; i<=31; i++)
@@ -2700,15 +2737,16 @@ BOOL CALLBACK preview_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         if (!SendDlgItemMessage(hdlg, PrevOpt23, BM_GETCHECK, 0, 0))
           SlideOpt |= (1<<23);
         GetDlgItemText(hdlg, PrevWidth, text, 79);
-        sscanf(text, "%d", &i);
+        sscanf(text, "%ld", &i);
         if (i>=40 && i<=255)  slide->tx = i;
         GetDlgItemText(hdlg, PrevHeight, text, 79);
-        sscanf(text, "%d", &i);
+        sscanf(text, "%ld", &i);
         if (i>=10 && i<=255)  slide->ty = i;
         slide->option = SlideOpt;
-        InvalidateRect(HwndP, 0, 1);
+        InvalidateRect(HwndP, 0, 1);  /* fall through */
       case IDCANCEL: EndDialog(hdlg, 1); return(1);
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG: SlideOpt = slide->option;
       for (i=25; i<=31; i++)
         SendDlgItemMessage(hdlg, PrevOpt25+i-25, BM_SETCHECK,
@@ -2716,9 +2754,9 @@ BOOL CALLBACK preview_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       SendDlgItemMessage(hdlg, PrevOpt23, BM_SETCHECK, !(SlideOpt&(1<<23)), 0);
       SendDlgItemMessage(hdlg, PrevOpt31b, BM_SETCHECK,
                          (SlideOpt&0x80000000)!=0, 0);
-      sprintf(text, "%d", slide->tx);
+      sprintf(text, "%ld", slide->tx);
       SetDlgItemText(hdlg, PrevWidth, text);
-      sprintf(text, "%d", slide->ty);
+      sprintf(text, "%ld", slide->ty);
       SetDlgItemText(hdlg, PrevHeight, text);
       SetFocus(hdlg);
       return(1); }
@@ -2734,7 +2772,7 @@ void preview_insert(long x, long y, long sel)
  *                  double selection and to not update the screen afterwards.
  *                                                             3/19/97-DWM */
 {
-  long w, h, x1, y1, i, j, first, low, high, noupdate=(sel&2);
+  long w, h, x1, y1, i, j, low, high, noupdate=(sel&2);
   RECT rect;
   char temp[FE];
 
@@ -2752,7 +2790,7 @@ void preview_insert(long x, long y, long sel)
       sel++; }
   else
     sel = slide->tsel;
-  first = low = high = sel;
+  low = high = sel;
   if (sel<0 || sel>slide->numfile)  return;
   for (i=0; i<slide->numfile; i++)
     if (slide->file[i*FE+0x2F]&2) {
@@ -2763,7 +2801,7 @@ void preview_insert(long x, long y, long sel)
       memcpy(temp, slide->file+i*FE, FE);
       if (i<sel) {
         memmove(slide->file+i*FE, slide->file+i*FE+FE, (sel-i-1)*FE);
-        first--;  j--; }
+        j--; }
       else {
         memmove(slide->file+(sel+1)*FE, slide->file+sel*FE, (i-sel)*FE);
         sel++; }
@@ -2962,7 +3000,7 @@ LRESULT CALLBACK preview_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         InvalidateRect(HwndP, 0, 0); break;
       case MenuShowImage: preview_show(); return(0);
       case MenuSlide: SetForegroundWindow(Hwnd);
-        if (LastNum<0)  slide_show(); break;
+        if (LastNum<0) { slide_show(); } break;
       case MenuSlAuto: if (slide) slide->option &= 0xFDFFFFFF;
         if (slide) SlideOpt = slide->option;
         Busy = 0;  Down = 0;
@@ -3011,7 +3049,8 @@ LRESULT CALLBACK preview_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
     case WM_RBUTTONUP: if (Down==6) preview_insert(lp&0xFFFF, lp>>16, 0);
       cursor(0);  ReleaseCapture(); break;
     case WM_SIZE: InvalidateRect(hwnd, 0, 1); break;
-    case WM_VSCROLL: GetScrollRange(HwndP, SB_VERT, &x, &y);
+    case WM_VSCROLL: { int sx, sy;
+      GetScrollRange(HwndP, SB_VERT, &sx, &sy);  x = sx;  y = sy;
       i = j = GetScrollPos(HwndP, SB_VERT);
       switch (wp&0xFFFF) {
         case SB_BOTTOM: i = x; break;
@@ -3020,13 +3059,13 @@ LRESULT CALLBACK preview_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         case SB_LINEDOWN: if (i<y) i++; break;
         case SB_PAGEUP:   i-=max(1,PreCoor[3]); if (i<x||i>y) i = x; break;
         case SB_PAGEDOWN: i+=max(1,PreCoor[3]); if (i<x||i>y) i = y; break;
-        case SB_THUMBTRACK: ScrollOff = 1;
+        case SB_THUMBTRACK: ScrollOff = 1;  /* fall through */
         case SB_THUMBPOSITION: i = (wp>>16); break;
         case SB_TOP: i = y; }
     case WM_MOUSEWHEEL: /* part way through WM_VSCROLL */
       if (msg == WM_MOUSEWHEEL) {
         k = GET_WHEEL_DELTA_WPARAM(wp);
-        GetScrollRange(HwndP, SB_VERT, &x, &y);
+        GetScrollRange(HwndP, SB_VERT, &sx, &sy);  x = sx;  y = sy;
         i = j = GetScrollPos(HwndP, SB_VERT);
         i -= k / 120;
         if (i < x) i = x;
@@ -3058,7 +3097,8 @@ LRESULT CALLBACK preview_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
         KillTimer(HwndP, 4);
         SetTimer(HwndP, 3, 2000, (TIMERPROC)preview_timer);
         ScrollWindow(HwndP, 0, (j-i)*((short *)PreCoor)[3], 0, 0);
-        ScrollOff --; } break;
+        ScrollOff --; } }
+    break;
     default: return(DefWindowProc(hwnd, msg, wp, lp)); }
   return(0);
 }
@@ -3075,7 +3115,7 @@ void preview_move(long flags, long x, long y, long clear)
   RECT rect;
   long x1, y1, w, h, best, dist, i, n;
 
-  if (x>32768)  x -= 65536;  if (y>32768)  y -= 65536;
+  if (x>32768) { x -= 65536; }  if (y>32768) { y -= 65536; }
   ODown[5] = x;  ODown[6] = y;
   if (ODown[0]&2) {
     ODown[7] |= clear;
@@ -3137,7 +3177,7 @@ void preview_move(long flags, long x, long y, long clear)
   preview_rectangles(0);
 }
 
-VOID CALLBACK preview_move_wait(HWND hwnd, ulong msg, ulong id, long time)
+VOID CALLBACK preview_move_wait(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 /* Keep calling the preview_move function until it actually occurs.
  * Enter: HWND hwnd: handle of calling window.
  *        ulong msg: ignored.
@@ -3200,7 +3240,7 @@ long preview_page(HDC hdc, long ww, long wh, long page, long full)
     if (!full && !(slide->file[i*FE+0x2F]&2))    continue;
     if (first) { first--; continue; }
     x = (pos%nx)*w+5;  y = (pos/nx)*h+5;  pos++;
-    sprintf(text, "Processing image %d of %d.", pos+page*nx*ny, num);
+    sprintf(text, "Processing image %ld of %ld.", pos+page*nx*ny, num);
     SetDlgItemText(hdlg, CopyStat1, text);
     s = slide->file+FE*i;
     if (!(slide->option&0x4000000)) {
@@ -3227,7 +3267,7 @@ long preview_page(HDC hdc, long ww, long wh, long page, long full)
       if (s[0xC]<0 || s[0xC]==2 || s[0xC]==5 || s[0xC]==9)
         num += (((short *)(s+0xC+0x12))[0]<<7);
       if (s[0xC+1] || num)
-        sprintf(text+strlen(text), " - %d", 1+num);
+        sprintf(text+strlen(text), " - %ld", 1+num);
       draw_text(hdc, text, x, y, w-10, 12);
       y += 12; }
     if ((slide->option&0x60800000)!=0x60800000) {
@@ -3311,7 +3351,7 @@ void preview_palette_set(void)
     PreviewPal[i*3+2] = wp[i].peBlue; }
 }
 
-VOID CALLBACK preview_pic(HWND hwnd, ulong msg, ulong id, long time)
+VOID CALLBACK preview_pic(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 /* Handle the timer for background preview redrawing.
  * Enter: HWND hwnd: handle of calling window.
  *        ulong msg: ignored.
@@ -3503,7 +3543,7 @@ void preview_save(void)
   gspec[1] = 0;
   memcpy(gspec+2, SaveRec+SAVELEN*(SaveFilt-1), SAVELEN);
   if (gspec[0]==5)
-    ((long *)(gspec+0xC))[0] = (long)(gquant);
+    jpgcustomquant = (char *)gquant;
   strpath(savedir+1024, opfile);
   strcpy(base, opfile);
   for (i=0; i<page; i++) {
@@ -3532,7 +3572,7 @@ void preview_save(void)
     else       root = name;
     if (strchr(root, '.'))  ext = strchr(root, '.')-name;
     else                    ext = strlen(base);
-    sprintf(num, "%d", i+1);
+    sprintf(num, "%ld", i+1);
     if (ext-(root-name)<=8) {
       while (ext-(root-name)+strlen(num)>8)
         ext--; }
@@ -3551,7 +3591,7 @@ void preview_save(void)
     cursor(0); }
 }
 
-BOOL CALLBACK preview_save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK preview_save_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the Save Preview Screens dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -3561,13 +3601,15 @@ BOOL CALLBACK preview_save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   long w, h, num, full;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpPreviewSave);
         break;
       case IDOK: GetDlgItemText(hdlg, PrevSWidth, text, 79);
-        sscanf(text, "%d", &PrevSaveX);
+        sscanf(text, "%ld", &PrevSaveX);
         GetDlgItemText(hdlg, PrevSHeight, text, 79);
-        sscanf(text, "%d", &PrevSaveY);
+        sscanf(text, "%ld", &PrevSaveY);
         if (PrevSaveX<10)  PrevSaveX = 10;
         if (PrevSaveY<10)  PrevSaveY = 10;
         slide->option &= 0xFEFFFFFF;
@@ -3578,17 +3620,18 @@ BOOL CALLBACK preview_save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       case IDCANCEL: EndDialog(hdlg, 0);  return(1);
       case PrevSOpt1: case PrevSOpt2: case PrevSHeight: case PrevSWidth:
         w = PrevSaveX;  h = PrevSaveY;
-        GetDlgItemText(hdlg, PrevSWidth, text, 79);   sscanf(text, "%d", &w);
-        GetDlgItemText(hdlg, PrevSHeight, text, 79);  sscanf(text, "%d", &h);
-        if (w<10)  w = 10;  if (h<10)  h = 10;
+        GetDlgItemText(hdlg, PrevSWidth, text, 79);   sscanf(text, "%ld", &w);
+        GetDlgItemText(hdlg, PrevSHeight, text, 79);  sscanf(text, "%ld", &h);
+        if (w<10) { w = 10; }  if (h<10) { h = 10; }
         num = PreCoorMax;
         full = SendDlgItemMessage(hdlg,PrevSOpt2,BM_GETCHECK,0,0);
         if (!full) num = preview_deselect(1);
-        sprintf(text, "%d", num);
+        sprintf(text, "%ld", num);
         SetDlgItemText(hdlg, PrevSNum1, text);
-        sprintf(text, "%d", preview_page(0, w, h, -1, full));
+        sprintf(text, "%ld", preview_page(0, w, h, -1, full));
         SetDlgItemText(hdlg, PrevSNum2, text);  return(0);
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG:
       if (slide->tsel<0)  slide->tsel = 0;
       preview_compute();
@@ -3598,9 +3641,9 @@ BOOL CALLBACK preview_save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                          (slide->option&0x01000000)!=0, 0);
       SendDlgItemMessage(hdlg, PrevSOpt1, BM_SETCHECK,
                          !(slide->option&0x01000000), 0);
-      sprintf(text, "%d", PrevSaveX);
+      sprintf(text, "%ld", PrevSaveX);
       SetDlgItemText(hdlg, PrevSWidth, text);
-      sprintf(text, "%d", PrevSaveY);
+      sprintf(text, "%ld", PrevSaveY);
       SetDlgItemText(hdlg, PrevSHeight, text);
       SetFocus(hdlg);
       return(1); }
@@ -3623,13 +3666,13 @@ void preview_show(void)
   if (s[0xC]<0 || s[0xC]==2 || s[0xC]==5 || s[0xC]==9)
     num += (((short *)(s+0xC+0x12))[0]<<7);
   if (s[0xC+1] || num)
-    sprintf(name+strlen(name), "?%d", num+1);
+    sprintf(name+strlen(name), "?%ld", num+1);
   strcat(name, "\"");
   MultiOpen |= 2;
   open_pic_mid(Hwnd, name, 0);
 }
 
-VOID CALLBACK preview_timer(HWND hwnd, ulong msg, ulong id, long time)
+VOID CALLBACK preview_timer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 /* Handle the timer for producing the preview thumbnails.
  * Enter: HWND hwnd: handle of calling window.
  *        ulong msg: ignored.
@@ -3695,7 +3738,7 @@ VOID CALLBACK preview_timer(HWND hwnd, ulong msg, ulong id, long time)
         ((short *)(s+6))[2] = pinter;
         memcpy(s+0xC, pspec, LENPSPEC);
         p = (short *)(s+0x24);
-        if (!p[2])  p[2] = pwidth;  if (!p[3])  p[3] = pheight;
+        if (!p[2]) { p[2] = pwidth; }  if (!p[3]) { p[3] = pheight; }
         if (more==-1 && (pspec[1]&0x80))
           if ((new=realloc2(slide->file, (slide->numfile+1)*FE))) {
             slide->file = new;
@@ -3719,8 +3762,8 @@ VOID CALLBACK preview_timer(HWND hwnd, ulong msg, ulong id, long time)
     if (read) {
       cursor(1);
       p = (short *)(s+0x24);
-      if (p[0]<0 || p[0]>p[2])  p[0] = 0;   if (p[2]>pwidth)  p[2] = pwidth;
-      if (p[1]<0 || p[1]>p[3])  p[1] = 0;   if (p[3]>pheight) p[3] = pheight;
+      if (p[0]<0 || p[0]>p[2]) { p[0] = 0; }   if (p[2]>pwidth) { p[2] = pwidth; }
+      if (p[1]<0 || p[1]>p[3]) { p[1] = 0; }   if (p[3]>pheight) { p[3] = pheight; }
       if (p[0] || p[1] || p[2]!=pwidth || p[3]!=pheight) {         /* crop */
         aw = p[2]-p[0];  if (!pinter)  aw *= 3;
         for (ah=0; ah<p[3]-p[1]; ah++)
@@ -3733,7 +3776,7 @@ VOID CALLBACK preview_timer(HWND hwnd, ulong msg, ulong id, long time)
         if (h>slide->ty) {
           h = slide->ty;  w = pwidth*h/pheight;
           if (w>slide->tx)  w = slide->ty; }
-        if (!w)  w = 1;  if (!h)  h = 1;
+        if (!w) { w = 1; }  if (!h) { h = 1; }
         pic2 = scale_graphic(pwidth, pheight, pal, pic, w, h, 0);
         free2(pic);
         pic = pic2; }
@@ -3802,7 +3845,7 @@ void preview_update(HWND hwnd)
   RECT rect;
   long i, j, k, l, w, h, x, y, n, w2, num;
   char text[300], tbl[]="-+xx";
-  uchar *s, *buf;
+  uchar *s;
 
   if (!slide)  return;
   ODown[0] |= 2;
@@ -3827,7 +3870,6 @@ void preview_update(HWND hwnd)
     s = slide->file+FE*n;
     x += 5;  y += 5;
     if (!(slide->option&0x4000000)) {
-      buf = 0;
       if ((BitsPixel>8 || s[0x2E]) && s[0x2C] && s[0x2D] &&
           s[0x2C]<=slide->tx && s[0x2D]<=slide->ty) {
         ((ushort *)(PreCoor+i*2+4))[2] |= 0x8000;
@@ -3838,10 +3880,10 @@ void preview_update(HWND hwnd)
       sprintf(text, "%c %s", tbl[((ulong *)(slide->file+FE*n+0x20))[0]>>30],
               slide->filename+((long *)(slide->file+FE*n+2))[0]);
       num = (((uchar *)s)[0xC+1]&0x7F);
-      if (s[0xC]<0 || s[0xC]==2 || s[0xC]==5 || s[0xC]==9)
+      if (0 || s[0xC]==2 || s[0xC]==5 || s[0xC]==9)
         num += (((short *)(s+0xC+0x12))[0]<<7);
       if (s[0xC+1] || num)
-        sprintf(text+strlen(text), " - %d", 1+num);
+        sprintf(text+strlen(text), " - %ld", 1+num);
       draw_text(hdc, text, x, y, w-10, 12);
       y += 12; }
     if ((slide->option&0x60800000)!=0x60800000) {
@@ -3882,7 +3924,7 @@ void preview_update(HWND hwnd)
   ODown[0] &= 0xFD;
 }
 
-BOOL CALLBACK print_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK print_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the print layout dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -3893,7 +3935,9 @@ BOOL CALLBACK print_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   HWND ctrl;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,
                              HelpPrint+(PrintSet&0x20)!=0); break;
       case IDCANCEL: PrintSet &= 0xFF;  PrintSet |= 16;
@@ -3909,8 +3953,9 @@ BOOL CALLBACK print_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           PrintSet |= 2*SendDlgItemMessage(hdlg,MRadio2,BM_GETCHECK,0,0);
           PrintSet |= 4*SendDlgItemMessage(hdlg,CRadio2,BM_GETCHECK,0,0);
           PrintSet |= 8*SendDlgItemMessage(hdlg,VRadio2,BM_GETCHECK,0,0); }
-        memmove(PrintMarg, PrintMarg+5, 5*sizeof(float));
+        memmove(PrintMarg, PrintMarg+5, 5*sizeof(float));  /* fall through */
       default: return(0); }
+    /* fall through */
     case WM_INITDIALOG: PrintSet = (PrintSet&0xFF)*0x101;
       memmove(PrintMarg+5, PrintMarg, 5*sizeof(float));
       for (i=0; i<4; i++)
@@ -3959,7 +4004,7 @@ void print_getitem(HWND hdlg, long item, float *value, long type)
 
   GetDlgItemText(hdlg, item, text, 79);
   if (type) {
-    sscanf(text, "%d", &temp);
+    sscanf(text, "%ld", &temp);
     if (temp>=0)  value[0] = temp;
     return; }
   temp = sscanf(text, "%f%*c%f%*c%f", val, val+1, val+2);
@@ -4056,7 +4101,7 @@ void printer(HWND hwnd, long setup)
     old=Scale;  oldr=Reduce;  CopyMode = 1;
     Scale = ((PrintSet&8)!=0);  Reduce = 0;  rescale |= 2;  prep_pic(hwnd);
     w = curwidth;  h = curheight;
-    if (!w)  w = 1;  if (!h)  h = 1;
+    if (!w) { w = 1; }  if (!h) { h = 1; }
     if (!(PrintSet&2)) {
       pw = a[0];  ph = (float)h/w*a[3]/a[2]*pw;
       if (ph>a[1]) {
@@ -4109,28 +4154,28 @@ void read_ini(void)
     GetPrivateProfileString(inihead, key[i*3], key[i*3+1], text, 256, inifile);
     def = 1-(!strcmpi(text, key[i*3+1]));
     switch (i) {
-      case 0: sscanf(text, "%d", &Redox); break;
+      case 0: sscanf(text, "%ld", &Redox); break;
       case 1: Msg = (Msg&0xFFFE)+def; break;
       case 2: Msg = (Msg&0xFFFD)+(!def)*2; break;
       case 3: if (strlen(text)) strcpy(opendir, text); break;
       case 4: Undo[2] = -1;
-        sscanf(text, "%d%*c%d%*c%d%*c%d", Undo, Undo+1, Undo+2, Undo+3);
+        sscanf(text, "%ld%*c%ld%*c%ld%*c%ld", Undo, Undo+1, Undo+2, Undo+3);
         OrigX = Undo[0];  OrigY = Undo[1]; break;
-      case 5: sscanf(text, "%d", &FilterType); break;
+      case 5: sscanf(text, "%ld", &FilterType); break;
       case 6: Reduce = def; break;
       case 7: Dither = def; break;
-      case 8: sscanf(text, "%d", &Letter); break;
-      case 9: sscanf(text, "%d", &Lock);  Lock &= 0xFFF7; break;
+      case 8: sscanf(text, "%ld", &Letter); break;
+      case 9: sscanf(text, "%ld", &Lock);  Lock &= 0xFFF7; break;
       case 10: sscanf(text, "%f%*c%f*c%f*c%f", &AspectX, &AspectY, AspectXY,
                       AspectXY+1); break;
       case 11: Topmost = def; break;
-      case 12: sscanf(text, "%f%*c%f%*c%f%*c%f%*c%f%*c%d", PrintMarg,
+      case 12: sscanf(text, "%f%*c%f%*c%f%*c%f%*c%f%*c%ld", PrintMarg,
                       PrintMarg+1, PrintMarg+2, PrintMarg+3, PrintMarg+4,
                       &PrintSet); break;
       case 13: Msg = (Msg&0xFFFB)+def*4; break;
-      case 14: sscanf(text, "%d", &PreviewOpt); break;
+      case 14: sscanf(text, "%ld", &PreviewOpt); break;
       case 15: if (strlen(text)) strcpy(savedir, text); break;
-      case 16: sscanf(text, "%d%*c%d", &SaveFilt, &SaveOpt); break;
+      case 16: sscanf(text, "%ld%*c%ld", &SaveFilt, &SaveOpt); break;
       case 17: MultiOpen = def; break;
       case 18: if (strlen(text)) strcpy(opendir+256, text); break;
       case 19: if (strlen(text)) strcpy(savedir+256, text); break;
@@ -4140,19 +4185,19 @@ void read_ini(void)
         else {
           strcpy(titleimage+1, inifile);
           sprintf(titleimage+1+strlen(titleimage+1)-3, "TIF"); } break;
-      case 23: for (j=0; j<sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++)
-          sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace.length))+j));
+      case 23: for (j=0; j<(long)sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++) {
+          sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace.length))+j)); }
           break;
       case 24: if (strlen(text)) strcpy(opendir+768, text); break;
       case 25: if (strlen(text)) strcpy(savedir+768, text); break;
-      case 26: sscanf(text, "%d", &SlideOpt); break;
-      case 27: sscanf(text, "%d", &SlideDelay); break;
-      case 28: for (j=0; j<sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++)
-          sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace2.length))+j));
+      case 26: sscanf(text, "%ld", &SlideOpt); break;
+      case 27: sscanf(text, "%ld", &SlideDelay); break;
+      case 28: for (j=0; j<(long)sizeof(WINDOWPLACEMENT) && (size_t)j*2<strlen(text); j++) {
+          sscanf(text+j*2, "%2X", (int *)(((char *)(&WinPlace2.length))+j)); }
           break;
-      case 29: sscanf(text, "%d", &SlideTx); break;
-      case 30: sscanf(text, "%d", &SlideTy); break;
-      case 31: sscanf(text, "%d%*c%d%*c%d", &SortVal, &SortDir, &FindType);
+      case 29: sscanf(text, "%ld", &SlideTx); break;
+      case 30: sscanf(text, "%ld", &SlideTy); break;
+      case 31: sscanf(text, "%ld%*c%ld%*c%ld", &SortVal, &SortDir, &FindType);
         break;
       case 32: if (strlen(text)) strcpy(opendir+1024, text); break;
       case 33: if (strlen(text)) strcpy(lastview,     text); break;
@@ -4160,29 +4205,29 @@ void read_ini(void)
       case 35: if (strlen(text)) strcpy(lastview+512, text); break;
       case 36: if (strlen(text)) strcpy(lastview+768, text); break;
       case 37: if (strlen(text)) strcpy(savedir+1024, text); break;
-      case 38: sscanf(text, "%d%*c%d", &PrevSaveX, &PrevSaveY); break;
+      case 38: sscanf(text, "%ld%*c%ld", &PrevSaveX, &PrevSaveY); break;
       case 39: break;  // regnum
       case 40: if (strlen(text) && strlen(text)<255) strcpy(RegName, text);
         break;
       case 41: if (strlen(text) && strlen(text)==8) strcpy(RegPass, text);
         break;
       case 42: Interpolate = def;
-        j = -1;  sscanf(text, "0x%x", &j);  if (j<0)  sscanf(text, "%x", &j);
-        if (j>=0)  Interpolate = j; break;
+        j = -1;  sscanf(text, "0x%lx", &j);  if (j<0)  sscanf(text, "%lx", &j);
+        if (j>=0) { Interpolate = j; } break;
       case 43: HalfSizeBatch = def; break;
       case 44: if (strlen(text)) strcpy(savedir+5*256, text); break;
       case 45: MultiSave = def; break;
       default: ; } }
   memcpy(SaveRec, SaveDefault, SAVEFORMATS*SAVELEN);
   for (i=0; i<SAVEFORMATS; i++) {
-    sprintf(text2, "SaveOption%d", i);
+    sprintf(text2, "SaveOption%ld", i);
     GetPrivateProfileString(inihead, text2, "", text, 256, inifile);
     for (j=0; j<SAVELEN; j++) {
-      sscanf(text+j*2, "%2X", &k);
+      sscanf(text+j*2, "%2lX", &k);
       SaveRec[SAVELEN*i+j] = k; } }
   memset(gquant, 0x0A, 128);
   for (i=0; i<4; i++) {
-    sprintf(text2, "CustomQuant%d", i);
+    sprintf(text2, "CustomQuant%ld", i);
     GetPrivateProfileString(inihead, text2, "", text, 256, inifile);
     for (j=0; j<32; j++)
       sscanf(text+j*2, "%2X", (int *)(gquant+i*32+j)); }
@@ -4277,7 +4322,7 @@ void recheck(HWND hwnd, long refresh)
   CheckMenuItem(Hmenu, MenuSaveMulti,MF_CHECKED*(MultiSave&1));
   CheckMenuItem(Hmenu, MenuSlAuto,  MF_CHECKED*((SlideOpt&8)/8));
   CheckMenuItem(Hmenu, MenuSlide,   MF_CHECKED*(slide!=0));
-  sprintf(text, "&Increase Delay -- %d sec\t+", SlideDelay);
+  sprintf(text, "&Increase Delay -- %ld sec\t+", SlideDelay);
   ModifyMenu(Hmenu, MenuSlInc, 0, MenuSlInc, text);
   CheckMenuItem(Hmenu, MenuSlMan,   MF_CHECKED*(!(SlideOpt&8)));
   CheckMenuItem(Hmenu, MenuSole,    MF_CHECKED*((Msg&2)/2));
@@ -4327,7 +4372,7 @@ void recheck(HWND hwnd, long refresh)
     if (lastview[i*256]) {
       text2 = lastview+i*256;
       if (strrchr(text2, '\\'))  text2 = strrchr(text2, '\\')+1;
-      sprintf(text, "&%d: %s", i+1, text2);
+      snprintf(text, sizeof(text), "&%ld: %.250s", i+1, text2);
       AppendMenu(sub, MF_STRING, MenuLastView+i, text); }
   if (refresh) {
     InvalidateRect(hwnd, 0, 0);
@@ -4376,7 +4421,7 @@ void remove_quotes2(char *text)
       memmove(text+2, text+3, strlen(text+2));
 }
 
-BOOL CALLBACK rename_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK rename_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the rename dialog box.  Is done is selected,
  *  rename the specified file.
  * Enter: HWND hdlg: handle of current dialog window.
@@ -4386,7 +4431,9 @@ BOOL CALLBACK rename_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   char new[256], oname[NAMELEN], iname[NAMELEN], *s, *newf;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT,HelpRename); break;
       case IDOK: GetDlgItemText(hdlg, RenameNew, new, 256-1);
         s = slide->file+Rename*FE;
@@ -4411,6 +4458,7 @@ BOOL CALLBACK rename_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         return(Busy=0);
       case IDCANCEL: EndDialog(hdlg, 0); return(Busy=0);
       default: return(0); }
+    /* fall through */
     case WM_INITDIALOG: Busy = 1;
       SetDlgItemText(hdlg, RenameOrig,
                      slide->filename+((long *)(slide->file+Rename*FE+2))[0]);
@@ -4489,11 +4537,11 @@ long save_as(long saveas)
  *                     function, 6 for preview save.
  * Exit:  long okay: 0 for no file selected, 1 for selected.   6/20/96-DWM */
 {
-  long len, i, j, err, old, oldr;
+  long len, i, j, err=0, old, oldr;
   uchar gspec[SAVELEN+2];
   char *name, *ext;
 
-  if (SaveAs=saveas)
+  if ((SaveAs=saveas))
     opfile[0] = 0;
   strcpy(opfilter, SaveFilter);
   if (SaveAs==2 || SaveAs==4) {
@@ -4528,7 +4576,7 @@ long save_as(long saveas)
                    (OFN_FILEMUSTEXIST*(SaveAs==2 || SaveAs==4));
   if ((Msg&4) && (SaveAs<=1 || SaveAs==6))
     openfile.Flags |= OFN_OVERWRITEPROMPT;
-  openfile.lpfnHook = (DLGPROC)save_dialog;
+  openfile.lpfnHook = (LPOFNHOOKPROC)(void *)save_dialog;
   openfile.lpTemplateName = MAKEINTRESOURCE(SaDLG);
   Busy = 1;
   if (!GetSaveFileName(&openfile)) { Busy = 0; return(0); }
@@ -4539,7 +4587,7 @@ long save_as(long saveas)
     SaveFilt = appendtbl[SaveFilt-1]+1;
   if (SaveAs>=3 && SaveAs<=5)  return(1);
   name = strrchr(opfile, '\\');
-  if (!name)  strrchr(opfile, ':');
+  if (!name) { (void)strrchr(opfile, ':'); }
   if (!name) name = opfile;  else name++;
   ext = strrchr(name, '.');
   if ((!ext || (SaveOpt&1)) && SaveAs!=2) {
@@ -4550,7 +4598,7 @@ long save_as(long saveas)
   gspec[1] = (SaveAs==2);
   memcpy(gspec+2, SaveRec+SAVELEN*(SaveFilt-1), SAVELEN);
   if (gspec[0]==5)
-    ((long *)(gspec+0xC))[0] = (long)(gquant);
+    jpgcustomquant = (char *)gquant;
   strpath(savedir, opfile);
   old=Scale;  oldr=Reduce;  CopyMode = 2;
   Scale = (!(SaveOpt&2));  Reduce = 0;  rescale |= 2;  prep_pic(Hwnd);
@@ -4576,7 +4624,7 @@ long save_as(long saveas)
   return(1);
 }
 
-BOOL CALLBACK save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK save_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the main save dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -4585,7 +4633,9 @@ BOOL CALLBACK save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   HWND ctrl;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT, HelpSave+SaveAs);
         break;
       case IDOK: if (SaveAs<=2)
@@ -4608,6 +4658,7 @@ BOOL CALLBACK save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           SaveRec[SAVELEN*SaveDialog+1] = 0;
         return(0);
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG:
       if ((SaveAs>=3 && SaveAs<=4) || SaveAs==6) {
         SendDlgItemMessage(hdlg, SaveView1, BM_SETCHECK, 1, 0);
@@ -4630,12 +4681,12 @@ BOOL CALLBACK save_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       else
         SendDlgItemMessage(hdlg, SaveExt, BM_SETCHECK, SaveOpt&1, 0);
       SetWindowText(hdlg, SaveTitle[SaveAs]);
-      SetFocus(hdlg);
+      SetFocus(hdlg);  /* fall through */
     default: return(0); }
   return(0);
 }
 
-BOOL CALLBACK saveopt_custom(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK saveopt_custom(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the custom quantization table dialog box.
  * Enter: HWND hdlg: handle of current dialog window.
  *        long msg: message to process.
@@ -4646,19 +4697,22 @@ BOOL CALLBACK saveopt_custom(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   static uchar qtbl[128];
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT, HelpSaveCustom);
                      break;
       case IDOK: o = 64*SendDlgItemMessage(hdlg, SaveRad2, BM_GETCHECK,0,0);
         for (i=0; i<64; i++) {
           GetDlgItemText(hdlg, SaveQ+i, text, 79);
-          sscanf(text, "%d", &temp);
+          sscanf(text, "%ld", &temp);
           if (temp>0 && temp<=255)  qtbl[i+o] = temp; }
         memcpy(gquant, qtbl, 128);
         EndDialog(hdlg, 1); break;
       case IDCANCEL: EndDialog(hdlg, 0); break;
-      case SaveBest: for (i=0; i<64; i++)
-        SetDlgItemText(hdlg, SaveQ+i, "1"); return(0);
+      case SaveBest: for (i=0; i<64; i++) {
+        SetDlgItemText(hdlg, SaveQ+i, "1"); }
+        return(0);
       case SaveDef:
         o = 0x45*SendDlgItemMessage(hdlg, SaveRad2, BM_GETCHECK,0,0)+0x19;
         for (i=0; i<64; i++) {
@@ -4671,17 +4725,19 @@ BOOL CALLBACK saveopt_custom(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           return(0);
         for (i=0; i<64; i++) {
           GetDlgItemText(hdlg, SaveQ+i, text, 79);
-          sscanf(text, "%d", &temp);
+          sscanf(text, "%ld", &temp);
           if (temp>0 && temp<=255)  qtbl[i+o] = temp; }
         o ^= 64;
         for (i=0; i<64; i++) {
           sprintf(text, "%d", qtbl[i+o]);
           SetDlgItemText(hdlg, SaveQ+i, text); }
         return(0);
-      case SaveWorst: for (i=0; i<64; i++)
-        SetDlgItemText(hdlg, SaveQ+i, "255"); return(0);
+      case SaveWorst: for (i=0; i<64; i++) {
+        SetDlgItemText(hdlg, SaveQ+i, "255"); }
+        return(0);
       default: return(0); } break;
 
+    /* fall through */
     case WM_INITDIALOG: SetFocus(hdlg);
       SendDlgItemMessage(hdlg, SaveRad1, BM_SETCHECK, 1, 0);
       memcpy(qtbl, gquant, 128);
@@ -4693,7 +4749,7 @@ BOOL CALLBACK saveopt_custom(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   return(0);
 }
 
-BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK saveopt_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in any of the save options dialog boxes.  The various
  *  save formats and options are listed below.
  *   Format   Colors   Compress Size  DPI Other
@@ -4724,7 +4780,9 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   float temp2;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT,
                              HelpSaveBMP+SaveDialog);  break;
       case IDOK: SaveRec[SAVELEN*SaveDialog] =
@@ -4733,7 +4791,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                       SendDlgItemMessage(hdlg,SaveCompress,CB_GETCURSEL,0,0);
         text[0] = 0;
         GetDlgItemText(hdlg, SaveDPI, text, 79);
-        sscanf(text, "%d", &temp);  if (temp<=0 || temp>100000)  temp = 160;
+        sscanf(text, "%ld", &temp);  if (temp<=0 || temp>100000)  temp = 160;
         ((short *)(SaveRec+SAVELEN*SaveDialog+2))[0] = temp;
         for (i=0; i<4; i++)
           if (SendDlgItemMessage(hdlg, SaveRad1+i, BM_GETCHECK,0,0))
@@ -4747,7 +4805,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
             if (temp2<=0 || temp2>1000)  temp2 = 1;
             ((float *)(SaveRec+SAVELEN*SaveDialog+6))[i] = temp2; }
           else {
-            sscanf(text, "%d", &temp);
+            sscanf(text, "%ld", &temp);
             switch (SaveDialog*4+i) {
               case 13: if (temp<2 || temp>1000)  temp = 2;  break;
               case 20: if (temp<0 || temp>2600)  temp = 50; break;
@@ -4765,6 +4823,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         if (SaveDialog==5)
           SaveRec[SAVELEN*SaveDialog+5] = SendDlgItemMessage(hdlg, SaveCus,
                                                             BM_GETCHECK,0,0);
+        /* fall through */
       case IDCANCEL: EndDialog(hdlg, 1);
         if (PreviewPic) { free2(PreviewPic);  PreviewPic = 0; }
         if (!wpal)  return(1);
@@ -4790,12 +4849,12 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         if (SaveDialog==5) {
           GetDlgItemText(hdlg, SaveEdit1, text, 79);
           i = GetScrollPos(GetDlgItem(hdlg, SaveScroll), SB_CTL);
-          sscanf(text, "%d", &i);
+          sscanf(text, "%ld", &i);
           SetScrollPos(GetDlgItem(hdlg, SaveScroll), SB_CTL, i, 1); }
         if (SaveDialog<1 || SaveDialog>4)  return(0);
         GetDlgItemText(hdlg, SaveEdit1, text, 79);
         temp = PreviewTrans;
-        sscanf(text, "%d", &temp);
+        sscanf(text, "%ld", &temp);
         if (temp==PreviewTrans)  return(0);
         PreviewTrans = temp;
         if (PreviewOpt&0xC)  return(0);
@@ -4804,7 +4863,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         if (SaveDialog!=1 && SaveDialog!=4 && SaveDialog!=3)  return(0);
         GetDlgItemText(hdlg, SaveEdit2, text, 79);
         temp = PreviewInv;
-        sscanf(text, "%d", &temp);
+        sscanf(text, "%ld", &temp);
         if (temp==PreviewInv)  return(0);
         PreviewInv = temp;
         if (SaveDialog==3) {
@@ -4814,7 +4873,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       case SaveEdit3: case SaveEdit4: if (SaveDialog!=1)  return(0);
         GetDlgItemText(hdlg, wp&0xFFFF, text, 79);
         temp = PreviewXY[(wp&0xFFFF)-SaveEdit3];
-        sscanf(text, "%d", &temp);
+        sscanf(text, "%ld", &temp);
         if (temp==PreviewXY[(wp&0xFFFF)-SaveEdit3])  return(0);
         PreviewXY[(wp&0xFFFF)-SaveEdit3] = temp;
         if ((PreviewOpt&0xC)!=8)  return(0);
@@ -4828,7 +4887,9 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         create_savepic_rect(1, &rect, hdlg);
         InvalidateRect(hdlg, &rect, 1); return(0);
       default: return(0); }
-    case WM_HSCROLL: GetScrollRange((HWND)lp, SB_CTL, &x, &y);
+    /* fall through */
+    case WM_HSCROLL: { int sx, sy;
+      GetScrollRange((HWND)lp, SB_CTL, &sx, &sy);  x = sx;  y = sy;
       i = GetScrollPos((HWND)lp, SB_CTL);
       switch (wp&0xFFFF) {
         case SB_BOTTOM: i = x; break;
@@ -4843,8 +4904,8 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         sprintf(text, "%4.2f", i*0.01);
         PreviewGamma = i*0.01; }
       else
-        sprintf(text, "%d", i);
-      SetDlgItemText(hdlg, SaveEdit1, text); break;
+        sprintf(text, "%ld", i);
+      SetDlgItemText(hdlg, SaveEdit1, text); } break;
     case WM_INITDIALOG: init = 1; SetFocus(hdlg); break;
     case WM_LBUTTONDOWN: if (Down)  return(0);
       if (SaveDialog!=1 && SaveDialog!=2 && SaveDialog!=4)  return(0);
@@ -4854,7 +4915,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
     case WM_LBUTTONUP: if (Down==1) { Down = 0;  ReleaseCapture(); } break;
     case WM_MOUSEMOVE:
       if (Down==1) saveopt_left(hdlg, lp&0xFFFF, lp>>16);
-      if (Down==2) saveopt_right(hdlg, lp&0xFFFF, (lp>>16), 1); break;
+      if (Down==2) { saveopt_right(hdlg, lp&0xFFFF, (lp>>16), 1); } break;
     case WM_PAINT: if (SaveDialog<1 || SaveDialog>4)  break;
       hdc = BeginPaint(hdlg, &paint);
       cursor(1);
@@ -4875,10 +4936,10 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
     Down = 0;
     for (i=0; i<8; i++) {
       if (clr[SaveDialog]&(1<<i))
-        SendDlgItemMessage(hdlg, SaveColors, CB_ADDSTRING, 0, (long)clrt[i]);
+        SendDlgItemMessage(hdlg, SaveColors, CB_ADDSTRING, 0, (LPARAM)clrt[i]);
       if (com[SaveDialog]&(1<<i))
         SendDlgItemMessage(hdlg, SaveCompress, CB_ADDSTRING, 0,
-                           (long)SaveComp[i]); }
+                           (LPARAM)SaveComp[i]); }
     SendDlgItemMessage(hdlg, SaveColors, CB_SETCURSEL,
                        SaveRec[SAVELEN*SaveDialog], 0);
     SendDlgItemMessage(hdlg, SaveCompress, CB_SETCURSEL,
@@ -4898,7 +4959,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       else {
         if (i<2)  temp = ((long *)(SaveRec+SAVELEN*SaveDialog+6))[i];
         else      temp = ((short *)(SaveRec+SAVELEN*SaveDialog+6))[i+2];
-        sprintf(text, "%d", temp); }
+        sprintf(text, "%ld", temp); }
       SetDlgItemText(hdlg, SaveEdit1+i, text); }
     SendDlgItemMessage(hdlg, SaveFit, BM_SETCHECK, (PreviewOpt&2), 0);
     SendDlgItemMessage(hdlg, SaveFit1, BM_SETCHECK, (PreviewOpt&0xC)==0, 0);
@@ -4918,6 +4979,7 @@ BOOL CALLBACK saveopt_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         if (SaveAs==2 || SaveAs==4) {
           ctrl = GetDlgItem(hdlg, SaveEdit3);  EnableWindow(ctrl, 0);
           ctrl = GetDlgItem(hdlg, SaveText1);  EnableWindow(ctrl, 0); }
+        /* fall through */
       case 1: case 4: create_savepic_rect(3, 0, hdlg); break;
       case 3: SetScrollRange(GetDlgItem(hdlg, SaveScroll), SB_CTL, 1, 300,0);
         PreviewGamma = ((float *)(SaveRec+SAVELEN*SaveDialog+6))[0];
@@ -4956,7 +5018,7 @@ long saveopt_left(HWND hdlg, long x, long y)
     return(0);
   x -= rect.left;  y -= rect.top;
   w = rect.right-rect.left;  h = rect.bottom-rect.top;
-  if (!w) w = 1;  if (!h) h = 1;
+  if (!w) { w = 1; }  if (!h) { h = 1; }
   iw = PreviewArea[2+fit*4]-PreviewArea[0+fit*4];
   ih = PreviewArea[3+fit*4]-PreviewArea[1+fit*4];
   if (iw<=w && ih<=h) {
@@ -4976,15 +5038,15 @@ long saveopt_left(HWND hdlg, long x, long y)
   switch (PreviewOpt&0xC) {
     case 0: if (PreviewTrans==clr)  return(1);
       PreviewTrans = clr;
-      sprintf(text, "%d", clr);
+      sprintf(text, "%ld", clr);
       SetDlgItemText(hdlg, SaveEdit1, text); break;
     case 4: if (PreviewInv==clr)  return(1);
       PreviewInv = clr;
-      sprintf(text, "%d", clr);
+      sprintf(text, "%ld", clr);
       SetDlgItemText(hdlg, SaveEdit2, text); break;
-    case 8: sprintf(text, "%d", ix);
+    case 8: sprintf(text, "%ld", ix);
       SetDlgItemText(hdlg, SaveEdit3, text);
-      sprintf(text, "%d", iy);
+      sprintf(text, "%ld", iy);
       SetDlgItemText(hdlg, SaveEdit4, text); }
   if (SaveDialog==2)
     SendDlgItemMessage(hdlg, SaveCheck, BM_SETCHECK, 1, 0);
@@ -5022,7 +5084,7 @@ long saveopt_right(HWND hdlg, long x, long y, long move)
   return(1);
 }
 
-VOID CALLBACK scroll_wait(HWND hwnd, ulong msg, ulong id, long time)
+VOID CALLBACK scroll_wait(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 /* Prevent scrolling too fast.
  * Enter: HWND hwnd: handle of calling window.
  *        ulong msg: ignored.
@@ -5073,7 +5135,7 @@ void set_font(HDC dc, long type, long size, long fore, long back)
   long bold=0;
   char *name[]={" ","Arial"};
 
-  if (((long)font)!=-1)
+  if (font!=(HFONT)-1)
     DeleteObject(font);
   font = (HFONT)-1;
   if (!size)  return;
@@ -5134,11 +5196,11 @@ void set_letter_color(void)
       LetterColor[4] = -1;  return; }
     LetterColor[4] = c = ((ulong *)pic)[0]&0xFFFFFF;
     for (i=1; i<oldh-1; i++)
-      if ((((ulong *)(pic+i*oldw*3))[0]&0xFFFFFF)!=c ||
+      if ((((ulong *)(pic+i*oldw*3))[0]&0xFFFFFFUL)!=(ulong)c ||
           (((long *)(pic+(i*oldw+oldw-1)*3))[0]&0xFFFFFF)!=c)
         LetterColor[4] = -1;
     for (i=1; i<oldw-1; i++)
-      if ((((ulong *)(pic+i*3))[0]&0xFFFFFF)!=c ||
+      if ((((ulong *)(pic+i*3))[0]&0xFFFFFFUL)!=(ulong)c ||
           (((long *)(pic+(i+oldh*oldw-oldw)*3))[0]&0xFFFFFF)!=c)
         LetterColor[4] = -1; }
 }
@@ -5159,7 +5221,7 @@ void set_name(HWND hwnd)
     if (oldspec[0]==2 || oldspec[0]==5 || oldspec[0]==9)
       num += (((short *)(oldspec+0x12))[0]<<7);
     if (num || oldspec[1])
-      sprintf(text+strlen(text), " - %d", num+1); }
+      sprintf(text+strlen(text), " - %ld", num+1); }
   SetWindowText(hwnd, text);
 }
 
@@ -5168,7 +5230,7 @@ void set_size(void)
 {
   long x, y;
 
-  if (!oldw) oldw = 1;  if (!oldh) oldh = 1;
+  if (!oldw) { oldw = 1; }  if (!oldh) { oldh = 1; }
   x = oldw+extrax;  y = oldh+extray;
   if (x>GetSystemMetrics(SM_CXSCREEN)) {
     x = GetSystemMetrics(SM_CXSCREEN);
@@ -5187,7 +5249,7 @@ void set_size(void)
   View[4] = View[5] = 0;  View[6] = oldw;  View[7] = oldh;
 }
 
-BOOL CALLBACK slide_cat_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK slide_cat_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the Slide Category dialog box.  This allows a
  *  category to either be edited or created.  The specific category is given
  *  by the global variable EditCat.
@@ -5201,7 +5263,9 @@ BOOL CALLBACK slide_cat_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   long i, pos, len;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpSlideCat); break;
       case IDOK: slide->cat[EditCat*8+7] = 0;
         if (SendDlgItemMessage(hdlg, SlideShowY, BM_GETCHECK, 0, 0))
@@ -5216,7 +5280,7 @@ BOOL CALLBACK slide_cat_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
               slide->cat[i*8+6] = 0;
         GetDlgItemText(hdlg, SlideName, text, 255);
         if (!strlen(text))
-          sprintf(text, "Category %d", EditCat+1);
+          sprintf(text, "Category %ld", EditCat+1);
         if (slide->catname) {
           pos = ((long *)(slide->cat+EditCat*8))[0];
           len = ((short *)(slide->cat+EditCat*8+4))[0];
@@ -5243,19 +5307,22 @@ BOOL CALLBACK slide_cat_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           len = 0;
         ((long *)(slide->cat+EditCat*8))[0] = pos;
         ((short *)(slide->cat+EditCat*8+4))[0] = len;
-        slide->lencatname += len;
+        slide->lencatname += len;  /* fall through */
       case IDCANCEL: EndDialog(hdlg, 1);  return(1);
       case SlideShowN:
-        if (SendDlgItemMessage(hdlg, SlideShowN, BM_GETCHECK, 0, 0))
-          SendDlgItemMessage(hdlg, SlideShowY, BM_SETCHECK, 0, 0); break;
+        if (SendDlgItemMessage(hdlg, SlideShowN, BM_GETCHECK, 0, 0)) {
+          SendDlgItemMessage(hdlg, SlideShowY, BM_SETCHECK, 0, 0); }
+        break;
       case SlideShowY:
-        if (SendDlgItemMessage(hdlg, SlideShowY, BM_GETCHECK, 0, 0))
-          SendDlgItemMessage(hdlg, SlideShowN, BM_SETCHECK, 0, 0); break;
+        if (SendDlgItemMessage(hdlg, SlideShowY, BM_GETCHECK, 0, 0)) {
+          SendDlgItemMessage(hdlg, SlideShowN, BM_SETCHECK, 0, 0); }
+        break;
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG:
       SetWindowText(hdlg, Title[!((short *)(slide->cat+EditCat*8+4))[0]]);
       for (i=0; i<11; i++)
-        SendDlgItemMessage(hdlg,SlideQuick,CB_ADDSTRING,0,(long)quick[i]);
+        SendDlgItemMessage(hdlg,SlideQuick,CB_ADDSTRING,0,(LPARAM)quick[i]);
       if (((short *)(slide->cat+EditCat*8+4))[0]) {
         SetDlgItemText(hdlg, SlideName, slide->catname+
                        ((long *)(slide->cat+EditCat*8))[0]);
@@ -5324,9 +5391,9 @@ void slide_cat_list(HWND hdlg, long action)
           sprintf(text+strlen(text), "\t%d", slide->cat[i*8+6]-1);
         else
           sprintf(text+strlen(text), "\t");
-        sprintf(text+strlen(text), "\t%c", never[slide->cat[i*8+7]]);
+        sprintf(text+strlen(text), "\t%c", never[(uchar)slide->cat[i*8+7]]);
         num = SendDlgItemMessage(hdlg, SlideCatList, LB_ADDSTRING, 0,
-                                 (long)(text));
+                                 (LPARAM)(text));
         SendDlgItemMessage(hdlg, SlideCatList, LB_SETITEMDATA, num, i);
         SendDlgItemMessage(hdlg, SlideCatList, LB_SETSEL, sel[i], num); } }
   if (action>=2)
@@ -5447,7 +5514,7 @@ void slide_delete(long num, long part)
     else if (LastNum==num)  LastNum = -1;
     if (NextNum>num)  NextNum--;
     else if (NextNum==num) {
-      if (NextPic)  free2(NextPic);  NextPic = 0;  NextNum = -1; }
+      if (NextPic) { free2(NextPic); }  NextPic = 0;  NextNum = -1; }
     slide->numfile--; }
   /*
   slide->file = realloc2(slide->file, slide->numfile*FE);
@@ -5488,7 +5555,7 @@ void slide_delete(long num, long part)
   slide->filename = realloc2(slide->filename, slide->lenfilename);
 }
 
-BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK slide_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the Slide Options dialog box.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -5500,7 +5567,9 @@ BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   long i, j, val, tabs[]={112,120};
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd,HelpFile,HELP_CONTEXT,HelpSlide); break;
       case IDOK: SlideOpt &= 0xFFFFFA07;
         if (!SendDlgItemMessage(hdlg, SlideOpt5, BM_GETCHECK, 0, 0))
@@ -5516,7 +5585,7 @@ BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         if (SendDlgItemMessage(hdlg, SlideOpt10b, BM_GETCHECK, 0, 0))
           SlideOpt |= 0x400;
         GetDlgItemText(hdlg, SlideSec, text, 79);
-        sscanf(text, "%d", &i);
+        sscanf(text, "%ld", &i);
         if (i>=0 && i<=3600)  SlideDelay = slide->delay = i;
         if (SendDlgItemMessage(hdlg, SlideOpt4, BM_GETCHECK, 0, 0))
           SlideOpt |= 0x10;
@@ -5571,9 +5640,9 @@ BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                                          val, 0);
         DialogBox(hinst, MAKEINTRESOURCE(SlCatDLG), hdlg, (DLGPROC)slide_cat_dialog);
         slide_cat_list(hdlg, 0); break;
-      case SlideNew: for(i=0; i<30; i++)
+      case SlideNew: for(i=0; i<30; i++) {
         if (!((short *)(slide->cat+i*8+4))[0])
-          break;
+          break; }
         if (i==30) {
           if (Msg&4)
             MsgBox(hdlg, "There are already 30 categories.\n", "Warning",
@@ -5583,9 +5652,9 @@ BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
         DialogBox(hinst, MAKEINTRESOURCE(SlCatDLG), hdlg, (DLGPROC)slide_cat_dialog);
         slide_cat_list(hdlg, 0); break;
       case SlideRef: slide_refresh(1, hdlg);
-        if (HwndP)  InvalidateRect(HwndP, 0, 1); Busy = 1; break;
+        if (HwndP) { InvalidateRect(HwndP, 0, 1); }  Busy = 1; break;
       case SlideRoot: if (slide_root(hdlg))  slide_refresh(0, hdlg);
-        if (HwndP)  InvalidateRect(HwndP, 0, 1); Busy = 1; break;
+        if (HwndP) { InvalidateRect(HwndP, 0, 1); }  Busy = 1; break;
       case SlideShowN:
         SendDlgItemMessage(hdlg, SlideShowN, BM_SETCHECK,(SendDlgItemMessage(
                            hdlg, SlideShowN, BM_GETCHECK, 0, 0)+1)%2, 0);
@@ -5595,6 +5664,7 @@ BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                            hdlg, SlideShowY, BM_GETCHECK, 0, 0)+1)%2, 0);
         slide_cat_list(hdlg, 2); break;
       default: return(0); } break;
+    /* fall through */
     case WM_INITDIALOG: sprintf(text, "Root Directory: %s\\", slide->root);
       SetDlgItemText(hdlg, SlideDir, text);
       SendDlgItemMessage(hdlg, SlideOpt5, BM_SETCHECK, !(SlideOpt&0x20), 0);
@@ -5602,12 +5672,12 @@ BOOL CALLBACK slide_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
       SendDlgItemMessage(hdlg, SlideOpt6, BM_SETCHECK, (SlideOpt&0x40)!=0,0);
       SendDlgItemMessage(hdlg, SlideOpt8, BM_SETCHECK, !(SlideOpt&0x100), 0);
       SendDlgItemMessage(hdlg, SlideOpt3, BM_SETCHECK, (SlideOpt&8)!=0, 0);
-      sprintf(text, "%d", slide->delay);
+      sprintf(text, "%ld", slide->delay);
       SetDlgItemText(hdlg, SlideSec, text);
       SendDlgItemMessage(hdlg, SlideOpt4, BM_SETCHECK,(SlideOpt&0x10)!=0,0);
       SendDlgItemMessage(hdlg, SlideOpt10a, BM_SETCHECK,!(SlideOpt&0x400),0);
       SendDlgItemMessage(hdlg,SlideOpt10b,BM_SETCHECK,(SlideOpt&0x400)!=0,0);
-      SendDlgItemMessage(hdlg, SlideCatList, LB_SETTABSTOPS, 2, (long)tabs);
+      SendDlgItemMessage(hdlg, SlideCatList, LB_SETTABSTOPS, 2, (LPARAM)tabs);
       oldcat = malloc2(8*30+slide->lencatname);
       if (oldcat) {
         memcpy(oldcat, slide->cat, 8*30);
@@ -5690,7 +5760,7 @@ void slide_fill(SlideList *s, HWND hwnd)
     FileTimeToDosDateTime(&find.ftLastWriteTime, (LPWORD)(file+0x3E), (LPWORD)(file+0x3C));
     s->lenfilename += strlen(name3)+1;
     s->numfile++;
-    sprintf(text, "Located %d file%c", s->numfile,
+    sprintf(text, "Located %ld file%c", s->numfile,
             ' '+('s'-' ')*(s->numfile!=1));
     SetDlgItemText(hdlg, SlideStat1, text); }
   while (!(find_file(0,0,0, &find, name2)));
@@ -5826,7 +5896,7 @@ void slide_next(void)
                 ((((ulong *)(slide->file+FE*next+0x20))[0]&cmp) || !cmp)); }
     while (!okay);
     if (NextPic && NextNum==next) { cursor(0);  Busy--; return; }
-    if (NextPic)  free2(NextPic);  NextPic = 0;
+    if (NextPic) { free2(NextPic); }  NextPic = 0;
     s = slide->file+FE*next;
     sprintf(name, "%s\\%s", slide->dirname+((long *)(slide->dir+
             ((short *)s)[0]*6))[0], slide->filename+((long *)(s+2))[0]);
@@ -5860,7 +5930,7 @@ void slide_next(void)
   ((short *)(s+6))[2] = pinter;
   memcpy(s+0xC, pspec, LENPSPEC);
   p = (short *)(s+0x24);
-  if (!p[2])  p[2] = pwidth;  if (!p[3])  p[3] = pheight;
+  if (!p[2]) { p[2] = pwidth; }  if (!p[3]) { p[3] = pheight; }
   cursor(0);
   if (more==-1 && (pspec[1]&0x80)) {
     slidename[0] = 1;
@@ -6019,7 +6089,7 @@ void slide_open(HWND hwnd)
   openfile.nMaxFile = NAMELEN;
   openfile.lpstrFileTitle = openfile.lpstrCustomFilter = 0;
   openfile.lpstrInitialDir = opendir+768;
-  openfile.lpfnHook = (DLGPROC)open_slide_dialog;
+  openfile.lpfnHook = (LPOFNHOOKPROC)(void *)open_slide_dialog;
   openfile.lpTemplateName = MAKEINTRESOURCE(OpDLG);
   SlideOpt &= 0xFFFFFDFF;
   openfile.Flags = OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_HIDEREADONLY |
@@ -6293,7 +6363,7 @@ long slide_root(HWND hwnd)
   openfile.nMaxFile = NAMELEN;
   openfile.lpstrFileTitle = openfile.lpstrCustomFilter = 0;
   openfile.lpstrInitialDir = slide->root;
-  openfile.lpfnHook = (DLGPROC)open_slide_dialog;
+  openfile.lpfnHook = (LPOFNHOOKPROC)(void *)open_slide_dialog;
   openfile.lpTemplateName = MAKEINTRESOURCE(OpDLG);
   openfile.Flags = OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_HIDEREADONLY |
                    OFN_NONETWORKBUTTON;
@@ -6361,7 +6431,7 @@ long slide_save(HWND hwnd, long saveas)
     openfile.Flags = OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_HIDEREADONLY |
                      OFN_NONETWORKBUTTON;
     if (Msg&4)  openfile.Flags |= OFN_OVERWRITEPROMPT;
-    openfile.lpfnHook = (DLGPROC)save_dialog;
+    openfile.lpfnHook = (LPOFNHOOKPROC)(void *)save_dialog;
     openfile.lpTemplateName = MAKEINTRESOURCE(StdSaveDLG);
     SaveAs = 5;
     if (!GetSaveFileName(&openfile)) { Busy = 0; return(0); }
@@ -6550,7 +6620,7 @@ void sort(void)
   if (!DialogBox(hinst, MAKEINTRESOURCE(Sort2DLG), HwndP, (DLGPROC)sort2_dialog)) {
     Busy = 0;
     return; }
-  qsort((char *)(slide->file+first*FE), (size_t)num, (size_t)FE, sort_compare);
+  qsort((char *)(slide->file+first*FE), (size_t)num, (size_t)FE, (int (*)(const void *, const void *))(void *)sort_compare);
   slide->tsel = first;
   preview_deselect(1);
   InvalidateRect(HwndP, 0, 1);
@@ -6569,9 +6639,11 @@ int sort_compare(const char *s1, const char *s2)
   long val;
 
   if (SortDir) {
-    if (SortVal <= 3 && SortVal != 1)
-      val = stricmp((char *)(((long *)(s1+0x40))[0]),
-                    (char *)(((long *)(s2+0x40))[0]));
+    if (SortVal <= 3 && SortVal != 1) {
+      char *pool = (SortVal==3 ? slide->dirname : slide->filename);
+      val = stricmp(pool+((long *)(s1+0x40))[0],
+                    pool+((long *)(s2+0x40))[0]);
+    }
     else
       val = (((long *)(s1+0x40))[0]>((long *)(s2+0x40))[0])-
             (((long *)(s1+0x40))[0]<((long *)(s2+0x40))[0]);
@@ -6579,9 +6651,11 @@ int sort_compare(const char *s1, const char *s2)
     return((((long *)(s1+0x44))[0]>((long *)(s2+0x44))[0])-
            (((long *)(s1+0x44))[0]<((long *)(s2+0x44))[0]));
   }
-  if (SortVal <= 3 && SortVal != 1)
-    val = stricmp((char *)(((long *)(s2+0x40))[0]),
-                  (char *)(((long *)(s1+0x40))[0]));
+  if (SortVal <= 3 && SortVal != 1) {
+    char *pool = (SortVal==3 ? slide->dirname : slide->filename);
+    val = stricmp(pool+((long *)(s2+0x40))[0],
+                  pool+((long *)(s1+0x40))[0]);
+  }
   else
     val = (((long *)(s2+0x40))[0]>((long *)(s1+0x40))[0])-
           (((long *)(s2+0x40))[0]<((long *)(s1+0x40))[0]);
@@ -6590,7 +6664,7 @@ int sort_compare(const char *s1, const char *s2)
          (((long *)(s2+0x44))[0]<((long *)(s1+0x44))[0]));
 }
 
-BOOL CALLBACK sort_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK sort_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Handle the controls in the sort dialog box.
  * Enter: HWND hdlg: handle of current dialog window.
  *        long msg: message to process.
@@ -6627,15 +6701,18 @@ BOOL CALLBACK sort_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   long i;
 
   switch (msg) {
-    case WM_COMMAND: switch (wp&0xFFFF) {
+    case WM_COMMAND:
+      /* fall through */
+      switch (wp&0xFFFF) {
       case HelpHelp: WinHelp(Hwnd, HelpFile, HELP_CONTEXT, HelpSort);  break;
       case IDOK: SortVal=SendDlgItemMessage(hdlg,SortList,CB_GETCURSEL,0,0);
         SortDir = SendDlgItemMessage(hdlg, SortUp, BM_GETCHECK, 0, 0);
         EndDialog(hdlg, 1); return(1);
       case IDCANCEL: EndDialog(hdlg, 0); return(0);
       default: return(0); }
+    /* fall through */
     case WM_INITDIALOG: for (i=0; method[i]; i++)
-        SendDlgItemMessage(hdlg, SortList, CB_ADDSTRING, 0, (long)method[i]);
+        SendDlgItemMessage(hdlg, SortList, CB_ADDSTRING, 0, (LPARAM)method[i]);
       SendDlgItemMessage(hdlg, SortList, CB_SETCURSEL, SortVal, 0);
       SendDlgItemMessage(hdlg, SortUp, BM_SETCHECK, SortDir, 0);
       SendDlgItemMessage(hdlg, SortDown, BM_SETCHECK, SortDir^1, 0);
@@ -6644,7 +6721,7 @@ BOOL CALLBACK sort_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
   return(0);
 }
 
-BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
+INT_PTR CALLBACK sort2_dialog(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 /* Calculate the sort metrics for the actual sorting.
  * Enter: HWND hwnd: handle of current dialog window.
  *        long msg: message to process.
@@ -6667,18 +6744,18 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
     case WM_TIMER: for (i=0; i<100 && left && cur<slide->numfile; i++) {
         if (slide->file[cur*FE+0x2F]&2) {
           if (!i) {
-            sprintf(text, "%4.2f%% left to process.", 100.*left/num, cur);
+            sprintf(text, "%4.2f%% left to process.", 100.*left/num);
             SetDlgItemText(hdlg, SortStat, text); }
           s = slide->file+cur*FE;
           ((long *)(s+0x44))[0] = cur;
           switch (SortVal) {
-            case 0: val = (long)(slide->filename+((long *)(s+2))[0]); break;
+            case 0: val = ((long *)(s+2))[0]; break;
             case 1: val = ((ulong *)(s+0x3C))[0]>>1; break;
             case 2: n = slide->filename+((long *)(s+2))[0];
               if (strchr(n, '.'))  n = strrchr(n, '.');
-              val = (long)(n);  break;
-            case 3: val = (long)(slide->dirname+((long *)(slide->dir+
-                                          ((short *)s)[0]*6))[0]); break;
+              val = (long)(n-slide->filename);  break;
+            case 3: val = ((long *)(slide->dir+((short *)s)[0]*6))[0];
+              break;
             case 4: val = ((long *)(s+0x38))[0]; break;
             case 5: val = ((ushort *)(s+0x3E))[0]; break;
             case 6: val = ((ushort *)(s+0x3C))[0]; break;
@@ -6687,16 +6764,16 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
             case 9: val = ((short *)(s+6))[0]; break;
             case 10: val = ((short *)(s+6))[1]; break;
             case 11: if (!((short *)(s+6))[1])  val = 0;
-              else val=65536*((short *)(s+6))[0]/((short *)(s+6))[1]; break;
+              else { val=65536*((short *)(s+6))[0]/((short *)(s+6))[1]; } break;
             case 12: val = ((long *)(s+0xC+4))[0]; break;
             case 13: val = 1-s[0xA]; break;
             case 14: val = 0;
               for (j=0; j<30; j++)
-                if (((ulong *)(s+0x20))[0]&(1<<j))  val++; break;
+                { if (((ulong *)(s+0x20))[0]&(1<<j))  val++; } break;
             case 15: val = ((((ulong *)(s+0x20))[0]&0x40000000)!=0); break;
             case 16: j = ((short *)(s+6))[0]*((short *)(s+6))[1];
               if (j)  val = 65536.*((long *)(s+0x38))[0]*8/j;
-              else    val = 0x7FFFFFFF; break;
+              else { val = 0x7FFFFFFF; } break;
             /** Additional scalar sort preparations go here **/
             default: break; }
           if (SortVal>=17) {
@@ -6721,9 +6798,9 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                 switch (SortVal) {
                   case 17: val += (pic[S]*0.3+pic[S+1]*0.59+pic[S+2]*0.11);
                     break;
-                  case 18: if (S!=len-1)
-                    val += abs((pic[S]*0.3+pic[S+1]*0.59+pic[S+2]*0.11)-
-                               (pic[S+3]*0.3+pic[S+4]*0.59+pic[S+5]*0.11));
+                  case 18: if (S!=len-1) {
+                    val += fabs((pic[S]*0.3+pic[S+1]*0.59+pic[S+2]*0.11)-
+                               (pic[S+3]*0.3+pic[S+4]*0.59+pic[S+5]*0.11)); }
                     break;
                   case 19: case 21: V = max(max(pic[S], pic[S+1]), pic[S+2]);
                     N = min(min(pic[S], pic[S+1]), pic[S+2]);
@@ -6739,12 +6816,12 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
                     else if (pic[S+1]==V)
                       bin[(long)(42.6*(2+((float)pic[S+2]-pic[S])/
                           (V-N)))] += inc;
-                    else
+                    else {
                       bin[(long)(42.6*(4+((float)pic[S]-pic[S+1])/
-                          (V-N)))] += inc;  break;
+                          (V-N)))] += inc; }  break;
                   case 20: V = max(max(pic[S], pic[S+1]), pic[S+2]);
                     N = min(min(pic[S], pic[S+1]), pic[S+2]);
-                    if (V)  val += 255*(V-N)/V;  break;
+                    if (V) { val += 255*(V-N)/V; }  break;
                   case 22: val+=max(max(pic[S], pic[S+1]), pic[S+2]); break;
                   case 23: val += pic[S]-max(pic[S+1],pic[S+2]); break;
                   case 24: val += pic[S+1]-max(pic[S],pic[S+2]); break;
@@ -6761,7 +6838,7 @@ BOOL CALLBACK sort2_dialog(HWND hdlg, ulong msg, WPARAM wp, LPARAM lp)
           ((long *)(s+0x40))[0] = val;
           left--; }
         cur++; }
-      if (left && cur<slide->numfile) break;
+      if (left && cur<slide->numfile) break;  /* fall through */
     case WM_COMMAND: if (msg==WM_COMMAND && (wp&0xFFFF)!=IDCANCEL) break;
       KillTimer(hdlg, 0);
       free2(text);
@@ -6780,8 +6857,8 @@ void start_ctl3d(void)
     return;
   reg = GetProcAddress(hctl3d, "Ctl3dRegister");
   sub = GetProcAddress(hctl3d, "Ctl3dAutoSubclass");
-  if ((*reg)(hinst))
-    (*sub)(hinst);
+  if (((BOOL (WINAPI *)(HINSTANCE))(void *)reg)(hinst))
+    ((BOOL (WINAPI *)(HINSTANCE))(void *)sub)(hinst);
 }
 
 void strpath(char *dest, char *src)
@@ -6829,11 +6906,11 @@ void test(char *data)
   fprintf(fptr, "%s\n", data);
   fclose(fptr);
   return; /**/
-/**   SetWindowText(Hwnd, data); /**/
-/**   debug(data); /**/
+/*   SetWindowText(Hwnd, data); */
+/*   debug(data); */
 }
 
-VOID CALLBACK timer(HWND hwnd, ulong msg, ulong id, long time)
+VOID CALLBACK timer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 /* Handle a system wide timer.  This is primarily for the slide show
  *  functions.
  * Enter: HWND hwnd: handle of calling window.
@@ -6880,12 +6957,6 @@ void undo(HWND hwnd)
 /* Undo the last zoom, resize, or scroll command.
  * Enter: HWND hwnd: pointer to window.                        5/30/96-DWM */
 {
-  long x, y, w, h;
-  RECT rect;
-
-  get_window_rect(hwnd, &rect);
-  x = rect.left;  w = rect.right-x;
-  y = rect.top;   h = rect.bottom-y;
   prep_undo(hwnd);
   memcpy(View, Undo+UNDOLEN+4, 8*sizeof(long));
   MoveWindow(hwnd, Undo[UNDOLEN], Undo[UNDOLEN+1], Undo[UNDOLEN+2],
@@ -6963,12 +7034,13 @@ int APIENTRY WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR argv, int winmode)
   SetTimer(Hwnd, 2, 333, (TIMERPROC)timer);
   srand((time(0)<<16)+(time(0)>>16));
   memset(oldspec, 0, LENPSPEC);
-  if (argv) if (strlen(argv))
+  if (argv) {
+    if (strlen(argv))
     open_pic_mid(hwnd, argv, 0);
   else if (titleimage[1]) {
     titleimage[0] = 1;
     open_pic_mid(hwnd, titleimage+1, 0);
-    titleimage[0] = 0; }
+    titleimage[0] = 0; } }
   if (!Topmost)
     ShowWindow(hwnd, winmode);
   else {
@@ -7024,9 +7096,9 @@ long windows_file(char *name)
     switch (i) {
       case 0: cmd = GetCommandLine();
         if (strlen(cmd)<256)  strcpy(path, cmd);
-        if (strchr(path, '\\'))  strrchr(path, '\\')[1] = 0; break;
+        if (strchr(path, '\\')) { strrchr(path, '\\')[1] = 0; } break;
       case 1: GetSystemDirectory(path, 255);
-        if (path[strlen(path)-1]!='\\')  strcat(path, "\\"); break;
+        if (path[strlen(path)-1]!='\\') { strcat(path, "\\"); } break;
       case 2: GetWindowsDirectory(path, 255);
         if (path[strlen(path)-1]!='\\')  strcat(path, "\\"); }
     if (strlen(path)+strlen(name)<255)  strcat(path, name);
@@ -7054,27 +7126,27 @@ void write_ini(long offset)
   for (i=0; key[i*3]; i++) {
     text = key[i*3+1];
     switch (i) {
-      case 0: text = t2;  sprintf(t2, "%d", Redox); break;
+      case 0: text = t2;  sprintf(t2, "%ld", Redox); break;
       case 1: if (Msg&1)  text = key[i*3+2]; break;
       case 2: if (!(Msg&2))  text = key[i*3+2]; break;
       case 3: text = opendir; break;
-      case 4: text = t2;  sprintf(t2, "%d,%d,%d,%d", x, y, rect.right-
+      case 4: text = t2;  sprintf(t2, "%ld,%ld,%ld,%ld", x, y, rect.right-
                                   rect.left, rect.bottom-rect.top); break;
-      case 5: text = t2;  sprintf(t2, "%d", FilterType); break;
+      case 5: text = t2;  sprintf(t2, "%ld", FilterType); break;
       case 6: if (Reduce) text = key[i*3+2]; break;
       case 7: if (Dither) text = key[i*3+2]; break;
-      case 8: text = t2;  sprintf(t2, "%d", Letter); break;
-      case 9: text = t2;  sprintf(t2, "%d", Lock); break;
+      case 8: text = t2;  sprintf(t2, "%ld", Letter); break;
+      case 9: text = t2;  sprintf(t2, "%ld", Lock); break;
       case 10:text = t2;  sprintf(t2, "%g,%g,%g,%g", AspectX, AspectY,
                                   AspectXY[0], AspectXY[1]); break;
       case 11: if (Topmost)  text = key[i*3+2]; break;
-      case 12: text = t2;  sprintf(t2, "%g,%g,%g,%g,%g,%d", PrintMarg[0],
+      case 12: text = t2;  sprintf(t2, "%g,%lg,%g,%g,%g,%ld", PrintMarg[0],
                       PrintMarg[1], PrintMarg[2], PrintMarg[3], PrintMarg[4],
                       PrintSet); break;
       case 13: if (Msg&4)  text = key[i*3+2]; break;
-      case 14: text = t2;  sprintf(t2, "%d", PreviewOpt); break;
+      case 14: text = t2;  sprintf(t2, "%ld", PreviewOpt); break;
       case 15: text = savedir; break;
-      case 16: text = t2;  sprintf(t2, "%d,%d", SaveFilt, SaveOpt); break;
+      case 16: text = t2;  sprintf(t2, "%ld,%ld", SaveFilt, SaveOpt); break;
       case 17: if (MultiOpen)  text = key[i*3+2]; break;
       case 18: text = opendir+256; break;
       case 19: text = savedir+256; break;
@@ -7083,20 +7155,20 @@ void write_ini(long offset)
       case 22: text = titleimage+1; break;
       case 23: text = t2;  t2[0] = 0;
         GetWindowPlacement(Hwnd, &WinPlace);
-        for (j=0; j<sizeof(WINDOWPLACEMENT); j++)
+        for (j=0; j<(long)sizeof(WINDOWPLACEMENT); j++)
           sprintf(t2+strlen(t2), "%02X", ((uchar *)(&WinPlace.length))[j]);
         break;
       case 24: text = opendir+768; break;
       case 25: text = savedir+768; break;
-      case 26: text = t2;  sprintf(t2, "%d", SlideOpt); break;
-      case 27: text = t2;  sprintf(t2, "%d", SlideDelay); break;
+      case 26: text = t2;  sprintf(t2, "%ld", SlideOpt); break;
+      case 27: text = t2;  sprintf(t2, "%ld", SlideDelay); break;
       case 28: text = t2;  t2[0] = 0;
-        for (j=0; j<sizeof(WINDOWPLACEMENT); j++)
+        for (j=0; j<(long)sizeof(WINDOWPLACEMENT); j++)
           sprintf(t2+strlen(t2), "%02X", ((uchar *)(&WinPlace2.length))[j]);
         break;
-      case 29: text = t2;  sprintf(t2, "%d", SlideTx); break;
-      case 30: text = t2;  sprintf(t2, "%d", SlideTy); break;
-      case 31: text = t2;  sprintf(t2, "%d,%d,%d", SortVal, SortDir,
+      case 29: text = t2;  sprintf(t2, "%ld", SlideTx); break;
+      case 30: text = t2;  sprintf(t2, "%ld", SlideTy); break;
+      case 31: text = t2;  sprintf(t2, "%ld,%ld,%ld", SortVal, SortDir,
                                    FindType); break;
       case 32: text = opendir+1024; break;
       case 33: text = lastview;     break;
@@ -7104,12 +7176,12 @@ void write_ini(long offset)
       case 35: text = lastview+512; break;
       case 36: text = lastview+768; break;
       case 37: text = savedir+1024; break;
-      case 38: text = t2;  sprintf(t2, "%d,%d", PrevSaveX, PrevSaveY); break;
+      case 38: text = t2;  sprintf(t2, "%ld,%ld", PrevSaveX, PrevSaveY); break;
       case 39: continue; // regnum
       case 40: text = RegName; break;
       case 41: text = RegPass; break;
       case 42: if (Interpolate==1) text = key[i*3+2];
-        if (Interpolate>1) {  text = t2;  sprintf(t2, "0x%X", Interpolate); }
+        if (Interpolate>1) {  text = t2;  sprintf(t2, "0x%lX", Interpolate); }
         break;
       case 43: if (HalfSizeBatch) text = key[i*3+2]; break;
       case 44: text = savedir+5*256; break;
@@ -7118,12 +7190,12 @@ void write_ini(long offset)
     if (i!=4 || !IsIconic(Hwnd))
       WritePrivateProfileString(inihead, key[i*3], text, inifile); }
   for (i=0; i<SAVEFORMATS; i++) {
-    sprintf(text2, "SaveOption%d", i);
+    sprintf(text2, "SaveOption%ld", i);
     for (j=0; j<SAVELEN; j++)
       sprintf(t2+j*2, "%02X", SaveRec[SAVELEN*i+j]);
     WritePrivateProfileString(inihead, text2, t2, inifile); }
   for (i=0; i<4; i++) {
-    sprintf(text2, "CustomQuant%d", i);
+    sprintf(text2, "CustomQuant%ld", i);
     for (j=0; j<32; j++)
       sprintf(t2+j*2, "%02X", gquant[i*32+j]);
     WritePrivateProfileString(inihead, text2, t2, inifile); }
@@ -7174,7 +7246,7 @@ void zoom(float mag, long style)
     mx = rect.right;  my = rect.bottom; }
   memcpy(View, View+4, 4*sizeof(long));
   cx = (View[0]+View[2])/2;  cy = (View[1]+View[3])/2;
-  if (Focus[0])  cx = Focus[0];  if (Focus[1])  cy = Focus[1];
+  if (Focus[0]) { cx = Focus[0]; }  if (Focus[1]) { cy = Focus[1]; }
   if (!zy)  zy = 1;
   if (w>mx) {
     View[0] = cx-0.5*mx/zy;
@@ -7191,8 +7263,8 @@ void zoom(float mag, long style)
     View[3] = View[1]+(float)my/zy;
     h = my; }
   mx = r2.left;  my = r2.top;
-  if (mx+w>sx)  mx = sx-w;  if (mx<0)  mx = 0;
-  if (my+h>sy)  my = sy-h;  if (my<0)  my = 0;
+  if (mx+w>sx) { mx = sx-w; }  if (mx<0) { mx = 0; }
+  if (my+h>sy) { my = sy-h; }  if (my<0) { my = 0; }
   if (!(Lock&9))
     set_client(Hwnd, mx, my, w, h, 1);
   rescale |= 2;  InvalidateRect(Hwnd, 0, 0);
