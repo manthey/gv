@@ -22,13 +22,16 @@ AR=x86_64-w64-mingw32-ar
 # All warnings are failures.  The two exceptions are codebase idioms:
 # - pointer-sign: char * and uchar * are used interchangeably throughout
 # - unused-parameter: Windows callback signatures require unused parameters
-# Optimized for maximum executable speed:
-#  -O3              - aggressive optimization
-#  -march=x86-64-v2 - use SSE4.2/POPCNT (any x86-64 CPU since ~2009)
-#  -flto            - whole-program optimization at link time
+# Benchmarks (bench/) opening the 30-image sample set showed compiler
+# flag changes (-O3 vs -O2, LTO, SSE4.2 codegen) to be within measurement
+# noise for this program, so use the settings that give the smallest
+# binary and the broadest compatibility:
+#  -O2   - standard optimization (same speed as -O3 here, ~5% smaller)
+#  -flto - whole-program optimization (neutral for clang size and speed;
+#          required for speed if a gcc build is ever used)
 WARN="-Wall -Wextra -Wno-pointer-sign -Wno-unused-parameter -Werror"
-CFLAGS="-O3 -march=x86-64-v2 -flto -fms-extensions $WARN -I."
-LINKFLAGS="-march=x86-64-v2 -flto"
+CFLAGS="-O2 -flto -fms-extensions $WARN -I."
+LINKFLAGS="-flto"
 LIBS="-ladvapi32 -lcomdlg32 -lgdi32 -lkernel32 -lshell32 -luser32 -ldwmapi"
 
 rm -rf build64

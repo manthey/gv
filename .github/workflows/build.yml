@@ -1,4 +1,13 @@
-# Build GV (Graphic Viewer), 64-bit, with MSVC + nmake (the official build).
+# Build GV (Graphic Viewer), 64-bit, with two compilers:
+#  - MSVC + nmake (the historical official build) runs as a confirmation
+#    build: it must compile cleanly, but its artifacts are not published.
+#  - llvm-mingw (clang), built by build64.bat, produces the artifacts that
+#    are published and released.
+# The clang build is gated on the MSVC build, so a release only happens
+# when both compilers accept the source.
+# Benchmarks (bench/) showed compiler flag changes to be within measurement
+# noise, while the clang build was consistently ~4-5% faster than the MSVC
+# build opening the 30-image sample set, so the clang build ships.
 #
 # Replaces the former AppVeyor configuration:
 #  - every push to master updates a rolling "gv-latest" GitHub release
@@ -20,7 +29,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-msvc:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
@@ -60,15 +69,57 @@ jobs:
         shell: cmd
         run: dir gv.exe gvlib.dll gvlib.lib mem.lib
 
+  build-clang:
+    needs: build-msvc
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # llvm-mingw (clang) build; build64.bat downloads the portable
+      # toolchain automatically if it is not already on the runner.
+      - name: Stamp version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}" -replace '^v', ''
+          if ($tag -match '^(\d+)\.(\d+)$') {
+            $major = $Matches[1]; $minor = $Matches[2]
+            (Get-Content gv.h) -replace '#define SUBVERSION\s+\d+', "#define SUBVERSION   $minor" | Set-Content gv.h
+            $rc = Get-Content gv.rc -Raw
+            $rc = $rc -replace 'FILEVERSION \d+,\d+,\d+,\d+', ('FILEVERSION ' + "$major`,$minor,0,0")
+            $rc = $rc -replace 'PRODUCTVERSION \d+,\d+,\d+,\d+', ('PRODUCTVERSION ' + "$major`,$minor,0,0")
+            $rc = $rc -replace '"FileVersion", "[0-9.]*', ('"FileVersion", "' + "$major.$minor")
+            $rc = $rc -replace '"ProductVersion", "[0-9.]*', ('"ProductVersion", "' + "$major.$minor")
+            Set-Content gv.rc $rc
+            Write-Host "Version stamped from tag: $major.$minor"
+          } else {
+            Write-Host "Tag '$tag' does not match N.N; building source version unchanged."
+          }
+
+      - name: Build
+        shell: cmd
+        run: build64.bat
+
+      # Self-contained library roundtrip test, then a cross-check of the
+      # file formats against Pillow.
+      - name: Test
+        shell: pwsh
+        run: |
+          build64\asmconv_test.exe out-new
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          python -m pip install --quiet pillow
+          python tests\interop.py
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
       - name: Collect artifacts
         shell: cmd
         run: |
           mkdir dist
-          copy gv.exe dist\
-          copy gvlib.dll dist\
-          copy gvlib.lib dist\
+          copy build64\gv.exe dist\
+          copy build64\gvlib.dll dist\
+          copy build64\gvlib.lib dist\
           copy gvlib.h dist\
-          copy mem.lib dist\
+          copy build64\mem.lib dist\
           copy mem.h dist\
 
       - name: Upload build artifacts
@@ -97,8 +148,8 @@ jobs:
           files: dist/*
           fail_on_unmatched_files: true
 
-      # Push to master: update the rolling "gv-latest" release, mirroring the
-      # old AppVeyor "tag: gv-latest, force_update: true" deployment.
+      # Push to master: update the rolling "gv-latest" release, mirroring
+      # the old AppVeyor "tag: gv-latest, force_update: true" deployment.
       - name: Release (rolling gv-latest)
         if: github.ref == 'refs/heads/master'
         env:

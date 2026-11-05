@@ -1,8 +1,8 @@
-11/4/26 - Version 1.15
+11/4/26 - Version 1.16
+ Change: Removed the Sole Process menu item and option.  Images are always loaded as fast as possible.
 
- Feature: Ported to 64 bits (MSVC x64 and llvm-mingw x86_64).
- Change: CI moved from AppVeyor to GitHub Actions.
- Change: Compiler flags tuned for maximum executable speed (/GL+/LTCG+/fp:fast on MSVC; -O3+-flto on clang).
+11/4/26 - Version 1.15
+ Feature: Ported to 64 bits
 
 4/9/17 - Official 1.14 release
 
