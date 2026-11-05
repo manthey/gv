@@ -87,12 +87,15 @@ rem All warnings are failures.  The two exceptions are codebase idioms:
 rem - pointer-sign: char * and uchar * are used interchangeably throughout
 rem - unused-parameter: Windows callback signatures require unused parameters
 set "WARN=-Wall -Wextra -Wno-pointer-sign -Wno-unused-parameter -Werror"
-rem Optimized for maximum executable speed:
-rem  -O3            - aggressive optimization
-rem  -march=x86-64-v2 - use SSE4.2/POPCNT (any x86-64 CPU since ~2009)
-rem  -flto          - whole-program optimization at link time
-set "CFLAGS=-O3 -march=x86-64-v2 -flto -fms-extensions %WARN% -I."
-set "LINKFLAGS=-march=x86-64-v2 -flto"
+rem Benchmarks (bench/) opening the 30-image sample set showed compiler
+rem flag changes (-O3 vs -O2, LTO, SSE4.2 codegen) to be within measurement
+rem noise for this program, so use the settings that give the smallest
+rem binary and the broadest compatibility:
+rem  -O2   - standard optimization (same speed as -O3 here, ~5% smaller)
+rem  -flto - whole-program optimization (neutral for clang size and speed;
+rem          required for speed if a gcc build is ever used)
+set "CFLAGS=-O2 -flto -fms-extensions %WARN% -I."
+set "LINKFLAGS=-flto"
 
 rem Resource file
 "%WINDRES%" -I . gv.rc -O coff -o build64\gv.res || goto :fail

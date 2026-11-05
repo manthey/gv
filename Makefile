@@ -2,13 +2,17 @@
 #  vcc
 #  nmake
 # CL_OPTS=/O2 /GL /W4 /w34244 /wd4996 /w34305 /wd4706 /wd4057 /wd4127 /nologo
-# Optimized for maximum executable speed:
-#  /O2      - full speed optimization
+# CL_OPTS=/O2 /GL /W2 /w24101 /w34244 /w34305 /nologo
+# Benchmarks (bench/) opening the 30-image sample set showed further
+# speed-oriented flags to be within measurement noise, so keep the build
+# simple and hardened:
+#  /O2       - standard optimization
 #  /GL /LTCG - whole-program optimization at link time
-#  /Gw /Gy  - per-global and per-function sections, better LTCG dead-code removal
-#  /GS-     - omit buffer security checks (small speed win, slight safety loss)
-#  /fp:fast - relaxed floating point (reassociates/replaces with faster ops)
-CL_OPTS=/O2 /GL /Gw /Gy /GS- /fp:fast /W2 /w24101 /w34244 /w34305 /nologo
+#  /GS and /fp:precise are left at their (safe) defaults on purpose:
+#  /GS- and /fp:fast bought no measurable speed here, and /fp:fast makes
+#  decode output differ between compilers, which the confirmation build
+#  wants to avoid.
+CL_OPTS=/O2 /GL /W2 /w24101 /w34244 /w34305 /nologo
 LINK_OPTS=/LTCG /OPT:REF /OPT:ICF /nologo
 LIB_OPTS=/LTCG /nologo
 CLIB_OPTS=$(CL_OPTS)
