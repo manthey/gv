@@ -67,8 +67,7 @@ MainMenu MENU {
   MENUITEM "&Bigger\t^+", MenuZPlus
   MENUITEM "&Smaller\t^-", MenuZMinus
   MENUITEM SEPARATOR
-  MENUITEM "Lock &Aspect Ratio...\t^8", MenuZAspect
-  MENUITEM "&78x110 Aspect Ratio\t^7", MenuZ78 }
+  MENUITEM "Lock &Aspect Ratio...\t^8", MenuZAspect }
   POPUP "&Options" {
   POPUP "Letter&boxing" {
     MENUITEM "&Fit Window", MenuLetFit
@@ -226,7 +225,6 @@ MainMenu ACCELERATORS {
   "3", MenuZ025, VIRTKEY, CONTROL
   "4", MenuZ400, VIRTKEY, CONTROL
   "5", MenuZ050, VIRTKEY, CONTROL
-  "7", MenuZ78, VIRTKEY, CONTROL
   "8", MenuZAspect, VIRTKEY, CONTROL
   "`", MenuRefresh, ASCII
   "<", MenuRotateCCW,ASCII

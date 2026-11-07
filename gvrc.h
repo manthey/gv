@@ -52,7 +52,6 @@
 #define  MenuZPlus      409
 #define  MenuZMinus     410
 #define  MenuZAspect    411
-#define  MenuZ78        412
 #define MenuLetFit      5
 #define  MenuLetBlack   501
 #define   MenuLetGrey   5011
