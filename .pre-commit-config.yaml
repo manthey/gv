@@ -1,0 +1,47 @@
+# Pre-commit hooks for GV (Graphic Viewer).
+#
+# Setup:  pip install pre-commit
+# Enable: pre-commit install
+#
+# The clang-format hook runs in fixing mode (-i): if a commit contains
+# trivial format violations, the hook rewrites the files and the commit is
+# aborted.  Re-add the corrected files and commit again:
+#
+#     git add -u
+#     git commit
+#
+# To fix the whole tree at once (as was done for the initial modernization):
+#
+#     pre-commit run --all-files
+#
+# clang-format is located the same way the build scripts locate their
+# llvm-mingw toolchain (LLVM_MINGW / TOOLCHAIN_DIR / PATH, see
+# hooks/clang_format.py), so no separate clang-format installation is
+# needed.  The style itself is defined in .clang-format; formatting output
+# is stable across LLVM 23.x patch releases, which is the version line the
+# build toolchain ships.
+#
+# See https://pre-commit.com for general pre-commit documentation.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Remove trailing whitespace (skips binary files).
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      # Ensure a single newline at the end of each file.
+      - id: end-of-file-fixer
+      # Normalize line endings to LF; .bat files stay CRLF per .gitattributes.
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: \.bat$
+      - id: check-added-large-files
+
+  # Format all C sources and headers in fixing mode.
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format
+        entry: python hooks/clang_format.py -i --style=file --fallback-style=llvm
+        language: system
+        types: [c]

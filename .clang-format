@@ -1,0 +1,25 @@
+# GV (Graphic Viewer) C style.
+#
+# The codebase historically used a compact style (short indents, long lines,
+# tabs mixed with spaces) because editors of the time were slow.  This style
+# keeps the overall look of the existing code (2-space indent, braces on the
+# same line as the control statement, right-aligned pointers) while
+# normalizing the layout mechanically via clang-format.
+#
+# Enforcement is automatic: the pre-commit hook in .pre-commit-config.yaml
+# runs clang-format in fixing mode, so a commit with trivial format
+# violations is corrected and must simply be re-staged.
+#
+# Notes:
+#  - ReflowComments is off to preserve the historical banner comment blocks
+#    above each function (the "* Enter: ...  5/4/96-DWM *" style annotations).
+#  - SortIncludes is off: the legacy Windows include ordering is intentional
+#    and header sorting can break compilation of Win32 code.
+BasedOnStyle: LLVM
+ColumnLimit: 100
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+SortIncludes: Never
+ReflowComments: false
+MaxEmptyLinesToKeep: 1
