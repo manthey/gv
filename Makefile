@@ -51,7 +51,7 @@ gvlib.lib: lib.obj
 gvlib.dll: lib.obj mem.obj
 	link $(LINK_OPTS) /dll /out:gvlib.dll lib.obj mem.obj advapi32.lib comdlg32.lib gdi32.lib kernel32.lib shell32.lib user32.lib
 	IF EXIST "C:\P\LIB" copy gvlib.dll C:\P\LIB\gvlib.dll
-	
+
 lib.obj: lib.c gload.c gsave.c gvlib.c process.c gload.h gvlib.h process.h
 	cl /c $(CLIB_OPTS) lib.c
 
