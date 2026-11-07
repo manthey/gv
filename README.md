@@ -14,13 +14,9 @@ On Windows, build GV by running `build64.bat` from the repository root.  It work
 
 ## Code style
 
-The C code is formatted with clang-format; the style is defined in `.clang-format`.  It keeps the historical look of the codebase (2-space indent, braces on the same line as the control statement) while normalizing spacing, line lengths (100 columns), and tabs mechanically.  The historical banner comment blocks above each function (the `* Enter: ...  5/4/96-DWM *` style annotations) are preserved.
-
-Formatting is enforced automatically with pre-commit:
+Formatting is defined by the hooks, not by this document: the style is whatever `.clang-format` says, and the pre-commit hooks in `.pre-commit-config.yaml` enforce and auto-correct it.
 
     pip install pre-commit
     pre-commit install
 
-The hooks also fix trivial whitespace violations (trailing whitespace, missing end-of-file newlines, mixed line endings).  The clang-format hook runs in fixing mode: if a commit contains format violations, the files are rewritten and the commit is aborted, so re-add the corrected files and commit again (`git add -u && git commit`).
-
-clang-format comes from the same llvm-mingw toolchain the build uses; it is found via `LLVM_MINGW`, `TOOLCHAIN_DIR`, or `PATH` (see `hooks/clang_format.py`).  Running `build64.bat` once is therefore enough to enable the hooks.  To fix the whole tree at once, run `pre-commit run --all-files`.
+clang-format comes from the same llvm-mingw toolchain the build uses (see `hooks/clang_format.py`), so running `build64.bat` once is enough to enable the hooks.  If a commit is aborted because a hook rewrote files, re-add them and commit again.  To fix the whole tree at once: `pre-commit run --all-files`.

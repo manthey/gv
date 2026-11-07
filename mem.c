@@ -9,11 +9,12 @@
 typedef struct MALLOCTBL {
   HANDLE hmem;
   void *mem;
-  long count; } MALLOCTBL;
+  long count;
+} MALLOCTBL;
 
 static HANDLE HMalloc;
-static long MallocMax=0, MallocNum=0;
-static MALLOCTBL *MallocTbl=0;
+static long MallocMax = 0, MallocNum = 0;
+static MALLOCTBL *MallocTbl = 0;
 
 void free2(void *mem)
 /* Free memory allocated through Windows calls.
@@ -22,15 +23,18 @@ void free2(void *mem)
   long i;
   HANDLE hmem;
 
-  if (!mem)  return;
-  for (i=0; i<MallocNum; i++)
-	if (mem==MallocTbl[i].mem) {
-	  hmem = MallocTbl[i].hmem;
-	  GlobalUnlock(hmem);
-	  GlobalFree(hmem);
-	  memmove(MallocTbl+i, MallocTbl+i+1, (MallocNum-i-1)*sizeof(MALLOCTBL));
-	  MallocNum--;
-	  return; }
+  if (!mem)
+    return;
+  for (i = 0; i < MallocNum; i++)
+    if (mem == MallocTbl[i].mem) {
+      hmem = MallocTbl[i].hmem;
+      GlobalUnlock(hmem);
+      GlobalFree(hmem);
+      memmove(MallocTbl + i, MallocTbl + i + 1,
+              (MallocNum - i - 1) * sizeof(MALLOCTBL));
+      MallocNum--;
+      return;
+    }
 }
 
 void free2_all(void)
@@ -39,8 +43,8 @@ void free2_all(void)
 {
   long i;
 
-  for (i=MallocNum-1; i>=0; i--)
-	free2(MallocTbl[i].mem);
+  for (i = MallocNum - 1; i >= 0; i--)
+    free2(MallocTbl[i].mem);
 }
 
 HANDLE handle2(void *mem)
@@ -53,11 +57,12 @@ HANDLE handle2(void *mem)
 {
   long i;
 
-  if (!mem)  return(0);
-  for (i=0; i<MallocNum; i++)
-	if (mem==MallocTbl[i].mem)
-	  return(MallocTbl[i].hmem);
-  return(GlobalHandle(mem));
+  if (!mem)
+    return (0);
+  for (i = 0; i < MallocNum; i++)
+    if (mem == MallocTbl[i].mem)
+      return (MallocTbl[i].hmem);
+  return (GlobalHandle(mem));
 }
 
 void *lock2(HANDLE hmem)
@@ -72,32 +77,40 @@ void *lock2(HANDLE hmem)
   HANDLE hmem2;
   long i;
 
-  if (!hmem)  return(0);
-  for (i=0; i<MallocNum; i++)
-	if (hmem==MallocTbl[i].hmem) {
-	  MallocTbl[i].count++;
-	  GlobalLock(hmem);
-	  return(MallocTbl[i].mem); }
-  if (MallocNum>=MallocMax) {
-	if (!MallocMax) {
-	  HMalloc = GlobalAlloc(GMEM_MOVEABLE, 1000*sizeof(MALLOCTBL));
-	  if (!HMalloc)  return(0);
-	  MallocTbl = GlobalLock(HMalloc);
-	  MallocMax = 1000; }
-	else {
-	  GlobalUnlock(HMalloc);
-	  hmem2 = GlobalReAlloc(HMalloc, (MallocMax+1000)*sizeof(MALLOCTBL),
-							GMEM_MOVEABLE);
-	  if (!hmem2) {
-		MallocTbl = GlobalLock(HMalloc);  return(0); }
-	  HMalloc = hmem2;  MallocTbl = GlobalLock(HMalloc);
-	  MallocMax += 1000; } }
+  if (!hmem)
+    return (0);
+  for (i = 0; i < MallocNum; i++)
+    if (hmem == MallocTbl[i].hmem) {
+      MallocTbl[i].count++;
+      GlobalLock(hmem);
+      return (MallocTbl[i].mem);
+    }
+  if (MallocNum >= MallocMax) {
+    if (!MallocMax) {
+      HMalloc = GlobalAlloc(GMEM_MOVEABLE, 1000 * sizeof(MALLOCTBL));
+      if (!HMalloc)
+        return (0);
+      MallocTbl = GlobalLock(HMalloc);
+      MallocMax = 1000;
+    } else {
+      GlobalUnlock(HMalloc);
+      hmem2 = GlobalReAlloc(HMalloc, (MallocMax + 1000) * sizeof(MALLOCTBL),
+                            GMEM_MOVEABLE);
+      if (!hmem2) {
+        MallocTbl = GlobalLock(HMalloc);
+        return (0);
+      }
+      HMalloc = hmem2;
+      MallocTbl = GlobalLock(HMalloc);
+      MallocMax += 1000;
+    }
+  }
   mem = GlobalLock(hmem);
-  MallocTbl[MallocNum].hmem  = hmem;
-  MallocTbl[MallocNum].mem   = mem;
+  MallocTbl[MallocNum].hmem = hmem;
+  MallocTbl[MallocNum].mem = mem;
   MallocTbl[MallocNum].count = 1;
   MallocNum++;
-  return(mem);
+  return (mem);
 }
 
 void *malloc2(size_t size)
@@ -108,29 +121,37 @@ void *malloc2(size_t size)
   HANDLE hmem;
   char *mem;
 
-  if (!size)  return(0);
-  if (MallocNum>=MallocMax) {
-	if (!MallocMax) {
-	  HMalloc = GlobalAlloc(GMEM_MOVEABLE, 1000*sizeof(MALLOCTBL));
-	  if (!HMalloc)  return(0);
-	  MallocTbl = GlobalLock(HMalloc);
-	  MallocMax = 1000; }
-	else {
-	  GlobalUnlock(HMalloc);
-	  hmem = GlobalReAlloc(HMalloc, (MallocMax+1000)*sizeof(MALLOCTBL),
-						   GMEM_MOVEABLE);
-	  if (!hmem) {
-		MallocTbl = GlobalLock(HMalloc);  return(0); }
-	  HMalloc = hmem;  MallocTbl = GlobalLock(HMalloc);
-	  MallocMax += 1000; } }
+  if (!size)
+    return (0);
+  if (MallocNum >= MallocMax) {
+    if (!MallocMax) {
+      HMalloc = GlobalAlloc(GMEM_MOVEABLE, 1000 * sizeof(MALLOCTBL));
+      if (!HMalloc)
+        return (0);
+      MallocTbl = GlobalLock(HMalloc);
+      MallocMax = 1000;
+    } else {
+      GlobalUnlock(HMalloc);
+      hmem = GlobalReAlloc(HMalloc, (MallocMax + 1000) * sizeof(MALLOCTBL),
+                           GMEM_MOVEABLE);
+      if (!hmem) {
+        MallocTbl = GlobalLock(HMalloc);
+        return (0);
+      }
+      HMalloc = hmem;
+      MallocTbl = GlobalLock(HMalloc);
+      MallocMax += 1000;
+    }
+  }
   hmem = GlobalAlloc(GMEM_MOVEABLE, size);
-  if (!hmem)  return(0);
+  if (!hmem)
+    return (0);
   mem = GlobalLock(hmem);
-  MallocTbl[MallocNum].hmem  = hmem;
-  MallocTbl[MallocNum].mem   = mem;
+  MallocTbl[MallocNum].hmem = hmem;
+  MallocTbl[MallocNum].mem = mem;
   MallocTbl[MallocNum].count = 1;
   MallocNum++;
-  return(mem);
+  return (mem);
 }
 
 void *pointer2(HANDLE hmem)
@@ -142,11 +163,12 @@ void *pointer2(HANDLE hmem)
 {
   long i;
 
-  if (!hmem)  return(0);
-  for (i=0; i<MallocNum; i++)
-	if (hmem==MallocTbl[i].hmem)
-	  return(MallocTbl[i].mem);
-  return(0);
+  if (!hmem)
+    return (0);
+  for (i = 0; i < MallocNum; i++)
+    if (hmem == MallocTbl[i].hmem)
+      return (MallocTbl[i].mem);
+  return (0);
 }
 
 void *realloc2(void *current, size_t size)
@@ -158,23 +180,33 @@ void *realloc2(void *current, size_t size)
   long i;
   HANDLE hmem, hmem2;
 
-  if (!size)  size = 1;
-  if (!current)  return(malloc2(size));
+  if (!size)
+    size = 1;
+  if (!current)
+    return (malloc2(size));
   /* Reallocate to even size blocks to help avoid memory fragmentation. */
-  if (size>2*1024*1024)  size = (((size-1)/(1024*1024))+1)*1024*1024;
-  else { for (i=1; i<(long)size; i*=2) { }  size = i; }
-  for (i=0; i<MallocNum; i++)
-	if (current==MallocTbl[i].mem) {
-	  hmem = (HANDLE)MallocTbl[i].hmem;
-	  GlobalUnlock(hmem);
-	  hmem2 = GlobalReAlloc(hmem, size, GMEM_MOVEABLE);
-	  if (!hmem2) {
-		GlobalLock(hmem);  return(0); }
-	  current = GlobalLock(hmem2);
-	  MallocTbl[i].hmem = hmem2;
-	  MallocTbl[i].mem = current;
-	  return(current); }
-  return(0);
+  if (size > 2 * 1024 * 1024)
+    size = (((size - 1) / (1024 * 1024)) + 1) * 1024 * 1024;
+  else {
+    for (i = 1; i < (long)size; i *= 2) {
+    }
+    size = i;
+  }
+  for (i = 0; i < MallocNum; i++)
+    if (current == MallocTbl[i].mem) {
+      hmem = (HANDLE)MallocTbl[i].hmem;
+      GlobalUnlock(hmem);
+      hmem2 = GlobalReAlloc(hmem, size, GMEM_MOVEABLE);
+      if (!hmem2) {
+        GlobalLock(hmem);
+        return (0);
+      }
+      current = GlobalLock(hmem2);
+      MallocTbl[i].hmem = hmem2;
+      MallocTbl[i].mem = current;
+      return (current);
+    }
+  return (0);
 }
 
 long size2(const void *mem)
@@ -185,9 +217,11 @@ long size2(const void *mem)
 {
   HANDLE hmem;
 
-  if (!mem)  return(0);
-  if (!(hmem=GlobalHandle(mem)))  return(0);
-  return(GlobalSize(hmem));
+  if (!mem)
+    return (0);
+  if (!(hmem = GlobalHandle(mem)))
+    return (0);
+  return (GlobalSize(hmem));
 }
 
 HANDLE unlock2(void *mem)
@@ -202,16 +236,19 @@ HANDLE unlock2(void *mem)
   long i;
   HANDLE hmem;
 
-  if (!mem)  return(0);
-  for (i=0; i<MallocNum; i++)
-	if (mem==MallocTbl[i].mem) {
-	  hmem = MallocTbl[i].hmem;
-	  GlobalUnlock(hmem);
-	  MallocTbl[i].count--;
-	  if (!MallocTbl[i].count) {
-		memmove(MallocTbl+i, MallocTbl+i+1,
-				(MallocNum-i-1)*sizeof(MALLOCTBL));
-		MallocNum--; }
-	  return(hmem); }
-  return(0);
+  if (!mem)
+    return (0);
+  for (i = 0; i < MallocNum; i++)
+    if (mem == MallocTbl[i].mem) {
+      hmem = MallocTbl[i].hmem;
+      GlobalUnlock(hmem);
+      MallocTbl[i].count--;
+      if (!MallocTbl[i].count) {
+        memmove(MallocTbl + i, MallocTbl + i + 1,
+                (MallocNum - i - 1) * sizeof(MALLOCTBL));
+        MallocNum--;
+      }
+      return (hmem);
+    }
+  return (0);
 }

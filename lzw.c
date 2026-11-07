@@ -34,26 +34,25 @@
 #define STATIC
 #endif
 
-#define LZW_MAXCODES    4096            /* codes are at most 12 bits */
+#define LZW_MAXCODES 4096 /* codes are at most 12 bits */
 
 typedef struct {
-  ushort next;                          /* next node of the chain, or 0 */
-  uchar  chr;                           /* final byte of the string */
-  uchar  pad;
+  ushort next; /* next node of the chain, or 0 */
+  uchar chr;   /* final byte of the string */
+  uchar pad;
 } LZWNODE;
 
 static ushort lzw_head[LZW_MAXCODES];   /* chain head per prefix code */
 static LZWNODE lzw_node[LZW_MAXCODES];  /* strings, indexed by code-first */
 static ushort lzw_prefix[LZW_MAXCODES]; /* decoder: prefix code per string */
-static uchar  lzw_suffix[LZW_MAXCODES]; /* decoder: final byte per string */
-static uchar  lzw_stack[LZW_MAXCODES];  /* decoder: string reversal buffer */
+static uchar lzw_suffix[LZW_MAXCODES];  /* decoder: final byte per string */
+static uchar lzw_stack[LZW_MAXCODES];   /* decoder: string reversal buffer */
 
 long lzw(uchar *dest, uchar *source, long len, long maxlen, short numbits);
 long lzwlen(uchar *source, long len, short numbits);
 long lzwtif(uchar *dest, uchar *source, long len, long maxlen);
 long lzwtiflen(uchar *source, long len);
-void unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
-           short numbits);
+void unlzw(uchar *dest, uchar *source, long maxlen, long srclen, short numbits);
 void unlzwtif(uchar *dest, uchar *source, long maxlen, long srclen);
 
 STATIC long lzw_encode(uchar *dest, uchar *source, long len, long maxlen,
@@ -72,11 +71,11 @@ STATIC long lzw_encode(uchar *dest, uchar *source, long len, long maxlen,
   long accbits = 0, bits = 0, out = 0;
 
   if (len < 1)
-    return(0);
+    return (0);
   clearcode = (ushort)(1 << numbits);
-  eof = (ushort)(clearcode+1);
-  firstcode = (ushort)(clearcode+2);
-  codesize = initcodesize = (uchar)(numbits+1);
+  eof = (ushort)(clearcode + 1);
+  firstcode = (ushort)(clearcode + 2);
+  codesize = initcodesize = (uchar)(numbits + 1);
   maxcode = (ushort)((1 << codesize) - msb);
   freecode = firstcode;
   memset(lzw_head, 0, sizeof(lzw_head));
@@ -84,26 +83,37 @@ STATIC long lzw_encode(uchar *dest, uchar *source, long len, long maxlen,
 /* LZW_EMIT appends codesize bits of a code to the output.  When dest is
  * NULL nothing is stored, only counted.  The macro is reentered with the
  * label done defined below. */
-#define LZW_EMIT(code) \
-    { \
-      if (msb) { \
-        acc = (acc << codesize) | (ulong)(code); \
-        accbits += codesize;  bits += codesize; \
-        while (accbits >= 8) { \
-          if (dest) { \
-            if (out >= maxlen)  goto done; \
-            dest[out] = (uchar)(acc >> (accbits-8)); } \
-          out++;  accbits -= 8; } \
-      } else { \
-        acc |= (ulong)(code) << accbits; \
-        accbits += codesize;  bits += codesize; \
-        while (accbits >= 8) { \
-          if (dest) { \
-            if (out >= maxlen)  goto done; \
-            dest[out] = (uchar)acc; } \
-          out++;  acc >>= 8;  accbits -= 8; } \
-      } \
-    }
+#define LZW_EMIT(code)                                                         \
+  {                                                                            \
+    if (msb) {                                                                 \
+      acc = (acc << codesize) | (ulong)(code);                                 \
+      accbits += codesize;                                                     \
+      bits += codesize;                                                        \
+      while (accbits >= 8) {                                                   \
+        if (dest) {                                                            \
+          if (out >= maxlen)                                                   \
+            goto done;                                                         \
+          dest[out] = (uchar)(acc >> (accbits - 8));                           \
+        }                                                                      \
+        out++;                                                                 \
+        accbits -= 8;                                                          \
+      }                                                                        \
+    } else {                                                                   \
+      acc |= (ulong)(code) << accbits;                                         \
+      accbits += codesize;                                                     \
+      bits += codesize;                                                        \
+      while (accbits >= 8) {                                                   \
+        if (dest) {                                                            \
+          if (out >= maxlen)                                                   \
+            goto done;                                                         \
+          dest[out] = (uchar)acc;                                              \
+        }                                                                      \
+        out++;                                                                 \
+        acc >>= 8;                                                             \
+        accbits -= 8;                                                          \
+      }                                                                        \
+    }                                                                          \
+  }
 
   LZW_EMIT(clearcode)
   incode = *source++;
@@ -114,27 +124,27 @@ STATIC long lzw_encode(uchar *dest, uchar *source, long len, long maxlen,
     /* find the string incode followed by c in the table */
     link = &lzw_head[incode];
     code = *link;
-    while (code && lzw_node[code-firstcode].chr != c) {
-      link = &lzw_node[code-firstcode].next;
+    while (code && lzw_node[code - firstcode].chr != c) {
+      link = &lzw_node[code - firstcode].next;
       code = *link;
     }
     if (code) {
-      incode = code;                /* the longer string is already known */
+      incode = code; /* the longer string is already known */
       continue;
     }
-    LZW_EMIT(incode)                /* emit the code for the current string */
-    lzw_node[freecode-firstcode].chr = c;    /* add incode+c to the table */
-    lzw_node[freecode-firstcode].next = 0;
+    LZW_EMIT(incode) /* emit the code for the current string */
+    lzw_node[freecode - firstcode].chr = c; /* add incode+c to the table */
+    lzw_node[freecode - firstcode].next = 0;
     *link = freecode;
     incode = c;
     freecode++;
-    if (freecode > maxcode) {       /* the code width must grow */
+    if (freecode > maxcode) { /* the code width must grow */
       if (codesize < 12) {
         codesize++;
         maxcode = (ushort)((1 << codesize) - msb);
-        if (codesize == 12)         /* deferred clear, as in the original */
+        if (codesize == 12) /* deferred clear, as in the original */
           maxcode--;
-      } else {                      /* the 12-bit table is full: clear it */
+      } else { /* the 12-bit table is full: clear it */
         LZW_EMIT(clearcode)
         codesize = initcodesize;
         maxcode = (ushort)((1 << codesize) - msb);
@@ -143,20 +153,20 @@ STATIC long lzw_encode(uchar *dest, uchar *source, long len, long maxlen,
       }
     }
   }
-  LZW_EMIT(incode)                  /* emit the code for the final string */
+  LZW_EMIT(incode) /* emit the code for the final string */
   LZW_EMIT(eof)
-  if (dest && accbits > 0 && out < maxlen) {   /* flush any partial byte */
+  if (dest && accbits > 0 && out < maxlen) { /* flush any partial byte */
     if (msb)
-      dest[out] = (uchar)(acc << (8-accbits));
+      dest[out] = (uchar)(acc << (8 - accbits));
     else
       dest[out] = (uchar)acc;
     out++;
   }
   if (!dest)
-    out = (bits+7) >> 3;
-  return(out);
+    out = (bits + 7) >> 3;
+  return (out);
 done:
-  return(out);
+  return (out);
 }
 
 STATIC void lzw_decode(uchar *dest, uchar *source, long maxlen, long srclen,
@@ -168,82 +178,83 @@ STATIC void lzw_decode(uchar *dest, uchar *source, long maxlen, long srclen,
  * next free code) stop the decoding as well.                      2026-DWM */
 {
   ushort clearcode, eof, firstcode, freecode, maxcode, oldcode, incode, code,
-         codemask;
+      codemask;
   uchar codesize, initcodesize, finchar;
   ulong acc = 0;
   long accbits = 0, in = 0, out = 0, sp;
 
   clearcode = (ushort)(1 << numbits);
-  eof = (ushort)(clearcode+1);
-  firstcode = (ushort)(clearcode+2);
-  codesize = initcodesize = (uchar)(numbits+1);
+  eof = (ushort)(clearcode + 1);
+  firstcode = (ushort)(clearcode + 2);
+  codesize = initcodesize = (uchar)(numbits + 1);
   codemask = (ushort)((1 << codesize) - 1);
   maxcode = (ushort)((1 << codesize) - msb);
   freecode = firstcode;
-  oldcode = 0;                      /* only used if the stream omits the
+  oldcode = 0; /* only used if the stream omits the
                                        initial clear code */
   finchar = 0;
 
 /* LZW_GETCODE reads the next codesize-bit code into code, or jumps to done
  * if the input is exhausted. */
-#define LZW_GETCODE() \
-    { \
-      while (accbits < codesize) { \
-        if (in >= srclen)  goto done; \
-        if (msb) { \
-          acc = (acc << 8) | source[in]; \
-        } else { \
-          acc |= (ulong)source[in] << accbits; \
-        } \
-        accbits += 8; \
-        in++; \
-      } \
-      if (msb) { \
-        code = (ushort)((acc >> (accbits-codesize)) & codemask); \
-        accbits -= codesize; \
-        acc &= (1UL << accbits) - 1; \
-      } else { \
-        code = (ushort)(acc & codemask); \
-        acc >>= codesize; \
-        accbits -= codesize; \
-      } \
-    }
+#define LZW_GETCODE()                                                          \
+  {                                                                            \
+    while (accbits < codesize) {                                               \
+      if (in >= srclen)                                                        \
+        goto done;                                                             \
+      if (msb) {                                                               \
+        acc = (acc << 8) | source[in];                                         \
+      } else {                                                                 \
+        acc |= (ulong)source[in] << accbits;                                   \
+      }                                                                        \
+      accbits += 8;                                                            \
+      in++;                                                                    \
+    }                                                                          \
+    if (msb) {                                                                 \
+      code = (ushort)((acc >> (accbits - codesize)) & codemask);               \
+      accbits -= codesize;                                                     \
+      acc &= (1UL << accbits) - 1;                                             \
+    } else {                                                                   \
+      code = (ushort)(acc & codemask);                                         \
+      acc >>= codesize;                                                        \
+      accbits -= codesize;                                                     \
+    }                                                                          \
+  }
 
   for (;;) {
     LZW_GETCODE()
     if (code == eof)
       break;
-    if (code == clearcode) {        /* reset the string table */
+    if (code == clearcode) { /* reset the string table */
       codesize = initcodesize;
       codemask = (ushort)((1 << codesize) - 1);
       maxcode = (ushort)((1 << codesize) - msb);
       freecode = firstcode;
-      LZW_GETCODE()                 /* the next code starts a new string */
+      LZW_GETCODE() /* the next code starts a new string */
       if (code == eof)
         break;
       oldcode = code;
-      finchar = (uchar)(code & (clearcode-1));
+      finchar = (uchar)(code & (clearcode - 1));
       if (out >= maxlen)
         goto done;
       dest[out++] = finchar;
       continue;
     }
-    if (code > freecode)            /* corrupt stream */
+    if (code > freecode) /* corrupt stream */
       break;
     incode = code;
     sp = 0;
-    if (code == freecode) {         /* the "KwKwK" case: the code names the
+    if (code == freecode) { /* the "KwKwK" case: the code names the
                                        string being defined right now */
       lzw_stack[sp++] = finchar;
       code = oldcode;
     }
-    while (code >= clearcode) {     /* walk the string back to its root */
+    while (code >= clearcode) { /* walk the string back to its root */
       lzw_stack[sp++] = lzw_suffix[code];
       code = lzw_prefix[code];
     }
     finchar = (uchar)code;
     lzw_stack[sp++] = finchar;
-    while (sp > 0) {                /* emit the string in forward order */
+    while (sp > 0) { /* emit the string in forward order */
       if (out >= maxlen)
         goto done;
       dest[out++] = lzw_stack[--sp];
@@ -266,29 +277,28 @@ done:
 long lzw(uchar *dest, uchar *source, long len, long maxlen, short numbits)
 /* Compress data using LZW, GIF style (LSB first).  See lzw_encode. */
 {
-  return(lzw_encode(dest, source, len, maxlen, numbits, 0));
+  return (lzw_encode(dest, source, len, maxlen, numbits, 0));
 }
 
 long lzwlen(uchar *source, long len, short numbits)
 /* Compute the length that data compressed with lzw would have. */
 {
-  return(lzw_encode(0, source, len, 0x7FFFFFFF, numbits, 0));
+  return (lzw_encode(0, source, len, 0x7FFFFFFF, numbits, 0));
 }
 
 long lzwtif(uchar *dest, uchar *source, long len, long maxlen)
 /* Compress data using LZW, TIFF style (MSB first, early change). */
 {
-  return(lzw_encode(dest, source, len, maxlen, 8, 1));
+  return (lzw_encode(dest, source, len, maxlen, 8, 1));
 }
 
 long lzwtiflen(uchar *source, long len)
 /* Compute the length that data compressed with lzwtif would have. */
 {
-  return(lzw_encode(0, source, len, 0x7FFFFFFF, 8, 1));
+  return (lzw_encode(0, source, len, 0x7FFFFFFF, 8, 1));
 }
 
-void unlzw(uchar *dest, uchar *source, long maxlen, long srclen,
-           short numbits)
+void unlzw(uchar *dest, uchar *source, long maxlen, long srclen, short numbits)
 /* Decompress LZW data, GIF style (LSB first).  See lzw_decode. */
 {
   lzw_decode(dest, source, maxlen, srclen, numbits, 0);
