@@ -1557,12 +1557,8 @@ LRESULT CALLBACK main_loop(HWND hwnd, ulong msg, WPARAM wp, LPARAM lp)
       case MenuZ100: zoom(1, 1); break;
       case MenuZ200: zoom(2, 1); break;
       case MenuZ400: zoom(4, 1); break;
-      case MenuZ78: if (AspectX==78 && AspectY==110)  AspectX = AspectY = 0;
-        else { AspectX = 78;  AspectY = 110; }
-        recheck(hwnd, 0); break;
-      case MenuZAspect: if (AspectX && AspectY && (AspectX!=78 ||
-                            AspectY!=110)) {
-          AspectX = AspectY = 0;  recheck(hwnd, 0); break; }
+      case MenuZAspect: if (AspectX && AspectY) {
+          AspectX = AspectY = 0;  recheck(hwnd, 0);  break; }
         Busy=1;
         DialogBox(hinst, MAKEINTRESOURCE(AsDLG), hwnd, (DLGPROC)aspect_dialog);
         Busy=0;
@@ -4312,9 +4308,7 @@ void recheck(HWND hwnd, long refresh)
   CheckMenuItem(Hmenu, MenuSpiff,   MF_CHECKED*((Interpolate&0x1C00)!=0));
   CheckMenuItem(Hmenu, MenuTop,     MF_CHECKED*Topmost);
   CheckMenuItem(Hmenu, MenuWarn,    MF_CHECKED*((Msg&4)/4));
-  CheckMenuItem(Hmenu, MenuZ78,     MF_CHECKED*(AspectX==78&&AspectY==110));
-  CheckMenuItem(Hmenu, MenuZAspect, MF_CHECKED*(AspectX && AspectY &&
-                                               (AspectX!=78||AspectY!=110)));
+  CheckMenuItem(Hmenu, MenuZAspect, MF_CHECKED*(AspectX && AspectY));
   CheckMenuItem(Hmenu, MenuZEnlarge,MF_CHECKED*(Redox&1));
   CheckMenuItem(Hmenu, MenuZLock,   MF_CHECKED*(Lock&1));
   CheckMenuItem(Hmenu, MenuZPrev,   MF_CHECKED*((Lock&2)/2));
